@@ -5,7 +5,7 @@
 ## 功能简介
 本工具目前支持以下功能：
 - 统计任意（您拥有相关权限的，下同，不再赘述）目录的文件信息，且支持以各种形式（html, table, json）导出。  
-支持中断恢复，且统计过的目录信息会记录在本地数据库文件中（gdurl.sqlite）
+支持中断恢复，且统计过的目录（包括其所有子孙目录）信息会记录在本地数据库文件中（gdurl.sqlite）
 请在本项目目录下命令行输入 `./count -h` 查看使用帮助
 
 - 拷贝任意目录所有文件到您指定目录，同样支持中断恢复。
@@ -93,6 +93,7 @@ server {
 curl 'YOUR_WEBSITE_URL/api/gdurl/count?fid=124pjM5LggSuwI1n40bcD5tQ13wS0M6wg'
 ```
 ![](./static/count.png)
+
 如果返回了这样的文件统计，说明部署成功了。
 
 最后，在命令行执行（请将[YOUR_WEBSITE]和[YOUR_BOT_TOKEN]分别替换成你自己的网址和bot token）
