@@ -68,7 +68,11 @@ http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy
 
 如果你之前是在本地操作的，请在服务器上同样重复一遍，配置好相关参数后，执行`npm i pm2 -g`安装进程守护程序pm2
 
-安装好pm2之后，执行 `pm2 start server.js`，代码运行后会在服务器上监听`23333`端口，接下来可通过nginx或其他工具起一个web服务，示例nginx配置：
+安装好pm2之后，执行 `pm2 start server.js`，代码运行后会在服务器上监听`23333`端口。
+
+*如果你不想用nginx，可以将`server.js`中的`23333`改成`80`直接监听80端口（可能需要root权限）*
+
+接下来可通过nginx或其他工具起一个web服务，示例nginx配置：
 ```
 server {
   listen 80;
@@ -83,6 +87,13 @@ server {
 }
 ```
 配置好nginx后，可以再套一层cloudflare，具体教程请自行搜索。
+
+检查网站是否部署成功，可以命令行执行（请将YOUR_WEBSITE_URL替换成你的网址）
+```
+curl 'YOUR_WEBSITE_URL/api/gdurl/count?fid=124pjM5LggSuwI1n40bcD5tQ13wS0M6wg'
+```
+![](./static/count.png)
+如果返回了这样的文件统计，说明部署成功了。
 
 最后，在命令行执行（请将[YOUR_WEBSITE]和[YOUR_BOT_TOKEN]分别替换成你自己的网址和bot token）
 ```
