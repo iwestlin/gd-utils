@@ -545,7 +545,7 @@ async function create_folders ({ source, old_mapping, folders, root, task_id, se
     console.log('排队等候的目录数量', limit.pendingCount)
   }, LOG_DELAY)
 
-  while (same_levels.length && (limit.activeCount || limit.pendingCount)) {
+  do {
     await Promise.all(same_levels.map(async v => {
       const { name, id, parent } = v
       const target = mapping[parent] || root
@@ -557,7 +557,7 @@ async function create_folders ({ source, old_mapping, folders, root, task_id, se
     }))
     folders = folders.filter(v => !mapping[v.id])
     same_levels = [].concat(...same_levels.map(v => folders.filter(vv => vv.parent === v.id)))
-  }
+  } while (same_levels.length && (limit.activeCount || limit.pendingCount))
 
   clearInterval(loop)
   return mapping
