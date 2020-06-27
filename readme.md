@@ -64,7 +64,9 @@ http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy
 首先在 [https://core.telegram.org/bots#6-botfather](https://core.telegram.org/bots#6-botfather) 根据指示拿到 bot 的 token，然后填入 config.js 中的 `tg_token` 变量。
 
 接下来需要将代码部署到服务器上。
-将配置好的项目文件夹打包上传到服务器，解压后进入项目目录，执行`npm i pm2 -g`(需要先安装nodejs)
+如果你一开始就是在服务器上配置的，可以直接执行`npm i pm2 -g`
+
+如果你之前是在本地操作的，请在服务器上同样重复一遍，配置好相关参数后，执行`npm i pm2 -g`安装进程守护程序pm2
 
 安装好pm2之后，执行 `pm2 start server.js`，代码运行后会在服务器上监听`23333`端口，接下来可通过nginx或其他工具起一个web服务，示例nginx配置：
 ```
