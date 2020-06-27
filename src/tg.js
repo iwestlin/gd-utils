@@ -51,7 +51,7 @@ async function send_all_tasks (chat_id) {
   const headers = ['ID', 'status', 'ctime']
   records = records.map(v => {
     const { id, status, ctime } = v
-    return [id, status, dayjs(ctime).format('MM-DD HH:mm')]
+    return [id, status, dayjs(ctime).format('YYYY-MM-DD HH:mm:ss')]
   })
   tb.push(headers, ...records)
   const text = tb.toString().replace(/─/g, '—')
@@ -84,8 +84,8 @@ async function send_task_info ({ task_id, chat_id }) {
   text += '源ID：' + gen_link(source) + '\n'
   text += '目的ID：' + gen_link(target) + '\n'
   text += '任务状态：' + status + '\n'
-  text += '创建时间：' + dayjs(ctime).format('YYYY-MM-DD HH:mm') + '\n'
-  text += '完成时间：' + (ftime ? dayjs(ftime).format('YYYY-MM-DD HH:mm') : '未完成') + '\n'
+  text += '创建时间：' + dayjs(ctime).format('YYYY-MM-DD HH:mm:ss') + '\n'
+  text += '完成时间：' + (ftime ? dayjs(ftime).format('YYYY-MM-DD HH:mm:ss') : '未完成') + '\n'
   text += '目录进度：' + copied_folders + '/' + (folder_count === undefined ? '未知数量' : folder_count) + '\n'
   text += '文件进度：' + copied_files + '/' + (file_count === undefined ? '未知数量' : file_count) + '\n'
   text += '总大小：' + (total_size || '未知大小')
