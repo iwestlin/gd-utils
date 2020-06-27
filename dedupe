@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+
+const { argv } = require('yargs')
+  .usage('用法: ./$0 <source id> <target id> [options]')
+  .alias('u', 'update')
+  .describe('u', '不使用本地缓存，强制从线上获取源文件夹信息')
+  .alias('S', 'service_account')
+  .describe('S', '使用service account进行操作，前提是必须在 ./sa 目录下放置sa授权json文件')
+  .help('h')
+  .alias('h', 'help')
+
+const { dedupe, validate_fid } = require('./src/gd')
+
+const [fid] = argv._
+if (validate_fid(fid)) {
+  const { update, service_account } = argv
+  dedupe({ fid, update, service_account }).then(info => {
+    if (!info) return
+    const { file_count, folder_count } = info
+    console.log('任务完成，共删除文件数：', file_count, '目录数：', folder_count)
+  })
+} else {
+  console.warn('目录ID缺失或格式错误')
+}

@@ -1,0 +1,49 @@
+#!/usr/bin/env node
+
+const bytes = require('bytes')
+
+const { argv } = require('yargs')
+  .usage('用法: ./$0 <source id> <target id> [options]\ntarget id可选，不填则使用config.js里的DEFAULT_TARGET')
+  .alias('u', 'update')
+  .describe('u', '不使用本地缓存，强制从线上获取源文件夹信息')
+  .alias('f', 'file')
+  .describe('f', '复制单个文件')
+  .alias('n', 'name')
+  .describe('n', '给目标文件夹重命名，不填则保留原始目录名')
+  .alias('N', 'not_teamdrive')
+  .describe('N', '如果不是团队盘链接，可以加上此参数以提高接口查询效率，降低延迟')
+  .alias('s', 'size')
+  .describe('s', '不填默认拷贝全部文件，如果设置了这个值，则过滤掉小于这个size的文件，必须以b结尾，比如10mb')
+  .alias('S', 'service_account')
+  .describe('S', '指定使用service account进行操作，前提是必须在 ./sa 目录下放置json授权文件，请确保sa帐号拥有操作权限。')
+  .help('h')
+  .alias('h', 'help')
+
+const { copy, copy_file, validate_fid } = require('./src/gd')
+const { DEFAULT_TARGET } = require('./config')
+
+let [source, target] = argv._
+
+if (validate_fid(source)) {
+  const { name, update, file, not_teamdrive, size, service_account } = argv
+  if (file) {
+    target = target || DEFAULT_TARGET
+    if (!validate_fid(target)) throw new Error('target id 格式不正确')
+    return copy_file(source, target).then(r => {
+      const link = 'https://drive.google.com/drive/folders/' + target
+      console.log('任务完成，文件所在位置：\n', link)
+    }).catch(console.error)
+  }
+  let min_size
+  if (size) {
+    console.log(`不复制大小低于 ${size} 的文件`)
+    min_size = bytes.parse(size)
+  }
+  copy({ source, target, name, min_size, update, not_teamdrive, service_account }).then(folder => {
+    if (!folder) return
+    const link = 'https://drive.google.com/drive/folders/' + folder.id
+    console.log('任务完成，新文件夹链接：\n', link)
+  })
+} else {
+  console.warn('目录ID缺失或格式错误')
+}

@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+
+const { argv } = require('yargs')
+  .usage('用法: ./$0 <目录ID> [options]')
+  .example('./$0 1ULY8ISgWSOVc0UrzejykVgXfVL_I4r75', '获取 https://drive.google.com/drive/folders/1ULY8ISgWSOVc0UrzejykVgXfVL_I4r75 内包含的的所有文件的统计信息')
+  .example('./$0 root -s size -t html -o out.html', '获取个人盘根目录统计信息，结果以HTML表格输出，根据总大小逆序排列，保存到本目录下的out.html文件中（不存在则新建，存在则覆盖）')
+  .example('./$0 root -s name -t json -o out.json', '获取个人盘根目录统计信息，结果以JSON格式输出，根据文件扩展名排序，保存到本目录下的out.json文件中')
+  .example('./$0 root -t all -o all.json', '获取个人盘根目录统计信息，将所有文件信息（包括文件夹）以JSON格式输出，保存到本目录下的all.json文件中')
+  .alias('u', 'update')
+  .describe('u', '强制从线上获取信息(无视是否存在本地缓存)')
+  .alias('N', 'not_teamdrive')
+  .describe('N', '如果不是团队盘链接，可以加上此参数以提高接口查询效率，降低延迟。如果要统计的是个人盘且./sa目录下的service account没有相关权限，请确保加上此参数以使用个人的auth信息进行查询')
+  .alias('S', 'service_account')
+  .describe('S', '指定使用service account进行统计，前提是必须在sa目录下放置SA json文件')
+  .alias('s', 'sort')
+  .describe('s', '统计结果排序方法，可选值 name 或 size，不填则默认根据文件数量逆序排列')
+  .alias('t', 'type')
+  .describe('t', '统计结果输出类型，可选值 html/json/all，all表示输出所有文件json数据，最好搭配 -o 使用。不填则默认输出命令行表格')
+  .alias('o', 'output')
+  .describe('o', '统计结果输出文件，适合搭配 -t 使用')
+  .help('h')
+  .alias('h', 'help')
+
+const { count, validate_fid } = require('./src/gd')
+const [fid] = argv._
+if (validate_fid(fid)) {
+  const { update, sort, type, output, not_teamdrive, service_account } = argv
+  count({ fid, update, sort, type, output, not_teamdrive, service_account }).catch(console.error)
+} else {
+  console.warn('目录ID缺失或格式错误')
+}

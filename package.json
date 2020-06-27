@@ -1,0 +1,31 @@
+{
+  "name": "gd-utils",
+  "version": "1.0.0",
+  "description": "google drive utils",
+  "main": "src/gd.js",
+  "scripts": {
+    "start": "https_proxy='http://127.0.0.1:1086' nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "viegg",
+  "license": "ISC",
+  "dependencies": {
+    "@koa/router": "^9.0.1",
+    "@viegg/axios": "^1.0.0",
+    "better-sqlite3": "^7.1.0",
+    "bytes": "^3.1.0",
+    "cli-table3": "^0.6.0",
+    "colors": "^1.4.0",
+    "dayjs": "^1.8.28",
+    "gtoken": "^5.0.1",
+    "html-escaper": "^3.0.0",
+    "https-proxy-agent": "^5.0.0",
+    "koa": "^2.13.0",
+    "koa-bodyparser": "^4.3.0",
+    "p-limit": "^3.0.1",
+    "prompts": "^2.3.2",
+    "signal-exit": "^3.0.3",
+    "yargs": "^15.3.1"
+  }
+}
