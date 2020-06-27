@@ -31,7 +31,7 @@ http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy
 请把`YOUR_PROXY_URL`替换成你自己的代理地址
 
 ## 依赖安装
-- 命令行执行`git clone https://github.com/iwestlin/gdurl && cd gdurl` 克隆并切换到本项目文件夹下
+- 命令行执行`git clone https://github.com/iwestlin/gd-utils && cd gd-utils` 克隆并切换到本项目文件夹下
 - 执行 `npm i` 安装依赖，部分依赖可能需要代理环境才能下载，所以需要上一步的配置
 
 如果在安装过程中发生报错，请切换nodejs版本到v12再试。如果报错信息里有`Error: not found: make`之类的消息，说明你的命令行环境缺少make命令，可参考[这里](https://askubuntu.com/questions/192645/make-command-not-found)或直接google搜索`Make Command Not Found`
