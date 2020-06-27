@@ -557,7 +557,7 @@ async function create_folders ({ source, old_mapping, folders, root, task_id, se
     }))
     folders = folders.filter(v => !mapping[v.id])
     same_levels = [].concat(...same_levels.map(v => folders.filter(vv => vv.parent === v.id)))
-    if (!limit.activeCount && !limit.pendingCount) break
+    // if (!limit.activeCount && !limit.pendingCount) break
   }
 
   clearInterval(loop)
