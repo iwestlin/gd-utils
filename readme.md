@@ -92,7 +92,15 @@ http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy
 
 安装好pm2之后，执行 `pm2 start server.js`，代码运行后会在服务器上监听`23333`端口。
 
-*如果你不想用nginx，可以将`server.js`中的`23333`改成`80`直接监听80端口（可能需要root权限）*
+如果你启动程序后想看运行日志，执行 `pm2 logs`
+
+查看 pm2 守护的进程列表，执行 `pm2 l`
+
+停止运行中的进程，执行 `pm2 stop 对应的进程名称`
+
+**如果你修改了代码中的配置，需要 `pm2 reload server` 才能生效**。
+
+> 如果你不想用nginx，可以将`server.js`中的`23333`改成`80`直接监听80端口（可能需要root权限）
 
 接下来可通过nginx或其他工具起一个web服务，示例nginx配置：
 ```
@@ -145,6 +153,12 @@ const DEFAULT_TARGET = '' // 必填，拷贝默认目的地ID，如果不指定t
 
 ## 注意事项
 程序的原理是调用了[google drive官方接口](https://developers.google.com/drive/api/v3/reference/files/list)，递归获取目标文件夹下所有文件及其子文件夹信息，粗略来讲，某个目录下包含多少个文件夹，就至少需要这么多次请求才能统计完成。
+
+如果你要统计的文件数非常多（一百万以上），请一定在命令行进行操作，因为程序运行的时候会把文件信息保存在内存中，文件数太多的话容易内存占用太多被nodejs干掉。可以像这样执行命令：
+```
+ node --max-old-space-size=4096 count folder-id -S
+ ```
+这样进程就能最大占用4G内存了。
 
 目前尚不知道google是否会对接口做频率限制，也不知道会不会影响google账号本身的安全。
 
