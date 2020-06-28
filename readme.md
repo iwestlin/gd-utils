@@ -10,6 +10,15 @@
 
 - [@greathappyforest 踩的坑](doc/tgbot-appache2-note.md)
 
+## 搭建过程
+[https://drive.google.com/drive/folders/1Lu7Cwh9lIJkfqYDIaJrFpzi8Lgdxr4zT](https://drive.google.com/drive/folders/1Lu7Cwh9lIJkfqYDIaJrFpzi8Lgdxr4zT)
+
+需要注意的地方：
+
+- 视频中省略了一个比较重要的步骤就是**从本地上传service account授权文件到 sa 目录下**，tg机器人的所有操作都是通过sa授权的，所以你们别忘了。。
+- 视频中**nginx的配置里，server_name就是你的二级域名，需要和cloudflare的设置一样**的（mybbbottt），我分开录的视频所以没做到一致。
+- 还有省略的步骤就是注册域名和把域名托管到cloudflare了，这一步网上太多资料了，甚至也有免费注册（一年）域名的地方（ https://www.freenom.com/ ），具体教程大家搜搜看吧。
+
 ## 功能简介
 本工具目前支持以下功能：
 - 统计任意（您拥有相关权限的，下同，不再赘述）目录的文件信息，且支持以各种形式（html, table, json）导出。  
@@ -42,7 +51,7 @@ http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy
 
 ## 依赖安装
 - 命令行执行`git clone https://github.com/iwestlin/gd-utils && cd gd-utils` 克隆并切换到本项目文件夹下
-- 执行 `npm i` 安装依赖，部分依赖可能需要代理环境才能下载，所以需要上一步的配置
+- **执行 `npm install --unsafe-perm=true --allow-root` 安装依赖**，部分依赖可能需要代理环境才能下载，所以需要上一步的配置
 
 如果在安装过程中发生报错，请切换nodejs版本到v12再试。如果报错信息里有`Error: not found: make`之类的消息，说明你的命令行环境缺少make命令，可参考[这里](https://askubuntu.com/questions/192645/make-command-not-found)或直接google搜索`Make Command Not Found`
 
