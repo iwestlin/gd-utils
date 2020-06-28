@@ -152,6 +152,7 @@ async function send_count ({ fid, chat_id }) {
   return axins.post(url, {
     chat_id,
     parse_mode: 'HTML',
+    // todo 输出文件名
     text: `<pre>${gd_link}
 ${table}</pre>`
   }).catch(async err => {

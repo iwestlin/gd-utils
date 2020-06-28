@@ -2,6 +2,14 @@
 
 > 不只是最快的 google drive 拷贝工具 [与其他工具的对比](./compare.md)
 
+## 常见问题
+项目发布一天以内，作者至少收到100种无法配置成功的反馈。。忙得焦头烂额，暂时没空做搭建过程的录屏。
+下面是一些网友的踩坑心得，如果你配置的时候也不小心掉进坑里，可以进去找找有没有解决办法：
+
+- [ikarosone 基于宝塔的搭建过程](https://www.ikarosone.top/archives/195.html)
+
+- [@greathappyforest 踩的坑](doc/tgbot-appache2-note.md)
+
 ## 功能简介
 本工具目前支持以下功能：
 - 统计任意（您拥有相关权限的，下同，不再赘述）目录的文件信息，且支持以各种形式（html, table, json）导出。  
