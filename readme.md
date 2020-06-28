@@ -32,6 +32,8 @@
 ## 环境配置
 本工具需要安装nodejs，客户端安装请访问[https://nodejs.org/zh-cn/download/](https://nodejs.org/zh-cn/download/)，服务器安装可参考[https://github.com/nodesource/distributions/blob/master/README.md#debinstall](https://github.com/nodesource/distributions/blob/master/README.md#debinstall)
 
+建议选择v12版本的node，以防接下来安装依赖出错。
+
 如果你的网络环境无法正常访问谷歌服务，需要先在命令行进行一些配置：（如果可以正常访问则跳过此节）
 ```
 http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy && HTTPS_PROXY=$http_proxy
@@ -43,6 +45,9 @@ http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy
 - 执行 `npm i` 安装依赖，部分依赖可能需要代理环境才能下载，所以需要上一步的配置
 
 如果在安装过程中发生报错，请切换nodejs版本到v12再试。如果报错信息里有`Error: not found: make`之类的消息，说明你的命令行环境缺少make命令，可参考[这里](https://askubuntu.com/questions/192645/make-command-not-found)或直接google搜索`Make Command Not Found`
+
+如果报错信息里有 `better-sqlite3`，先执行 `npm config set unsafe-perm=true`
+然后 `rm -rf node_module` 删掉依赖目录，最后再执行下`npm i`安装试试。
 
 依赖安装完成后，项目文件夹下会多出个`node_modules`目录，请不要删除它，接下来进行下一步配置。
 
