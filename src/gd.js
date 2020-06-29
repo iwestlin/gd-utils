@@ -315,13 +315,12 @@ async function create_folder (name, parent, use_sa) {
     mimeType: FOLDER_TYPE,
     parents: [parent]
   }
-  const headers = await gen_headers(use_sa)
-  const config = { headers }
   let retry = 0
   let data
   while (!data && (retry < RETRY_LIMIT)) {
     try {
-      data = (await axins.post(url, post_data, config)).data
+      const headers = await gen_headers(use_sa)
+      data = (await axins.post(url, post_data, { headers })).data
     } catch (err) {
       retry++
       handle_error(err)
@@ -542,18 +541,23 @@ async function create_folders ({ source, old_mapping, folders, root, task_id, se
     console.log('================')
     console.log('已创建的文件夹数量', count)
     console.log('正在进行的网络请求', limit.activeCount)
-    console.log('排队等候的目录数量', limit.pendingCount)
+    console.log('排队等候的网络请求', limit.pendingCount)
   }, LOG_DELAY)
 
   while (same_levels.length) {
     await Promise.all(same_levels.map(async v => {
-      const { name, id, parent } = v
-      const target = mapping[parent] || root
-      const new_folder = await limit(() => create_folder(name, target, service_account))
-      count++
-      mapping[id] = new_folder.id
-      const mapping_record = id + ' ' + new_folder.id + '\n'
-      db.prepare('update task set status=?, mapping = mapping || ? where id=?').run('copying', mapping_record, task_id)
+      try {
+        const { name, id, parent } = v
+        const target = mapping[parent] || root
+        const new_folder = await limit(() => create_folder(name, target, service_account))
+        if (!new_folder) throw new Error(name + '创建失败')
+        count++
+        mapping[id] = new_folder.id
+        const mapping_record = id + ' ' + new_folder.id + '\n'
+        db.prepare('update task set status=?, mapping = mapping || ? where id=?').run('copying', mapping_record, task_id)
+      } catch (e) {
+        console.error('创建目录出错:', v, e)
+      }
     }))
     folders = folders.filter(v => !mapping[v.id])
     same_levels = [].concat(...same_levels.map(v => folders.filter(vv => vv.parent === v.id)))

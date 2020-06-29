@@ -2,10 +2,27 @@
 
 > 不只是最快的 google drive 拷贝工具 [与其他工具的对比](./compare.md)
 
+## 常见问题
+项目发布一天以内，作者至少收到100种无法配置成功的反馈。。忙得焦头烂额，暂时没空做搭建过程的录屏。
+下面是一些网友的踩坑心得，如果你配置的时候也不小心掉进坑里，可以进去找找有没有解决办法：
+
+- [ikarosone 基于宝塔的搭建过程](https://www.ikarosone.top/archives/195.html)
+
+- [@greathappyforest 踩的坑](doc/tgbot-appache2-note.md)
+
+## 搭建过程
+[https://drive.google.com/drive/folders/1Lu7Cwh9lIJkfqYDIaJrFpzi8Lgdxr4zT](https://drive.google.com/drive/folders/1Lu7Cwh9lIJkfqYDIaJrFpzi8Lgdxr4zT)
+
+需要注意的地方：
+
+- 视频中省略了一个比较重要的步骤就是**从本地上传service account授权文件到 sa 目录下**，tg机器人的所有操作都是通过sa授权的，所以你们别忘了。。
+- 视频中**nginx的配置里，server_name就是你的二级域名，需要和cloudflare的设置一样**的（mybbbottt），我分开录的视频所以没做到一致。
+- 还有省略的步骤就是注册域名和把域名托管到cloudflare了，这一步网上太多资料了，甚至也有免费注册（一年）域名的地方（ https://www.freenom.com/ ），具体教程大家搜搜看吧。
+
 ## 功能简介
 本工具目前支持以下功能：
 - 统计任意（您拥有相关权限的，下同，不再赘述）目录的文件信息，且支持以各种形式（html, table, json）导出。  
-支持中断恢复，且统计过的目录信息会记录在本地数据库文件中（gdurl.sqlite）
+支持中断恢复，且统计过的目录（包括其所有子孙目录）信息会记录在本地数据库文件中（gdurl.sqlite）
 请在本项目目录下命令行输入 `./count -h` 查看使用帮助
 
 - 拷贝任意目录所有文件到您指定目录，同样支持中断恢复。
@@ -24,6 +41,8 @@
 ## 环境配置
 本工具需要安装nodejs，客户端安装请访问[https://nodejs.org/zh-cn/download/](https://nodejs.org/zh-cn/download/)，服务器安装可参考[https://github.com/nodesource/distributions/blob/master/README.md#debinstall](https://github.com/nodesource/distributions/blob/master/README.md#debinstall)
 
+建议选择v12版本的node，以防接下来安装依赖出错。
+
 如果你的网络环境无法正常访问谷歌服务，需要先在命令行进行一些配置：（如果可以正常访问则跳过此节）
 ```
 http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy && HTTPS_PROXY=$http_proxy
@@ -32,9 +51,12 @@ http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy
 
 ## 依赖安装
 - 命令行执行`git clone https://github.com/iwestlin/gd-utils && cd gd-utils` 克隆并切换到本项目文件夹下
-- 执行 `npm i` 安装依赖，部分依赖可能需要代理环境才能下载，所以需要上一步的配置
+- **执行 `npm install --unsafe-perm=true --allow-root` 安装依赖**，部分依赖可能需要代理环境才能下载，所以需要上一步的配置
 
 如果在安装过程中发生报错，请切换nodejs版本到v12再试。如果报错信息里有`Error: not found: make`之类的消息，说明你的命令行环境缺少make命令，可参考[这里](https://askubuntu.com/questions/192645/make-command-not-found)或直接google搜索`Make Command Not Found`
+
+如果报错信息里有 `better-sqlite3`，先执行 `npm config set unsafe-perm=true`
+然后 `rm -rf node_module` 删掉依赖目录，最后再执行下`npm i`安装试试。
 
 依赖安装完成后，项目文件夹下会多出个`node_modules`目录，请不要删除它，接下来进行下一步配置。
 
@@ -63,12 +85,29 @@ http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy
 
 首先在 [https://core.telegram.org/bots#6-botfather](https://core.telegram.org/bots#6-botfather) 根据指示拿到 bot 的 token，然后填入 config.js 中的 `tg_token` 变量。
 
+然后获取自己的 telegram username，这个username不是显示的名称，而是tg个人网址后面的那串字符，比如，我的tg个人网址是 `https://t.me/viegg` ，用户名就是 `viegg`，获取用户名的目的是在代码里配置白名单，只允许特定的用户调用机器人。将username填入 `config.js`里的配置，像这样：
+`tg_whitelist: ['viegg']`，就代表只允许我自己使用这个机器人了。
+
+如果想把机器人的使用权限分享给别的用户，只需要改成这样子： `tg_whitelist: ['viegg', '其他人的username']`
+
 接下来需要将代码部署到服务器上。
 如果你一开始就是在服务器上配置的，可以直接执行`npm i pm2 -g`
 
 如果你之前是在本地操作的，请在服务器上同样重复一遍，配置好相关参数后，执行`npm i pm2 -g`安装进程守护程序pm2
 
-安装好pm2之后，执行 `pm2 start server.js`，代码运行后会在服务器上监听`23333`端口，接下来可通过nginx或其他工具起一个web服务，示例nginx配置：
+安装好pm2之后，执行 `pm2 start server.js`，代码运行后会在服务器上监听`23333`端口。
+
+如果你启动程序后想看运行日志，执行 `pm2 logs`
+
+查看 pm2 守护的进程列表，执行 `pm2 l`
+
+停止运行中的进程，执行 `pm2 stop 对应的进程名称`
+
+**如果你修改了代码中的配置，需要 `pm2 reload server` 才能生效**。
+
+> 如果你不想用nginx，可以将`server.js`中的`23333`改成`80`直接监听80端口（可能需要root权限）
+
+接下来可通过nginx或其他工具起一个web服务，示例nginx配置：
 ```
 server {
   listen 80;
@@ -83,6 +122,14 @@ server {
 }
 ```
 配置好nginx后，可以再套一层cloudflare，具体教程请自行搜索。
+
+检查网站是否部署成功，可以命令行执行（请将YOUR_WEBSITE_URL替换成你的网址）
+```
+curl 'YOUR_WEBSITE_URL/api/gdurl/count?fid=124pjM5LggSuwI1n40bcD5tQ13wS0M6wg'
+```
+![](./static/count.png)
+
+如果返回了这样的文件统计，说明部署成功了。
 
 最后，在命令行执行（请将[YOUR_WEBSITE]和[YOUR_BOT_TOKEN]分别替换成你自己的网址和bot token）
 ```
@@ -111,6 +158,12 @@ const DEFAULT_TARGET = '' // 必填，拷贝默认目的地ID，如果不指定t
 
 ## 注意事项
 程序的原理是调用了[google drive官方接口](https://developers.google.com/drive/api/v3/reference/files/list)，递归获取目标文件夹下所有文件及其子文件夹信息，粗略来讲，某个目录下包含多少个文件夹，就至少需要这么多次请求才能统计完成。
+
+如果你要统计的文件数非常多（一百万以上），请一定在命令行进行操作，因为程序运行的时候会把文件信息保存在内存中，文件数太多的话容易内存占用太多被nodejs干掉。可以像这样执行命令：
+```
+ node --max-old-space-size=4096 count folder-id -S
+ ```
+这样进程就能最大占用4G内存了。
 
 目前尚不知道google是否会对接口做频率限制，也不知道会不会影响google账号本身的安全。
 
