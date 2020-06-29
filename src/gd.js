@@ -16,8 +16,9 @@ const FOLDER_TYPE = 'application/vnd.google-apps.folder'
 const { https_proxy } = process.env
 const axins = axios.create(https_proxy ? { httpsAgent: new HttpsProxyAgent(https_proxy) } : {})
 
-const sa_files = fs.readdirSync(path.join(__dirname, '../sa')).filter(v => v.endsWith('.json'))
-let SA_TOKENS = sa_files.map(filename => {
+const SA_FILES = fs.readdirSync(path.join(__dirname, '../sa')).filter(v => v.endsWith('.json'))
+
+let SA_TOKENS = SA_FILES.map(filename => {
   const gtoken = new GoogleToken({
     keyFile: path.join(__dirname, '../sa', filename),
     scope: ['https://www.googleapis.com/auth/drive']
@@ -273,7 +274,20 @@ async function get_access_token () {
 }
 
 async function get_sa_token () {
-  const el = get_random_element(SA_TOKENS)
+  let tk
+  while (SA_TOKENS.length) {
+    tk = get_random_element(SA_TOKENS)
+    try {
+      return await real_get_sa_token(tk)
+    } catch (e) {
+      console.log(e)
+      SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== tk.gtoken)
+    }
+  }
+  throw new Error('没有可用的SA帐号')
+}
+
+function real_get_sa_token (el) {
   const { value, expires, gtoken } = el
   // 把gtoken传递出去的原因是当某账号流量用尽时可以依此过滤
   if (Date.now() < expires) return { access_token: value, gtoken }
