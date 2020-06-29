@@ -90,6 +90,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     }
   } else if (text.startsWith('/copy')) {
     const target = text.replace('/copy', '').trim().split(' ').map(v => v.trim())[1]
+    if (target && !validate_fid(target)) return sm({ chat_id, text: `目标ID ${target} 格式不正确` })
     tg_copy({ fid, target, chat_id }).then(task_id => {
       task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
     })
