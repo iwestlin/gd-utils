@@ -32,7 +32,7 @@ else
 fi
 
 # insofts为软件数组,里面的元数为你需要安装的软件
-insofts=(update upgrade wget curl git unzip zip sudo python3-distutils python3 python3-pip)
+insofts=(epel-release update upgrade wget curl git unzip zip sudo python3-distutils python3 python3-pip)
 
 # 具体业务逻辑
 os_debian(){
