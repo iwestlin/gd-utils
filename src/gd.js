@@ -16,8 +16,9 @@ const FOLDER_TYPE = 'application/vnd.google-apps.folder'
 const { https_proxy } = process.env
 const axins = axios.create(https_proxy ? { httpsAgent: new HttpsProxyAgent(https_proxy) } : {})
 
-const sa_files = fs.readdirSync(path.join(__dirname, '../sa')).filter(v => v.endsWith('.json'))
-let SA_TOKENS = sa_files.map(filename => {
+const SA_FILES = fs.readdirSync(path.join(__dirname, '../sa')).filter(v => v.endsWith('.json'))
+
+let SA_TOKENS = SA_FILES.map(filename => {
   const gtoken = new GoogleToken({
     keyFile: path.join(__dirname, '../sa', filename),
     scope: ['https://www.googleapis.com/auth/drive']
@@ -152,11 +153,10 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account }) {
   const limit = pLimit(PARALLEL_LIMIT)
 
   const loop = setInterval(() => {
-    console.log('================')
-    console.log('已获取的对象数量', result.length)
-    console.log('正在进行的网络请求', limit.activeCount)
-    console.log('排队等候的目录数量', limit.pendingCount)
-  }, LOG_DELAY)
+    const now = dayjs().format('HH:mm:ss')
+    const message = `${now} | 已获取对象 ${result.length} | 排队等候的网络请求 ${limit.pendingCount}`
+    print_progress(message)
+  }, 1000)
 
   async function recur (parent) {
     let files, should_save
@@ -180,8 +180,12 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account }) {
     result.push(...files)
     return Promise.all(folders.map(v => recur(v.id)))
   }
-  await recur(fid)
-  console.log('信息获取完毕')
+  try {
+    await recur(fid)
+  } catch (e) {
+    console.error(e)
+  }
+  console.log('\n信息获取完毕')
   not_finished.length ? console.log('未读取完毕的目录ID：', JSON.stringify(not_finished)) : console.log('所有目录读取完毕')
   clearInterval(loop)
   const smy = summary(result)
@@ -273,7 +277,20 @@ async function get_access_token () {
 }
 
 async function get_sa_token () {
-  const el = get_random_element(SA_TOKENS)
+  let tk
+  while (SA_TOKENS.length) {
+    tk = get_random_element(SA_TOKENS)
+    try {
+      return await real_get_sa_token(tk)
+    } catch (e) {
+      console.log(e)
+      SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== tk.gtoken)
+    }
+  }
+  throw new Error('没有可用的SA帐号')
+}
+
+function real_get_sa_token (el) {
   const { value, expires, gtoken } = el
   // 把gtoken传递出去的原因是当某账号流量用尽时可以依此过滤
   if (Date.now() < expires) return { access_token: value, gtoken }
@@ -469,23 +486,27 @@ async function real_copy ({ source, target, name, min_size, update, not_teamdriv
 }
 
 async function copy_files ({ files, mapping, root, task_id }) {
-  console.log('开始复制文件，总数：', files.length)
+  console.log('\n开始复制文件，总数：', files.length)
   const limit = pLimit(PARALLEL_LIMIT)
   let count = 0
   const loop = setInterval(() => {
-    console.log('================')
-    console.log('已复制的文件数量', count)
-    console.log('正在进行的网络请求', limit.activeCount)
-    console.log('排队等候的文件数量', limit.pendingCount)
-  }, LOG_DELAY)
+    const now = dayjs().format('HH:mm:ss')
+    const message = `${now} | 已复制文件数 ${count} | 排队等候的网络请求 ${limit.pendingCount}`
+    print_progress(message)
+  }, 1000)
   await Promise.all(files.map(async file => {
-    const { id, parent } = file
-    const target = mapping[parent] || root
-    const new_file = await limit(() => copy_file(id, target))
-    if (new_file) {
-      db.prepare('update task set status=?, copied = copied || ? where id=?').run('copying', id + '\n', task_id)
+    try {
+      const { id, parent } = file
+      const target = mapping[parent] || root
+      const new_file = await limit(() => copy_file(id, target))
+      if (new_file) {
+        db.prepare('update task set status=?, copied = copied || ? where id=?')
+          .run('copying', id + '\n', task_id)
+      }
+      count++
+    } catch (e) {
+      console.error(e)
     }
-    count++
   }))
   clearInterval(loop)
 }
@@ -538,11 +559,10 @@ async function create_folders ({ source, old_mapping, folders, root, task_id, se
   let same_levels = folders.filter(v => v.parent === folders[0].parent)
 
   const loop = setInterval(() => {
-    console.log('================')
-    console.log('已创建的文件夹数量', count)
-    console.log('正在进行的网络请求', limit.activeCount)
-    console.log('排队等候的网络请求', limit.pendingCount)
-  }, LOG_DELAY)
+    const now = dayjs().format('HH:mm:ss')
+    const message = `${now} | 已创建目录数 ${count} | 排队等候的网络请求 ${limit.pendingCount}`
+    print_progress(message)
+  }, 1000)
 
   while (same_levels.length) {
     await Promise.all(same_levels.map(async v => {
@@ -674,7 +694,20 @@ async function dedupe ({ fid, update, service_account }) {
 
 function handle_error (err) {
   const data = err && err.response && err.response.data
-  data ? console.error(JSON.stringify(data)) : console.error(err.message)
+  if (data) {
+    console.error(JSON.stringify(data))
+  } else {
+    if (!err.message.includes('timeout')) console.error(err.message)
+  }
+}
+
+function print_progress (msg) {
+  if (process.stdout.cursorTo) {
+    process.stdout.cursorTo(0)
+    process.stdout.write(msg)
+  } else {
+    console.log(msg)
+  }
 }
 
 module.exports = { ls_folder, count, validate_fid, copy, dedupe, copy_file, gen_count_body, real_copy }

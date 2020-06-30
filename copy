@@ -42,7 +42,7 @@ if (validate_fid(source)) {
   copy({ source, target, name, min_size, update, not_teamdrive, service_account }).then(folder => {
     if (!folder) return
     const link = 'https://drive.google.com/drive/folders/' + folder.id
-    console.log('任务完成，新文件夹链接：\n', link)
+    console.log('\n任务完成，新文件夹链接：\n', link)
   })
 } else {
   console.warn('目录ID缺失或格式错误')
