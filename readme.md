@@ -2,6 +2,20 @@
 
 > 不只是最快的 google drive 拷贝工具 [与其他工具的对比](./compare.md)
 
+## 一键安装脚本    
+- 首先准备好以下两个条件：    
+  - 在Telegram上注册好机器人并取得并记录下该机器人TOKEN     
+  - 一个域名在cloudflare解析到该机器人所在VPS的IP     
+- 准备好以上两个条件后，复制以下全部内容粘贴到VPS命令行窗口回车即可    
+```    
+wget https://raw.githubusercontent.com/vitaminx/gd-utils/master/gdutilsinstall.sh && chmod +x gdutilsinstall.sh && ./gdutilsinstall.sh
+```    
+- 安装过程中需要输入一下四个参数：    
+  - 机器人TOKEN：这个在Telegram里面找“@BotFather”注册即可获得    
+  - 使用机器人的Telegram用户名：在Telegram里面直接查看
+  - web服务名：这是个是很重要的识别标志，请设置为你的域名（不含HTTP）    
+  - 域名网址全称：你在cloudflare上解析到VPS的域名网址全称（含HTTP）    
+  
 ## demo
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
