@@ -1,7 +1,8 @@
 {
   "name": "gd-utils",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "google drive utils",
+  "repository": "iwestlin/gd-utils",
   "main": "src/gd.js",
   "scripts": {
     "start": "https_proxy='http://127.0.0.1:1086' nodemon server.js",

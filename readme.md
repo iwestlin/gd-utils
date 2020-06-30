@@ -5,7 +5,13 @@
 ## demo
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
-## 重要更新
+## 更新日志
+[2020-06-30]
+
+- 不换行输出进度信息，优化体验
+- 隐藏 timeout exceed 报错信息
+
+## 重要更新（2020-06-29）
 如果你遇到了以下几种问题，请务必阅读此节：
 
 - 任务异常中断
