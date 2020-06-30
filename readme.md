@@ -3,21 +3,28 @@
 > 不只是最快的 google drive 拷贝工具 [与其他工具的对比](./compare.md)
 
 ## 一键安装脚本(感谢 脚本制作者 [@vitaminx](https://github.com/vitaminx))
-> 如果你没有Linux操作经验或者是新开的vps，可尝试使用此脚本，目前在 CentOS/Debian/Ubuntu 测试通过
+> 如果你没有Linux操作经验或者是新开的vps，可尝试使用此脚本
 
-- 首先准备好以下两个条件：    
-  - 在Telegram上注册好机器人并取得并记录下该机器人TOKEN     
-  - 一个域名在cloudflare解析到该机器人所在VPS的IP     
-- 准备好以上两个条件后，复制以下内容粘贴到VPS命令行窗口回车即可    
-```    
+- 首先准备好以下两个条件：
+  - 在Telegram上注册好机器人并取得并记录下该机器人TOKEN
+  - 一个域名在cloudflare解析到该机器人所在VPS的IP
+- 准备好以上两个条件后，复制以下内容粘贴到VPS命令行窗口回车即可
+```
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/iwestlin/gd-utils/master/gdutilsinstall.sh)"
-```    
-- 安装过程中需要输入一下四个参数：    
-  - 机器人TOKEN：这个在Telegram里面找“@BotFather”注册即可获得    
+```
+- 安装过程中需要输入一下四个参数：
+  - 机器人TOKEN：这个在Telegram里面找“@BotFather”注册即可获得
   - 自己的的Telegram username：在Telegram里面直接查看
-  - web服务名：这是个是很重要的识别标志，请设置为你的域名（不含https://）    
-  - 域名网址全称：你在cloudflare上解析到VPS的域名网址全称（含https://）    
-  
+  - web服务名：这是个是很重要的识别标志，请设置为你的域名（格式：abc.34513.com）
+  - 域名网址全称：你在cloudflare上解析到VPS的域名网址全称（格式：https://abc.34513.com）
+- 测试可用完美安装系统：
+  - Centos 7/8
+  - debian 9/10
+  - ubuntu 16.04/18.04/19.10/20.04
+
+  - web服务名：这是个是很重要的识别标志，请设置为你的域名（不含https://）
+  - 域名网址全称：你在cloudflare上解析到VPS的域名网址全称（含https://）
+
 ## demo
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
@@ -68,10 +75,11 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/iwestlin/gd-utils/master
 
 如果你使用tg操作时，发送拷贝命令以后，/task 进度始终未开始（在复制文件数超多的文件夹时常会发生），是正常现象。
 这是因为程序正在获取源文件夹的所有文件信息。它的运行机制严格按照以下顺序：
-
+```
 1、获取源文件夹所有文件信息
 2、根据源文件夹的目录结构，在目标文件夹创建目录
 3、所有目录创建完成后，开始复制文件
+```
 
 **如果源文件夹的文件数非常多（一百万以上），请一定在命令行进行操作**，因为程序运行的时候会把文件信息保存在内存中，文件数太多的话容易内存占用太多被nodejs干掉。可以像这样执行命令：
 ```
@@ -91,7 +99,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/iwestlin/gd-utils/master
 
 ## 功能简介
 本工具目前支持以下功能：
-- 统计任意（您拥有相关权限的，下同，不再赘述）目录的文件信息，且支持以各种形式（html, table, json）导出。  
+- 统计任意（您拥有相关权限的，下同，不再赘述）目录的文件信息，且支持以各种形式（html, table, json）导出。
 支持中断恢复，且统计过的目录（包括其所有子孙目录）信息会记录在本地数据库文件中（gdurl.sqlite）
 请在本项目目录下命令行输入 `./count -h` 查看使用帮助
 
@@ -137,7 +145,7 @@ http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy
 - 命令行执行 `rclone config file` 找到 rclone 的配置文件路径
 - 打开这个配置文件 `rclone.conf`, 找到 `client_id`, `client_secret` 和 `refresh_token` 这三个变量，将其分别填入本项目下的 `config.js` 中，需要注意这三个值必须被成对的英文引号包裹，且引号后以英文逗号结尾，也就是需要符合JavaScript的[对象语法](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Object_initializer)
 
-如果你没有配置过rclone，可以搜索`rclone google drive 教程`完成相关配置。  
+如果你没有配置过rclone，可以搜索`rclone google drive 教程`完成相关配置。
 
 如果你的`rclone.conf`里没有`client_id`和`client_secret`，说明你配置rclone的时候默认用了rclone自己的client_id，连rclone自己[都不建议这样做](https://github.com/rclone/rclone/blob/8d55367a6a2f47a1be7e360a872bd7e56f4353df/docs/content/drive.md#making-your-own-client_id)，因为大家共享了它的接口调用限额，在使用高峰期可能会触发限制。
 
