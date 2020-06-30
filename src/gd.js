@@ -702,8 +702,12 @@ function handle_error (err) {
 }
 
 function print_progress (msg) {
-  process.stdout.cursorTo(0)
-  process.stdout.write(msg)
+  if (process.stdout.cursorTo) {
+    process.stdout.cursorTo(0)
+    process.stdout.write(msg)
+  } else {
+    console.log(msg)
+  }
 }
 
 module.exports = { ls_folder, count, validate_fid, copy, dedupe, copy_file, gen_count_body, real_copy }
