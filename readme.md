@@ -13,8 +13,12 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/vitaminx/gd-utils/master
 - 安装过程中需要输入一下四个参数：    
   - 机器人TOKEN：这个在Telegram里面找“@BotFather”注册即可获得    
   - 使用机器人的Telegram用户名：在Telegram里面直接查看
-  - web服务名：这是个是很重要的识别标志，请设置为你的域名（不含HTTP）    
-  - 域名网址全称：你在cloudflare上解析到VPS的域名网址全称（含HTTP）    
+  - web服务名：这是个是很重要的识别标志，请设置为你的域名（格式：abc.34513.com）    
+  - 域名网址全称：你在cloudflare上解析到VPS的域名网址全称（格式：https://abc.34513.com）    
+- 测试可用完美安装系统：    
+  - Centos 7/8    
+  - debian 9/10
+  - ubuntu 16.04/18.04/19.10/20.04     
   
 ## demo
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
