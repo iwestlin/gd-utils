@@ -22,9 +22,6 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/iwestlin/gd-utils/master
   - debian 9/10
   - ubuntu 16.04/18.04/19.10/20.04
 
-  - web服务名：这是个是很重要的识别标志，请设置为你的域名（不含https://）
-  - 域名网址全称：你在cloudflare上解析到VPS的域名网址全称（含https://）
-
 ## demo
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
