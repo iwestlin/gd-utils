@@ -115,6 +115,7 @@ async function tg_copy ({ fid, target, chat_id }) { // return task_id
       if (!record) record = {} // 防止无限循环
       if (!folder) return
       const link = 'https://drive.google.com/drive/folders/' + folder.id
+      // todo 加上完成文件数
       sm({ chat_id, text: `${fid} 复制完成，新文件夹链接：${link}` })
     })
     .catch(err => {

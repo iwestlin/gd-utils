@@ -434,7 +434,7 @@ async function real_copy ({ source, target, name, min_size, update, not_teamdriv
       })
       await copy_files({ files, mapping: all_mapping, root, task_id: record.id })
       db.prepare('update task set status=?, ftime=? where id=?').run('finished', Date.now(), record.id)
-      return { id: root }
+      return { id: root } // todo 加上task_id
     } else if (choice === 'restart') {
       const new_root = await get_new_root()
       if (!new_root) throw new Error('创建目录失败，请检查您的帐号是否有相应的权限')
