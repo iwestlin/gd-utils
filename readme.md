@@ -8,7 +8,7 @@
   - 一个域名在cloudflare解析到该机器人所在VPS的IP     
 - 准备好以上两个条件后，复制以下全部内容粘贴到VPS命令行窗口回车即可    
 ```    
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/vitaminx/gd-utils/master/gdutilsinstall.sh && chmod +x ./gdutilsinstall.sh && ./gdutilsinstall.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/vitaminx/gd-utils/master/gdutilsinstall.sh)"
 ```    
 - 安装过程中需要输入一下四个参数：    
   - 机器人TOKEN：这个在Telegram里面找“@BotFather”注册即可获得    
