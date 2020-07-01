@@ -7,7 +7,7 @@ const { db } = require('../db')
 const { gen_count_body, validate_fid, real_copy, get_name_by_id } = require('./gd')
 const { AUTH, DEFAULT_TARGET } = require('../config')
 const { tg_token } = AUTH
-const gen_link = fid => `<a href="https://drive.google.com/drive/folders/${fid}">${fid}</a>`
+const gen_link = (fid, text) => `<a href="https://drive.google.com/drive/folders/${fid}">${text || fid}</a>`
 
 if (!tg_token) throw new Error('请先在auth.js里设置tg_token')
 const { https_proxy } = process.env
@@ -76,13 +76,17 @@ async function send_task_info ({ task_id, chat_id }) {
   if (!record) return sm({ chat_id, text: '数据库不存在此任务ID：' + task_id })
 
   const { source, target, status, copied, mapping, ctime, ftime } = record
+  const folder_mapping = mapping && mapping.trim().split('\n')
+  const new_folder = folder_mapping && folder_mapping[0].split(' ')[1]
   const { summary } = db.prepare('select summary from gd where fid=?').get(source) || {}
   const { file_count, folder_count, total_size } = summary ? JSON.parse(summary) : {}
   const copied_files = copied ? copied.trim().split('\n').length : 0
-  const copied_folders = mapping ? (mapping.trim().split('\n').length - 1) : 0
+  const copied_folders = folder_mapping ? (folder_mapping.length - 1) : 0
   let text = '任务编号：' + task_id + '\n'
-  text += '源ID：' + gen_link(source) + '\n'
-  text += '目的ID：' + gen_link(target) + '\n'
+  const folder_name = await get_name_by_id(source)
+  text += '源文件夹：' + gen_link(source, folder_name) + '\n'
+  text += '目的位置：' + gen_link(target) + '\n'
+  text += '新文件夹：' + (new_folder ? gen_link(new_folder) : '暂未创建') + '\n'
   text += '任务状态：' + status + '\n'
   text += '创建时间：' + dayjs(ctime).format('YYYY-MM-DD HH:mm:ss') + '\n'
   text += '完成时间：' + (ftime ? dayjs(ftime).format('YYYY-MM-DD HH:mm:ss') : '未完成') + '\n'

@@ -20,6 +20,7 @@ router.get('/api/gdurl/count', async ctx => {
   let ua = headers['user-agent'] || ''
   ua = ua.toLowerCase()
   type = (type || '').toLowerCase()
+  // todo type=tree
   if (!type) {
     if (ua.includes('curl')) {
       type = 'curl'
