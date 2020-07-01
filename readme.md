@@ -26,8 +26,11 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/iwestlin/gd-utils/master
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
 ## 更新日志
-[2020-06-30]
+[2020-06-30]  
+- 当统计表格太长导致机器人发送消息失败时，发送统计概要
+- 增加了 [专家设置](#专家设置) 一节，保障接口安全
 
+[2020-06-30]  
 - 命令行操作时，不换行输出进度信息，同时将进度信息输出间隔调整为1秒
 - 隐藏 timeout exceed 报错信息
 
@@ -199,9 +202,7 @@ server {
 ```
 curl 'YOUR_WEBSITE_URL/api/gdurl/count?fid=124pjM5LggSuwI1n40bcD5tQ13wS0M6wg'
 ```
-![](./static/count.png)
-
-如果返回了这样的文件统计，说明部署成功了。
+如果返回了`gd-utils 成功启动`的消息，说明部署成功了。
 
 最后，在命令行执行（请将[YOUR_WEBSITE]和[YOUR_BOT_TOKEN]分别替换成你自己的网址和bot token）
 ```
@@ -227,6 +228,23 @@ const PARALLEL_LIMIT = 20 // 网络请求的并行数量，可根据网络环境
 const DEFAULT_TARGET = '' // 必填，拷贝默认目的地ID，如果不指定target，则会拷贝到此处，建议填写团队盘ID，注意要用英文引号包裹
 ```
 读者可根据各自情况进行调整
+
+## 专家设置
+这一节面向更加注重安全的专家用户，并假设读者了解nodejs的基本语法
+
+在 `config.js` 中，你可以额外设置两个变量 `ROUTER_PASSKEY` 和 `TG_IPLIST` 来进一步保证接口安全。
+```javascript
+// 如果设置了这个值，那么调用 /api/gdurl/count 这个接口必须携带一个叫 passkey 的query，且必须等于ROUTER_PASSKEY的值
+// 如果不设置这个值，那么默认关闭 /api/gdurl/count 这个接口的功能（因为观察到很多用户公开的贴出了自己的API地址……）
+const ROUTER_PASSKEY = 'your-custom-passkey'
+
+// 与你的服务器通信的tg服务器的 ip 地址，可以在pm2 logs 中看到
+// 如果设置了这个值，那么调用 /api/gdurl/tgbot 这个接口的IP地址必须是 TG_IPLIST 数组的其中之一
+// 如果不设置这个值，则默认任何IP都可以调用此接口（考虑到后面还有个 tg username的白名单验证）
+const TG_IPLIST = ['tg-ip-address']
+
+module.exports = { AUTH, PARALLEL_LIMIT, RETRY_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET, ROUTER_PASSKEY, TG_IPLIST }
+```
 
 ## 注意事项
 程序的原理是调用了[google drive官方接口](https://developers.google.com/drive/api/v3/reference/files/list)，递归获取目标文件夹下所有文件及其子文件夹信息，粗略来讲，某个目录下包含多少个文件夹，就至少需要这么多次请求才能统计完成。

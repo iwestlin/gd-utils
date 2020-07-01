@@ -4,16 +4,19 @@ const { db } = require('../db')
 const { validate_fid, gen_count_body } = require('./gd')
 const { send_count, send_help, send_choice, send_task_info, sm, extract_fid, reply_cb_query, tg_copy, send_all_tasks } = require('./tg')
 
-const { AUTH } = require('../config')
+const { AUTH, ROUTER_PASSKEY, TG_IPLIST } = require('../config')
 const { tg_whitelist } = AUTH
 
 const counting = {}
 const router = new Router()
 
 router.get('/api/gdurl/count', async ctx => {
+  if (!ROUTER_PASSKEY) return ctx.body = 'gd-utils 成功启动'
   const { query, headers } = ctx.request
-  let { fid, type, update } = query
+  let { fid, type, update, passkey } = query
+  if (passkey !== ROUTER_PASSKEY) return ctx.body = 'invalid passkey'
   if (!validate_fid(fid)) throw new Error('无效的分享ID')
+
   let ua = headers['user-agent'] || ''
   ua = ua.toLowerCase()
   type = (type || '').toLowerCase()
@@ -38,6 +41,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
   const { body } = ctx.request
   console.log('ctx.ip', ctx.ip) // 可以只允许tg服务器的ip
   console.log('tg message:', body)
+  if (TG_IPLIST && !TG_IPLIST.includes(ctx.ip)) return ctx.body = 'invalid ip'
   ctx.body = '' // 早点释放连接
   const message = body.message || body.edited_message
 
