@@ -157,8 +157,10 @@ async function send_count ({ fid, chat_id }) {
     text: `<pre>${gd_link}
 ${table}</pre>`
   }).catch(async err => {
-    const description = err.response && err.response.data && err.response.data.description
-    if (description && description.includes('message is too long')) {
+    // const description = err.response && err.response.data && err.response.data.description
+    // const too_long_msgs = ['request entity too large', 'message is too long']
+    // if (description && too_long_msgs.some(v => description.toLowerCase().includes(v))) {
+    if (true) {
       const smy = await gen_count_body({ fid, type: 'json', service_account: true })
       const { file_count, folder_count, total_size } = JSON.parse(smy)
       return sm({

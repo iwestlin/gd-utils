@@ -627,7 +627,7 @@ async function confirm_dedupe ({ file_number, folder_number }) {
   const answer = await prompts({
     type: 'select',
     name: 'value',
-    message: `检测到重复文件${file_number}个，重复目录${folder_number}个，是否删除？`,
+    message: `检测到同位置下重复文件${file_number}个，重复空目录${folder_number}个，是否删除？`,
     choices: [
       { title: 'Yes', description: '确认删除', value: 'yes' },
       { title: 'No', description: '先不删除', value: 'no' }
