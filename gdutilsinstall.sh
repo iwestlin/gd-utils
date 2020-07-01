@@ -1,7 +1,7 @@
 #!/bin/bash
 echo
 echo -e "\033[1;32m===== <<gdutils项目一件部署脚本要求及说明>> =====\033[0m"
-echo -e "\033[1;32m---------------[ v1.0 by oneking ]---------------\033[0m"
+echo -e "\033[1;32m---------------[ v2.1 by oneking ]---------------\033[0m"
 echo -e "\033[32m 1.\033[0m 本脚本是针对TG大神@viegg的gdutils项目一键部署脚本;"
 echo -e "\033[32m 2.\033[0m 脚本包括“TD盘VPS上查询转存部署”和“Telegram机器人部署”两部分"
 echo -e "\033[32m 3.\033[0m 本脚本适应CentOS/Debian/Ubuntu三种操作系统，自动识别、自动选择对应分支一键安装部署"
@@ -37,6 +37,8 @@ if [[ "$os" = "Debian" ]];then
     cmd_install_rely="build-essential" #c++编译环境
     nodejs_curl="https://deb.nodesource.com/setup_10.x" #nodejs下载链接
     cmd_install_rpm_build="" #安装rpm-build
+    nginx_conf="/etc/nginx/sites-enabled/" #nginx配置文件存放路径
+    rm_nginx_default="rm -f /etc/nginx/sites-enabled/default" #删除default
     echo
     echo -e "\033[1;32m★★★★★ 您的操作系统为Debian，即将为你开始部署gdutils项目 ★★★★★\033[0m"
 elif [[ "$os" = "Ubuntu" ]];then
@@ -44,6 +46,9 @@ elif [[ "$os" = "Ubuntu" ]];then
     cmd_install_rely="build-essential"
     nodejs_curl="https://deb.nodesource.com/setup_10.x"
     cmd_install_rpm_build=""
+    nginx_conf="/etc/nginx/sites-enabled/"
+    rm_nginx_default="rm -f /etc/nginx/sites-enabled/default"
+    rm_
     echo
     echo -e "\033[1;32m★★★★★ 您的操作系统为Ubuntu，即将为你开始部署gdutils项目 ★★★★★\033[0m"
 elif [[ "$os" = "CentOS" ]];then
@@ -51,6 +56,8 @@ elif [[ "$os" = "CentOS" ]];then
     cmd_install_rely="gcc-c++ make"
     nodejs_curl="https://rpm.nodesource.com/setup_10.x"
     cmd_install_rpm_build="yum install rpm-build -y"
+    nginx_conf="/etc/nginx/conf.d/"
+    rm_nginx_default=""
     echo
     echo -e "\033[1;32m★★★★★ 您的操作系统为Centos，即将为你开始部署gdutils项目 ★★★★★\033[0m"
 elif [[ "$os" = "mac" ]];then
@@ -162,15 +169,17 @@ echo
 echo -e "\033[1;32m===== <<配置nginx服务>> ===== \033[0m"
 echo
 echo -e "\033[1;32m“nginx”起一个web服务......\033[0m"
-cd /etc/nginx/sites-enabled/
+
+cd $nginx_conf
 echo "server {
 listen 80;
 server_name $YOUR_BOT_SERVER_NAME;
 location / {
     proxy_pass http://127.0.0.1:23333/;
 }
-}" > /etc/nginx/sites-enabled/gdutilsbot && 
-rm -f /etc/nginx/sites-enabled/default
+}" > ${nginx_conf}gdutilsbot && 
+$rm_nginx_default
+
 ls && 
 nginx -t &&  
 nginx -c /etc/nginx/nginx.conf && 
