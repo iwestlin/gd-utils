@@ -27,6 +27,8 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/iwestlin/gd-utils/master
 
 ## 更新日志
 [2020-07-01]（建议所有使用tg机器人的用户更新）  
+- 给机器人的 `/count` 和 `/copy` 命令添加了 `-u` 参数的支持，命令最后加上 -u 表示强制从线上获取源文件夹信息
+- 允许继续状态为已完成的任务（适合搭配 -u 参数，增量复制刚分享出来的未更新完毕的文件夹）
 - 支持识别转发的 [@gdurl](https://t.me/s/gdurl) 频道消息中的google drive链接
 - 机器人回复任务完成消息时，携带 `成功拷贝目录（文件）数/总目录（文件）数`
 - 机器人回复统计消息时，携带文件夹名称
