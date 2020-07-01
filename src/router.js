@@ -111,8 +111,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     }
     send_task_info({ task_id, chat_id }).catch(console.error)
   } else if (text.includes('drive.google.com/') || validate_fid(text)) {
-    fid = fid || text
-    return send_choice({ fid, chat_id }).catch(console.error)
+    return send_choice({ fid: fid || text, chat_id }).catch(console.error)
   } else {
     sm({ chat_id, text: '暂不支持此命令' })
   }
