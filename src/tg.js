@@ -13,6 +13,15 @@ if (!tg_token) throw new Error('请先在auth.js里设置tg_token')
 const { https_proxy } = process.env
 const axins = axios.create(https_proxy ? { httpsAgent: new HttpsProxyAgent(https_proxy) } : {})
 
+const FID_TO_NAME = {}
+
+async function get_folder_name (fid) {
+  let name = FID_TO_NAME[fid]
+  if (name) return name
+  name = await get_name_by_id(fid)
+  return FID_TO_NAME[fid] = name
+}
+
 module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy, extract_from_text }
 
 function send_help (chat_id) {
@@ -72,10 +81,9 @@ async function send_all_tasks (chat_id) {
   })
 }
 
-async function send_task_info ({ task_id, chat_id }) {
+async function get_task_info (task_id) {
   const record = db.prepare('select * from task where id=?').get(task_id)
-  if (!record) return sm({ chat_id, text: '数据库不存在此任务ID：' + task_id })
-
+  if (!record) return {}
   const { source, target, status, copied, mapping, ctime, ftime } = record
   const folder_mapping = mapping && mapping.trim().split('\n')
   const new_folder = folder_mapping && folder_mapping[0].split(' ')[1]
@@ -84,7 +92,7 @@ async function send_task_info ({ task_id, chat_id }) {
   const copied_files = copied ? copied.trim().split('\n').length : 0
   const copied_folders = folder_mapping ? (folder_mapping.length - 1) : 0
   let text = '任务编号：' + task_id + '\n'
-  const folder_name = await get_name_by_id(source)
+  const folder_name = await get_folder_name(source)
   text += '源文件夹：' + gen_link(source, folder_name) + '\n'
   text += '目的位置：' + gen_link(target) + '\n'
   text += '新文件夹：' + (new_folder ? gen_link(new_folder) : '暂未创建') + '\n'
@@ -94,7 +102,27 @@ async function send_task_info ({ task_id, chat_id }) {
   text += '目录进度：' + copied_folders + '/' + (folder_count === undefined ? '未知数量' : folder_count) + '\n'
   text += '文件进度：' + copied_files + '/' + (file_count === undefined ? '未知数量' : file_count) + '\n'
   text += '合计大小：' + (total_size || '未知大小')
-  return sm({ chat_id, text, parse_mode: 'HTML' })
+  return { text, status }
+}
+
+async function send_task_info ({ task_id, chat_id }) {
+  const { text } = await get_task_info(task_id)
+  if (!text) return sm({ chat_id, text: '数据库不存在此任务ID：' + task_id })
+  const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
+  let message_id
+  try {
+    const { data } = await axins.post(url, { chat_id, text, parse_mode: 'HTML' })
+    message_id = data && data.result && data.result.message_id
+  } catch (e) {
+    console.log('fail to send message to tg', e.message)
+  }
+  if (!message_id) return
+  const loop = setInterval(async () => {
+    const url = `https://api.telegram.org/bot${tg_token}/editMessageText`
+    const { text, status } = await get_task_info(task_id)
+    if (status !== 'copying') clearInterval(loop)
+    sm({ chat_id, text, parse_mode: 'HTML' })
+  }, 10 * 1000)
 }
 
 async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
@@ -127,7 +155,7 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
       const copied_folders = mapping ? (mapping.trim().split('\n').length - 1) : 0
 
       let text = `任务 ${task_id} 复制完成\n`
-      const name = await get_name_by_id(source)
+      const name = await get_folder_name(source)
       text += '源文件夹：' + gen_link(source, name) + '\n'
       text += '目录完成数：' + copied_folders + '/' + folder_count + '\n'
       text += '文件完成数：' + copied_files + '/' + file_count + '\n'
@@ -163,10 +191,10 @@ function reply_cb_query ({ id, data }) {
 
 async function send_count ({ fid, chat_id, update }) {
   const table = await gen_count_body({ fid, update, type: 'tg', service_account: true })
-  if (!table) return sm({chat_id, parse_mode: 'HTML', text: gen_link(fid) + ' 信息获取失败'})
+  if (!table) return sm({ chat_id, parse_mode: 'HTML', text: gen_link(fid) + ' 信息获取失败' })
   const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
   const gd_link = `https://drive.google.com/drive/folders/${fid}`
-  const name = await get_name_by_id(fid)
+  const name = await get_folder_name(fid)
   return axins.post(url, {
     chat_id,
     parse_mode: 'HTML',
