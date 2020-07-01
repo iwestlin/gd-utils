@@ -115,7 +115,7 @@ async function tg_copy ({ fid, target, chat_id }) { // return task_id
   }
 
   real_copy({ source: fid, target, not_teamdrive: true, service_account: true, is_server: true })
-    .then(info => {
+    .then(async info => {
       if (!record) record = {} // 防止无限循环
       if (!info) return
       const { task_id } = info
@@ -127,10 +127,11 @@ async function tg_copy ({ fid, target, chat_id }) { // return task_id
       const copied_folders = mapping ? (mapping.trim().split('\n').length - 1) : 0
 
       let text = `任务 ${task_id} 复制完成\n`
-      text += '源文件夹：' + gen_link(source) + '\n'
+      const name = await get_name_by_id(source)
+      text += '源文件夹：' + gen_link(source, name) + '\n'
       text += '目录完成数：' + copied_folders + '/' + folder_count + '\n'
       text += '文件完成数：' + copied_files + '/' + file_count + '\n'
-      sm({ chat_id, text })
+      sm({ chat_id, text, parse_mode: 'HTML' })
     })
     .catch(err => {
       if (!record) record = {}
