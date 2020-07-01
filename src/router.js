@@ -73,7 +73,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
   const username = message && message.from && message.from.username
   if (!chat_id || !text || !tg_whitelist.includes(username)) return console.warn('异常请求')
 
-  const fid = extract_fid(text) || extract_from_text(text)
+  const fid = (validate_fid(text) && text) || extract_fid(text) || extract_from_text(text)
   const no_fid_commands = ['/task', '/help']
   if (!no_fid_commands.some(cmd => text.startsWith(cmd)) && !validate_fid(fid)) {
     return sm({ chat_id, text: '未识别出分享ID' })
@@ -83,7 +83,8 @@ router.post('/api/gdurl/tgbot', async ctx => {
     if (counting[fid]) return sm({ chat_id, text: fid + ' 正在统计，请稍等片刻' })
     try {
       counting[fid] = true
-      await send_count({ fid, chat_id })
+      const update = text.endsWith('-u')
+      await send_count({ fid, chat_id, update })
     } catch (err) {
       console.error(err)
       sm({ chat_id, text: fid + ' 统计失败：' + err.message })
@@ -93,7 +94,8 @@ router.post('/api/gdurl/tgbot', async ctx => {
   } else if (text.startsWith('/copy')) {
     const target = text.replace('/copy', '').trim().split(' ').map(v => v.trim())[1]
     if (target && !validate_fid(target)) return sm({ chat_id, text: `目标ID ${target} 格式不正确` })
-    tg_copy({ fid, target, chat_id }).then(task_id => {
+    const update = text.endsWith('-u')
+    tg_copy({ fid, target, chat_id, update }).then(task_id => {
       task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
     })
   } else if (text.startsWith('/task')) {

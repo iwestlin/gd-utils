@@ -92,11 +92,11 @@ async function send_task_info ({ task_id, chat_id }) {
   text += '完成时间：' + (ftime ? dayjs(ftime).format('YYYY-MM-DD HH:mm:ss') : '未完成') + '\n'
   text += '目录进度：' + copied_folders + '/' + (folder_count === undefined ? '未知数量' : folder_count) + '\n'
   text += '文件进度：' + copied_files + '/' + (file_count === undefined ? '未知数量' : file_count) + '\n'
-  text += '总大小：' + (total_size || '未知大小')
+  text += '合计大小：' + (total_size || '未知大小')
   return sm({ chat_id, text, parse_mode: 'HTML' })
 }
 
-async function tg_copy ({ fid, target, chat_id }) { // return task_id
+async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
   target = target || DEFAULT_TARGET
   if (!target) {
     sm({ chat_id, text: '请输入目的地ID或先在config.js里设置默认复制目的地ID(DEFAULT_TARGET)' })
@@ -114,7 +114,7 @@ async function tg_copy ({ fid, target, chat_id }) { // return task_id
     }
   }
 
-  real_copy({ source: fid, target, not_teamdrive: true, service_account: true, is_server: true })
+  real_copy({ source: fid, update, target, not_teamdrive: true, service_account: true, is_server: true })
     .then(async info => {
       if (!record) record = {} // 防止无限循环
       if (!info) return
@@ -161,8 +161,8 @@ function reply_cb_query ({ id, data }) {
   })
 }
 
-async function send_count ({ fid, chat_id }) {
-  const table = await gen_count_body({ fid, type: 'tg', service_account: true })
+async function send_count ({ fid, chat_id, update }) {
+  const table = await gen_count_body({ fid, update, type: 'tg', service_account: true })
   const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
   const gd_link = `https://drive.google.com/drive/folders/${fid}`
   const name = await get_name_by_id(fid)
