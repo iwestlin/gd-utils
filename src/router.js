@@ -73,7 +73,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
   const username = message && message.from && message.from.username
   if (!chat_id || !text || !tg_whitelist.includes(username)) return console.warn('异常请求')
 
-  const fid = (validate_fid(text) && text) || extract_fid(text) || extract_from_text(text)
+  const fid = extract_fid(text) || extract_from_text(text)
   const no_fid_commands = ['/task', '/help']
   if (!no_fid_commands.some(cmd => text.startsWith(cmd)) && !validate_fid(fid)) {
     return sm({ chat_id, text: '未识别出分享ID' })
@@ -110,7 +110,8 @@ router.post('/api/gdurl/tgbot', async ctx => {
       return running_tasks.forEach(v => send_task_info({ chat_id, task_id: v.id }).catch(console.error))
     }
     send_task_info({ task_id, chat_id }).catch(console.error)
-  } else if (text.includes('drive.google.com/')) {
+  } else if (text.includes('drive.google.com/') || validate_fid(text)) {
+    fid = fid || text
     return send_choice({ fid, chat_id }).catch(console.error)
   } else {
     sm({ chat_id, text: '暂不支持此命令' })
