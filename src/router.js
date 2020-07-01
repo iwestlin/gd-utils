@@ -83,7 +83,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     if (counting[fid]) return sm({ chat_id, text: fid + ' 正在统计，请稍等片刻' })
     try {
       counting[fid] = true
-      const update = text.endsWith('-u')
+      const update = text.endsWith(' -u')
       await send_count({ fid, chat_id, update })
     } catch (err) {
       console.error(err)
@@ -92,9 +92,9 @@ router.post('/api/gdurl/tgbot', async ctx => {
       delete counting[fid]
     }
   } else if (text.startsWith('/copy')) {
-    const target = text.replace('/copy', '').trim().split(' ').map(v => v.trim())[1]
+    const target = text.replace('/copy', '').replace(' -u', '').trim().split(' ').map(v => v.trim())[1]
     if (target && !validate_fid(target)) return sm({ chat_id, text: `目标ID ${target} 格式不正确` })
-    const update = text.endsWith('-u')
+    const update = text.endsWith(' -u')
     tg_copy({ fid, target, chat_id, update }).then(task_id => {
       task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
     })
