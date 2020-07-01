@@ -7,9 +7,18 @@
   - 在Telegram上注册好机器人并取得并记录下该机器人TOKEN     
   - 一个域名在cloudflare解析到该机器人所在VPS的IP     
 - 准备好以上两个条件后，复制以下全部内容粘贴到VPS命令行窗口回车即可    
-```    
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/vitaminx/gd-utils/master/gdutilsinstall.sh)"
-```    
+  - gdutils项目一键部署脚本（包括“查询转存”和“TG机器人”两部分）    
+  ```    
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/vitaminx/gd-utils/master/gdutilsinstall.sh)"
+  ```    
+  - gdutils项目一键部署脚本之“转存查询部分”    
+  ```    
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/vitaminx/gd-utils/master/gdutilscsinstall.sh)"
+  ```    
+  - gdutils项目一键部署脚本之“TG机器人部分”    
+  ```    
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/vitaminx/gd-utils/master/gdutilsbotinstall.sh)"
+  ```  
 - 安装过程中需要输入一下四个参数：    
   - 机器人TOKEN：这个在Telegram里面找“@BotFather”注册即可获得    
   - 使用机器人的Telegram用户名：在Telegram里面直接查看
