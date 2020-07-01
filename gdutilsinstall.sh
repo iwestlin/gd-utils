@@ -177,7 +177,7 @@ server_name $YOUR_BOT_SERVER_NAME;
 location / {
     proxy_pass http://127.0.0.1:23333/;
 }
-}" > ${nginx_conf}gdutilsbot && 
+}" > ${nginx_conf}gdutilsbot.conf && 
 $rm_nginx_default
 
 ls && 
