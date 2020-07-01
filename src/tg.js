@@ -21,9 +21,9 @@ function send_help (chat_id) {
 
 /help | 返回本条使用说明
 
-/count shareID | 返回sourceID的文件统计信息, sourceID可以是google drive分享网址本身，也可以是分享ID
+/count shareID [-u] | 返回sourceID的文件统计信息, sourceID可以是google drive分享网址本身，也可以是分享ID。如果命令最后加上 -u，则无视之前的记录强制从线上获取，适合一段时候后才更新完毕的分享链接。
 
-/copy sourceID targetID | 将sourceID的文件复制到targetID里（会新建一个文件夹），若不填targetID，则会复制到默认位置（在config.js里设置）。返回拷贝任务的taskID
+/copy sourceID targetID [-u] | 将sourceID的文件复制到targetID里（会新建一个文件夹），若不填targetID，则会复制到默认位置（在config.js里设置）。如果命令最后加上 -u，则无视本地缓存强制从线上获取源文件夹信息。返回拷贝任务的taskID
 
 /task taskID | 返回对应任务的进度信息，若不填则返回所有正在运行的任务进度，若填 all 则返回所有任务列表
 </pre>`
@@ -109,8 +109,7 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
       sm({ chat_id, text: '已有相同源ID和目的ID的任务正在进行，查询进度可输入 /task ' + record.id })
       return
     } else if (record.status === 'finished') {
-      sm({ chat_id, text: '有相同源ID和目的ID的任务已复制完成，如需重新复制请更换目的地' })
-      return
+      sm({ chat_id, text: `检测到已存在的任务 ${record.id}，开始继续拷贝` })
     }
   }
 
