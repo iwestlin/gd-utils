@@ -4,9 +4,10 @@ const axios = require('@viegg/axios')
 const HttpsProxyAgent = require('https-proxy-agent')
 
 const { db } = require('../db')
-const { gen_count_body, validate_fid, real_copy } = require('./gd')
+const { gen_count_body, validate_fid, real_copy, get_name_by_id } = require('./gd')
 const { AUTH, DEFAULT_TARGET } = require('../config')
 const { tg_token } = AUTH
+const gen_link = fid => `<a href="https://drive.google.com/drive/folders/${fid}">${fid}</a>`
 
 if (!tg_token) throw new Error('请先在auth.js里设置tg_token')
 const { https_proxy } = process.env
@@ -74,7 +75,6 @@ async function send_task_info ({ task_id, chat_id }) {
   const record = db.prepare('select * from task where id=?').get(task_id)
   if (!record) return sm({ chat_id, text: '数据库不存在此任务ID：' + task_id })
 
-  const gen_link = fid => `<a href="https://drive.google.com/drive/folders/${fid}">${fid}</a>`
   const { source, target, status, copied, mapping, ctime, ftime } = record
   const { summary } = db.prepare('select summary from gd where fid=?').get(source) || {}
   const { file_count, folder_count, total_size } = summary ? JSON.parse(summary) : {}
@@ -111,12 +111,22 @@ async function tg_copy ({ fid, target, chat_id }) { // return task_id
   }
 
   real_copy({ source: fid, target, not_teamdrive: true, service_account: true, is_server: true })
-    .then(folder => {
+    .then(info => {
       if (!record) record = {} // 防止无限循环
-      if (!folder) return
-      const link = 'https://drive.google.com/drive/folders/' + folder.id
-      // todo 加上完成文件数
-      sm({ chat_id, text: `${fid} 复制完成，新文件夹链接：${link}` })
+      if (!info) return
+      const { task_id } = info
+      const row = db.prepare('select * from task where id=?').get(task_id)
+      const { source, target, status, copied, mapping, ctime, ftime } = row
+      const { summary } = db.prepare('select summary from gd where fid=?').get(source) || {}
+      const { file_count, folder_count, total_size } = summary ? JSON.parse(summary) : {}
+      const copied_files = copied ? copied.trim().split('\n').length : 0
+      const copied_folders = mapping ? (mapping.trim().split('\n').length - 1) : 0
+
+      let text = `任务 ${task_id} 复制完成\n`
+      text += '源文件夹：' + gen_link(source) + '\n'
+      text += '目录完成数：' + copied_folders + '/' + folder_count + '\n'
+      text += '文件完成数：' + copied_files + '/' + file_count + '\n'
+      sm({ chat_id, text })
     })
     .catch(err => {
       if (!record) record = {}
@@ -150,11 +160,12 @@ async function send_count ({ fid, chat_id }) {
   const table = await gen_count_body({ fid, type: 'tg', service_account: true })
   const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
   const gd_link = `https://drive.google.com/drive/folders/${fid}`
+  const name = await get_name_by_id(fid)
   return axins.post(url, {
     chat_id,
     parse_mode: 'HTML',
-    // todo 输出文件名
-    text: `<pre>${gd_link}
+    text: `<pre>源文件夹名称：${name}
+源链接：${gd_link}
 ${table}</pre>`
   }).catch(async err => {
     // const description = err.response && err.response.data && err.response.data.description
@@ -166,8 +177,9 @@ ${table}</pre>`
       return sm({
         chat_id,
         parse_mode: 'HTML',
-        text: `文件统计：<a href="https://drive.google.com/drive/folders/${fid}">${fid}</a>\n<pre>
+        text: `链接：<a href="https://drive.google.com/drive/folders/${fid}">${fid}</a>\n<pre>
 表格太长超出telegram消息限制，只显示概要：
+目录名称：${name}
 文件总数：${file_count}
 目录总数：${folder_count}
 合计大小：${total_size}

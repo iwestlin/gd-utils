@@ -347,13 +347,22 @@ async function create_folder (name, parent, use_sa) {
   return data
 }
 
+async function get_name_by_id (fid) {
+  try {
+    const {name} = await get_info_by_id(fid, true)
+    return name
+  } catch (e) {
+    return fid
+  }
+}
+
 async function get_info_by_id (fid, use_sa) {
   let url = `https://www.googleapis.com/drive/v3/files/${fid}`
   let params = {
     includeItemsFromAllDrives: true,
     supportsAllDrives: true,
     corpora: 'allDrives',
-    fields: 'id,name,owners'
+    fields: 'id,name'
   }
   url += '?' + params_to_query(params)
   const headers = await gen_headers(use_sa)
@@ -434,7 +443,7 @@ async function real_copy ({ source, target, name, min_size, update, not_teamdriv
       })
       await copy_files({ files, mapping: all_mapping, root, task_id: record.id })
       db.prepare('update task set status=?, ftime=? where id=?').run('finished', Date.now(), record.id)
-      return { id: root } // todo 加上task_id
+      return { id: root, task_id: record.id }
     } else if (choice === 'restart') {
       const new_root = await get_new_root()
       if (!new_root) throw new Error('创建目录失败，请检查您的帐号是否有相应的权限')
@@ -456,7 +465,7 @@ async function real_copy ({ source, target, name, min_size, update, not_teamdriv
       })
       await copy_files({ files, mapping, root: new_root.id, task_id: record.id })
       db.prepare('update task set status=?, ftime=? where id=?').run('finished', Date.now(), record.id)
-      return new_root
+      return { id: new_root.id, task_id: record.id }
     } else {
       // ctrl+c 退出
       return console.log('退出程序')
@@ -481,7 +490,7 @@ async function real_copy ({ source, target, name, min_size, update, not_teamdriv
     })
     await copy_files({ files, mapping, root: new_root.id, task_id: lastInsertRowid })
     db.prepare('update task set status=?, ftime=? where id=?').run('finished', Date.now(), lastInsertRowid)
-    return new_root
+    return { id: new_root.id, task_id: lastInsertRowid }
   }
 }
 
@@ -710,4 +719,4 @@ function print_progress (msg) {
   }
 }
 
-module.exports = { ls_folder, count, validate_fid, copy, dedupe, copy_file, gen_count_body, real_copy }
+module.exports = { ls_folder, count, validate_fid, copy, dedupe, copy_file, gen_count_body, real_copy, get_name_by_id }
