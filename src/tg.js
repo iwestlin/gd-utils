@@ -61,9 +61,10 @@ async function send_all_tasks (chat_id) {
     chat_id,
     parse_mode: 'HTML',
     text: `所有拷贝任务：\n<pre>${text}</pre>`
-  }).catch(async err => {
-    const description = err.response && err.response.data && err.response.data.description
-    if (description && description.includes('message is too long')) {
+  }).catch(err => {
+    // const description = err.response && err.response.data && err.response.data.description
+    // if (description && description.includes('message is too long')) {
+    if (true) {
       const text = [headers].concat(records).map(v => v.join('\t')).join('\n')
       return sm({ chat_id, parse_mode: 'HTML', text: `所有拷贝任务：\n<pre>${text}</pre>` })
     }

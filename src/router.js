@@ -71,7 +71,10 @@ router.post('/api/gdurl/tgbot', async ctx => {
   const chat_id = message && message.chat && message.chat.id
   const text = message && message.text && message.text.trim()
   const username = message && message.from && message.from.username
-  if (!chat_id || !text || !tg_whitelist.includes(username)) return console.warn('异常请求')
+  const user_id = message && message.from && message.from.id
+  if (!chat_id || !text || (!tg_whitelist.includes(username) && !tg_whitelist.includes(user_id))) {
+    return console.warn('异常请求')
+  }
 
   const fid = extract_fid(text) || extract_from_text(text)
   const no_fid_commands = ['/task', '/help']
