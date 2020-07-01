@@ -154,7 +154,7 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account }) {
 
   const loop = setInterval(() => {
     const now = dayjs().format('HH:mm:ss')
-    const message = `${now} | 已获取对象 ${result.length} | 排队等候的网络请求 ${limit.pendingCount}`
+    const message = `${now} | 已获取对象 ${result.length} | 网络请求 进行中${limit.activeCount}/排队${limit.pendingCount}`
     print_progress(message)
   }, 1000)
 
@@ -500,7 +500,7 @@ async function copy_files ({ files, mapping, root, task_id }) {
   let count = 0
   const loop = setInterval(() => {
     const now = dayjs().format('HH:mm:ss')
-    const message = `${now} | 已复制文件数 ${count} | 排队等候的网络请求 ${limit.pendingCount}`
+    const message = `${now} | 已复制文件数 ${count} | 网络请求 进行中${limit.activeCount}/排队${limit.pendingCount}`
     print_progress(message)
   }, 1000)
   await Promise.all(files.map(async file => {
@@ -569,7 +569,7 @@ async function create_folders ({ source, old_mapping, folders, root, task_id, se
 
   const loop = setInterval(() => {
     const now = dayjs().format('HH:mm:ss')
-    const message = `${now} | 已创建目录数 ${count} | 排队等候的网络请求 ${limit.pendingCount}`
+    const message = `${now} | 已创建目录数 ${count} | 网络请求 进行中${limit.activeCount}/排队${limit.pendingCount}`
     print_progress(message)
   }, 1000)
 
@@ -653,7 +653,7 @@ async function rm_file ({ fid, service_account }) {
   const url = `https://www.googleapis.com/drive/v3/files/${fid}?supportsAllDrives=true`
   while (retry < RETRY_LIMIT) {
     try {
-      return await axins.delete(url, { headers })
+      return await axins.delete(url, { headers }) // todo move to trash
     } catch (err) {
       retry++
       handle_error(err)
