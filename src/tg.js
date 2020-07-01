@@ -12,7 +12,7 @@ if (!tg_token) throw new Error('请先在auth.js里设置tg_token')
 const { https_proxy } = process.env
 const axins = axios.create(https_proxy ? { httpsAgent: new HttpsProxyAgent(https_proxy) } : {})
 
-module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy }
+module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy, extract_from_text }
 
 function send_help (chat_id) {
   const text = `<pre>[使用帮助]
@@ -202,4 +202,10 @@ function extract_fid (text) {
   } catch (e) {
     return ''
   }
+}
+
+function extract_from_text (text) {
+  const reg = /https?:\/\/drive.google.com\/.+/g
+  const m = text.match(reg)
+  return m && extract_fid(m[0])
 }
