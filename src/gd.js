@@ -38,11 +38,13 @@ handle_exit(() => {
 async function gen_count_body ({ fid, type, update, service_account }) {
   async function update_info () {
     const info = await walk_and_save({ fid, update, service_account }) // 这一步已经将fid记录存入数据库中了
-    const { summary } = db.prepare('SELECT summary from gd WHERE fid=?').get(fid)
-    return [info, JSON.parse(summary)]
+    const row = db.prepare('SELECT summary from gd WHERE fid=?').get(fid)
+    if (!row) return []
+    return [info, JSON.parse(row.summary)]
   }
 
   function render_smy (smy, type) {
+    if (!smy) return
     if (['html', 'curl', 'tg'].includes(type)) {
       smy = (typeof smy === 'object') ? smy : JSON.parse(smy)
       const type_func = {
@@ -66,7 +68,7 @@ async function gen_count_body ({ fid, type, update, service_account }) {
     if (!info) { // 说明上次统计过程中断了
       [info] = await update_info()
     }
-    return JSON.stringify(info)
+    return info && JSON.stringify(info)
   }
   if (smy) return render_smy(smy, type)
   if (record && record.summary) return render_smy(record.summary, type)
