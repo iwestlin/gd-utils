@@ -26,9 +26,13 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/iwestlin/gd-utils/master
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
 ## 更新日志
-[2020-06-30]  
+[2020-07-01]（建议所有使用tg机器人的用户更新）  
+- 支持识别转发的 [@gdurl](https://t.me/s/gdurl) 频道消息中的google drive链接
+- 机器人回复任务完成消息时，携带 `成功拷贝目录（文件）数/总目录（文件）数`
+- 机器人回复统计消息时，携带文件夹名称
+- 机器人回复`/task`消息时，携带源文件夹名称链接和新文件夹链接
 - 当统计表格太长导致机器人发送消息失败时，发送统计概要
-- 增加了 [专家设置](#专家设置) 一节，保障接口安全
+- 增加了 [专家设置](#专家设置) 一节，保障HTTPS接口安全
 
 [2020-06-30]  
 - 命令行操作时，不换行输出进度信息，同时将进度信息输出间隔调整为1秒
