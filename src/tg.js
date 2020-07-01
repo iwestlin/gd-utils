@@ -121,7 +121,7 @@ async function send_task_info ({ task_id, chat_id }) {
     const url = `https://api.telegram.org/bot${tg_token}/editMessageText`
     const { text, status } = await get_task_info(task_id)
     if (status !== 'copying') clearInterval(loop)
-    axins.post(url, { chat_id, text, parse_mode: 'HTML' }).catch(e => console.error(e.message))
+    axins.post(url, { chat_id, message_id, text, parse_mode: 'HTML' }).catch(e => console.error(e.message))
   }, 10 * 1000)
 }
 

@@ -26,6 +26,9 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/iwestlin/gd-utils/master
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
 ## 更新日志
+[2020-07-02]  
+- 机器人 /task 命令返回的进度信息每 10 秒更新一次
+
 [2020-07-01]（建议所有使用tg机器人的用户更新）  
 - 给机器人的 `/count` 和 `/copy` 命令添加了 `-u` 参数的支持，命令最后加上 -u 表示强制从线上获取源文件夹信息
 - 允许继续状态为已完成的任务（适合搭配 -u 参数，增量复制刚分享出来的未更新完毕的文件夹）
