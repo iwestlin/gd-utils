@@ -243,7 +243,18 @@ const ROUTER_PASSKEY = 'your-custom-passkey'
 // 如果不设置这个值，则默认任何IP都可以调用此接口（考虑到后面还有个 tg username的白名单验证）
 const TG_IPLIST = ['tg-ip-address']
 
-module.exports = { AUTH, PARALLEL_LIMIT, RETRY_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET, ROUTER_PASSKEY, TG_IPLIST }
+module.exports = {
+  AUTH,
+  PARALLEL_LIMIT,
+  RETRY_LIMIT,
+  TIMEOUT_BASE,
+  TIMEOUT_MAX,
+  LOG_DELAY,
+  PAGE_SIZE,
+  DEFAULT_TARGET,
+  ROUTER_PASSKEY,
+  TG_IPLIST
+}
 ```
 
 ## 注意事项
