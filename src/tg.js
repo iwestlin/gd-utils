@@ -163,7 +163,7 @@ function reply_cb_query ({ id, data }) {
 
 async function send_count ({ fid, chat_id, update }) {
   const table = await gen_count_body({ fid, update, type: 'tg', service_account: true })
-  if (!table) return sm({chat_id, text: gen_link(fid) + ' 信息获取失败'})
+  if (!table) return sm({chat_id, parse_mode: 'HTML', text: gen_link(fid) + ' 信息获取失败'})
   const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
   const gd_link = `https://drive.google.com/drive/folders/${fid}`
   const name = await get_name_by_id(fid)
