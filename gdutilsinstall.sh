@@ -205,7 +205,7 @@ echo
 echo
 
 cd ~
-rm -f gdutilsinstall_other.sh
+rm -f gdutilsinstall.sh
 
 ###########################gdutils功能建议##################################
 # 本部分是对gdutils项目的建议，因为我主要用的是查询功能所以以下建议只涉及查询功能
