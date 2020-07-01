@@ -23,10 +23,10 @@ if [ -f "/etc/redhat-release" ];then
 	if [[ `cat /etc/redhat-release` =~ "CentOS" ]];then
 		os="CentOS"
 	fi
-elif [ "$aNAME"=~"Debian" -o "$bNAME"=~"Debian"  -o "$cNAME"=~"Debian" ];then os="Debian"
-elif [ "$aNAME"=~"Ubuntu" -o "$bNAME"=~"Ubuntu"  -o "$cNAME"=~"Ubuntu" ];then os="Debian"
-elif [ "$aNAME"=~"CentOS" -o "$bNAME"=~"CentOS"  -o "$cNAME"=~"CentOS" ];then os="CentOS"
-elif [ "$aNAME"=~"Darwin" -o "$bNAME"=~"Darwin"  -o "$cNAME"=~"Darwin" ];then os="mac"
+elif [ "$aNAME"=~"Debian" -o "$bNAME"=~"Debian"  -o "$cNAME"=~"Debian" ]; then os="Debian"
+elif [ "$aNAME"=~"Ubuntu" -o "$bNAME"=~"Ubuntu"  -o "$cNAME"=~"Ubuntu" ]; then os="Debian"
+elif [ "$aNAME"=~"CentOS" -o "$bNAME"=~"CentOS"  -o "$cNAME"=~"CentOS" ]; then os="CentOS"
+elif [ "$aNAME"=~"Darwin" -o "$bNAME"=~"Darwin"  -o "$cNAME"=~"Darwin" ]; then os="mac"
 else os="$bNAME"
 fi
 
@@ -110,7 +110,7 @@ echo -e "\033[1;32m★★★ 恭喜您!gdutils项目“TD查询转存”部分�
 echo
 
 cd ~
-rm -f gdutilscs.sh
+rm -f gdutilsos.sh
 
 ###########################gdutils功能建议##################################
 # 本部分是对gdutils项目的建议，因为我主要用的是查询功能所以以下建议只涉及查询功能
