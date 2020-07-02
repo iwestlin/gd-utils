@@ -233,7 +233,7 @@ function sm (data) {
 }
 
 function extract_fid (text) {
-  text = text.replace(/^\/count/, '').replace(/^\/copy/, '').trim()
+  text = text.replace(/^\/count/, '').replace(/^\/copy/, '').replace(/\\/g, '').trim()
   const [source, target] = text.split(' ').map(v => v.trim())
   if (validate_fid(source)) return source
   try {
