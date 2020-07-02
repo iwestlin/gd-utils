@@ -648,14 +648,21 @@ async function confirm_dedupe ({ file_number, folder_number }) {
   return answer.value
 }
 
-// 可以删除文件或文件夹，似乎不会进入回收站
+// 将文件或文件夹移入回收站，需要 sa 为 content manager 权限及以上
+async function trash_file ({fid, service_account}) {
+  const url = `https://www.googleapis.com/drive/v3/files/${fid}?supportsAllDrives=true`
+  const headers = await gen_headers(service_account)
+  return axins.patch(url, {trashed: true}, {headers})
+}
+
+// 直接删除文件或文件夹，不会进入回收站，需要 sa 为 manager 权限
 async function rm_file ({ fid, service_account }) {
   const headers = await gen_headers(service_account)
   let retry = 0
   const url = `https://www.googleapis.com/drive/v3/files/${fid}?supportsAllDrives=true`
   while (retry < RETRY_LIMIT) {
     try {
-      return await axins.delete(url, { headers }) // todo move to trash
+      return await axins.delete(url, { headers })
     } catch (err) {
       retry++
       handle_error(err)
@@ -688,7 +695,7 @@ async function dedupe ({ fid, update, service_account }) {
   let file_count = 0
   await Promise.all(dupes.map(async v => {
     try {
-      await limit(() => rm_file({ fid: v.id, service_account }))
+      await limit(() => trash_file({ fid: v.id, service_account }))
       if (v.mimeType === FOLDER_TYPE) {
         console.log('成功删除文件夹', v.name)
         folder_count++
