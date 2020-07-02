@@ -3,10 +3,12 @@
 > 不只是最快的 google drive 拷贝工具 [与其他工具的对比](./compare.md)
 
 ## 一键安装脚本    
-- 首先准备好以下两个条件：    
+- 安装机器人需准备好以下四个条件：    
   - 在Telegram上注册好机器人并取得并记录下该机器人TOKEN     
   - 一个域名在cloudflare解析到该机器人所在VPS的IP     
-- 准备好以上两个条件后，复制以下全部内容粘贴到VPS命令行窗口回车即可    
+  - 向机器人@userinfobot获取个人TG账号ID并记录    
+  - 注册好一个Google team drive加入sa并记录下该盘ID    
+- 准备好以上四个条件后，复制以下全部内容粘贴到VPS命令行窗口回车即可    
   - gdutils项目一键部署脚本（包括“查询转存”和“TG机器人”两部分）    
   ```    
   bash -c "$(curl -fsSL https://raw.githubusercontent.com/vitaminx/gd-utils/master/gdutilsinstall.sh)"
@@ -21,9 +23,11 @@
   ```  
 - 安装过程中需要输入一下四个参数：    
   - 机器人TOKEN：这个在Telegram里面找“@BotFather”注册即可获得    
-  - 使用机器人的Telegram用户名：在Telegram里面直接查看
-  - web服务名：这是个是很重要的识别标志，请设置为你的域名（格式：abc.34513.com）    
-  - 域名网址全称：你在cloudflare上解析到VPS的域名网址全称（格式：https://abc.34513.com）    
+  - Telegram用户ID：在Telegram里面向机器人@userinfobot发送消息即可获得
+  - Google team drive ID：即为你转存文件的默认地址，脚本强制要求写谷歌团队盘ID     
+  - 域名：你在cloudflare上解析到VPS的域名（格式：abc.34513.com）    
+  - 脚本安装问题请信息发给TG：onekings 或 vitaminor@gmail.com    
+  - 系统使用问题（如无法转存、重启连不上机器人等等）请联系项目作者@vegg
 - 测试可用完美安装系统：    
   - Centos 7/8    
   - debian 9/10
