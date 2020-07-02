@@ -240,9 +240,9 @@ function extract_fid (text) {
     if (!text.startsWith('http')) text = 'https://' + text
     const u = new URL(text)
     if (u.pathname.includes('/folders/')) {
-      const reg = /\/folders\/([a-zA-Z0-9_-]{10,100})/
+      const reg = /(?<=\/)[^\/?]+(?=(\?|$))/
       const match = u.pathname.match(reg)
-      return match && match[1]
+      return match && match[0]
     }
     return u.searchParams.get('id')
   } catch (e) {
