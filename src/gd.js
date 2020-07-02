@@ -304,7 +304,7 @@ function real_get_sa_token (el) {
         // console.log('got sa token', tokens)
         const { access_token, expires_in } = tokens
         el.value = access_token
-        el.expires = Date.now() + 1000 * expires_in
+        el.expires = Date.now() + 1000 * (expires_in - 60 * 5) // 提前5分钟判定为过期
         resolve({ access_token, gtoken })
       }
     })

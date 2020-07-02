@@ -2,32 +2,15 @@
 
 > 不只是最快的 google drive 拷贝工具 [与其他工具的对比](./compare.md)
 
-## 一键安装脚本(感谢 脚本制作者 [@vitaminx](https://github.com/vitaminx))
-> 如果你没有Linux操作经验或者是新开的vps，可尝试使用此脚本
-
-- 首先准备好以下两个条件：
-  - 在Telegram上注册好机器人并取得并记录下该机器人TOKEN
-  - 一个域名在cloudflare解析到该机器人所在VPS的IP
-- 准备好以上两个条件后，复制以下内容粘贴到VPS命令行窗口回车即可
-```
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/iwestlin/gd-utils/master/gdutilsinstall.sh)"
-```
-- 安装过程中需要输入一下四个参数：
-  - 机器人TOKEN：这个在Telegram里面找“@BotFather”注册即可获得
-  - 自己的的Telegram username：在Telegram里面直接查看
-  - web服务名：这是个是很重要的识别标志，请设置为你的域名（格式：abc.34513.com）
-  - 域名网址全称：你在cloudflare上解析到VPS的域名网址全称（格式：https://abc.34513.com）
-- 测试可用完美安装系统：
-  - Centos 7/8
-  - debian 9/10
-  - ubuntu 16.04/18.04/19.10/20.04
-
 ## demo
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
 ## 更新日志
 [2020-07-02]  
 - 机器人 /task 命令返回的进度信息每 10 秒更新一次
+- `./dedupe` 改为将重复文件移动到回收站（需要内容管理者及以上权限）
+- 给 sqlite 打开 WAL 模式提升效率
+- 提前5分钟将access_token判定为过期，减少未授权错误
 
 [2020-07-01]（建议所有使用tg机器人的用户更新）  
 - 给机器人的 `/count` 和 `/copy` 命令添加了 `-u` 参数的支持，命令最后加上 -u 表示强制从线上获取源文件夹信息
@@ -67,6 +50,26 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/iwestlin/gd-utils/master
 将无效sa文件移动以后，如果你使用了pm2启动，需要 `pm2 reload server` 重启下进程。
 
 操作示例： [https://drive.google.com/drive/folders/1iiTAzWF_v9fo_IxrrMYiRGQ7QuPrnxHf](https://drive.google.com/drive/folders/1iiTAzWF_v9fo_IxrrMYiRGQ7QuPrnxHf)
+
+## 一键安装脚本(感谢 脚本制作者 [@vitaminx](https://github.com/vitaminx))
+> 如果你没有Linux操作经验或者是新开的vps，可尝试使用此脚本
+
+- 首先准备好以下两个条件：
+  - 在Telegram上注册好机器人并取得并记录下该机器人TOKEN
+  - 一个域名在cloudflare解析到该机器人所在VPS的IP
+- 准备好以上两个条件后，复制以下内容粘贴到VPS命令行窗口回车即可
+```
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/iwestlin/gd-utils/master/gdutilsinstall.sh)"
+```
+- 安装过程中需要输入一下四个参数：
+  - 机器人TOKEN：这个在Telegram里面找“@BotFather”注册即可获得
+  - 自己的的Telegram username：在Telegram里面直接查看
+  - web服务名：这是个是很重要的识别标志，请设置为你的域名（格式：abc.34513.com）
+  - 域名网址全称：你在cloudflare上解析到VPS的域名网址全称（格式：https://abc.34513.com）
+- 测试可用完美安装系统：
+  - Centos 7/8
+  - debian 9/10
+  - ubuntu 16.04/18.04/19.10/20.04
 
 ## 常见问题
 下面是一些网友的踩坑心得，如果你配置的时候也不小心掉进坑里，可以进去找找有没有解决办法：
