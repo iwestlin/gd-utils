@@ -251,7 +251,7 @@ function extract_fid (text) {
 }
 
 function extract_from_text (text) {
-  const reg = /https?:\/\/drive.google.com\/.+/g
+  const reg = /https?:\/\/drive.google.com\/[^\s]+/g
   const m = text.match(reg)
   return m && extract_fid(m[0])
 }
