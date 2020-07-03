@@ -303,23 +303,14 @@ async function get_sa_token () {
   throw new Error('没有可用的SA帐号')
 }
 
-function real_get_sa_token (el) {
+async function real_get_sa_token (el) {
   const { value, expires, gtoken } = el
   // 把gtoken传递出去的原因是当某账号流量用尽时可以依此过滤
   if (Date.now() < expires) return { access_token: value, gtoken }
-  return new Promise((resolve, reject) => {
-    gtoken.getToken((err, tokens) => {
-      if (err) {
-        reject(err)
-      } else {
-        // console.log('got sa token', tokens)
-        const { access_token, expires_in } = tokens
-        el.value = access_token
-        el.expires = Date.now() + 1000 * (expires_in - 60 * 5) // 提前5分钟判定为过期
-        resolve({ access_token, gtoken })
-      }
-    })
-  })
+  const { access_token, expires_in } = await gtoken.getToken({ forceRefresh: true })
+  el.value = access_token
+  el.expires = Date.now() + 1000 * (expires_in - 60 * 5) // 提前5分钟判定为过期
+  return { access_token, gtoken }
 }
 
 function get_random_element (arr) {
