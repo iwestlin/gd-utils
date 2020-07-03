@@ -102,11 +102,12 @@ async function get_task_info (task_id) {
   text += '目录进度：' + copied_folders + '/' + (folder_count === undefined ? '未知数量' : folder_count) + '\n'
   text += '文件进度：' + copied_files + '/' + (file_count === undefined ? '未知数量' : file_count) + '\n'
   text += '合计大小：' + (total_size || '未知大小')
-  return { text, status }
+  const total_count = (folder_count || 0) + (file_count || 0)
+  return { text, status, total_count }
 }
 
 async function send_task_info ({ task_id, chat_id }) {
-  const { text, status } = await get_task_info(task_id)
+  const { text, status, total_count } = await get_task_info(task_id)
   if (!text) return sm({ chat_id, text: '数据库不存在此任务ID：' + task_id })
   const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
   let message_id
@@ -116,7 +117,8 @@ async function send_task_info ({ task_id, chat_id }) {
   } catch (e) {
     console.log('fail to send message to tg', e.message)
   }
-  if (!message_id || status !== 'copying') return
+  // get_task_info 在task文件数超大时比较吃cpu，如果超5万就不每10秒更新了
+  if (!message_id || status !== 'copying' || total_count > 50000) return
   const loop = setInterval(async () => {
     const url = `https://api.telegram.org/bot${tg_token}/editMessageText`
     const { text, status } = await get_task_info(task_id)
