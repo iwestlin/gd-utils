@@ -303,23 +303,14 @@ async function get_sa_token () {
   throw new Error('没有可用的SA帐号')
 }
 
-function real_get_sa_token (el) {
+async function real_get_sa_token (el) {
   const { value, expires, gtoken } = el
   // 把gtoken传递出去的原因是当某账号流量用尽时可以依此过滤
   if (Date.now() < expires) return { access_token: value, gtoken }
-  return new Promise((resolve, reject) => {
-    gtoken.getToken((err, tokens) => {
-      if (err) {
-        reject(err)
-      } else {
-        // console.log('got sa token', tokens)
-        const { access_token, expires_in } = tokens
-        el.value = access_token
-        el.expires = Date.now() + 1000 * (expires_in - 60 * 5) // 提前5分钟判定为过期
-        resolve({ access_token, gtoken })
-      }
-    })
-  })
+  const { access_token, expires_in } = await gtoken.getToken({ forceRefresh: true })
+  el.value = access_token
+  el.expires = Date.now() + 1000 * (expires_in - 60 * 5) // 提前5分钟判定为过期
+  return { access_token, gtoken }
 }
 
 function get_random_element (arr) {
@@ -439,10 +430,10 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
     if (choice === 'exit') {
       return console.log('退出程序')
     } else if (choice === 'continue') {
-      let { copied, mapping } = record
+      let { mapping } = record
       const copied_ids = {}
       const old_mapping = {}
-      copied = copied.trim().split('\n')
+      const copied = db.prepare('select fileid from copied where taskid=?').all(record.id)
       copied.forEach(id => copied_ids[id] = true)
       mapping = mapping.trim().split('\n').map(line => line.split(' '))
       const root = mapping[0][1]
@@ -468,8 +459,7 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
     } else if (choice === 'restart') {
       const new_root = await get_new_root()
       const root_mapping = source + ' ' + new_root.id + '\n'
-      db.prepare('update task set status=?, copied=?, mapping=? where id=?')
-        .run('copying', '', root_mapping, record.id)
+      db.prepare('update task set status=?, mapping=? where id=?').run('copying', root_mapping, record.id)
       const arr = await walk_and_save({ fid: source, update: true, not_teamdrive, service_account })
       let files = arr.filter(v => v.mimeType !== FOLDER_TYPE)
       if (min_size) files = files.filter(v => v.size >= min_size)
@@ -528,7 +518,7 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
     const new_file = await limit(() => copy_file(id, target, service_account, limit))
     if (new_file) {
       count++
-      db.prepare('update task set status=?, copied = copied || ? where id=?').run('copying', id + '\n', task_id)
+      db.prepare('INSERT INTO copied (taskid, fileid) VALUES (?, ?)').run(task_id, id)
     }
   })).finally(() => clearInterval(loop))
 }
@@ -601,7 +591,7 @@ async function create_folders ({ source, old_mapping, folders, root, task_id, se
         count++
         mapping[id] = new_folder.id
         const mapping_record = id + ' ' + new_folder.id + '\n'
-        db.prepare('update task set status=?, mapping = mapping || ? where id=?').run('copying', mapping_record, task_id)
+        db.prepare('update task set mapping = mapping || ? where id=?').run(mapping_record, task_id)
       } catch (e) {
         if (e.message === FILE_EXCEED_MSG) {
           clearInterval(loop)

@@ -84,12 +84,12 @@ async function send_all_tasks (chat_id) {
 async function get_task_info (task_id) {
   const record = db.prepare('select * from task where id=?').get(task_id)
   if (!record) return {}
-  const { source, target, status, copied, mapping, ctime, ftime } = record
+  const { source, target, status, mapping, ctime, ftime } = record
+  const copied_files = db.prepare('select fileid from copied where taskid=?').all(task_id)
   const folder_mapping = mapping && mapping.trim().split('\n')
   const new_folder = folder_mapping && folder_mapping[0].split(' ')[1]
   const { summary } = db.prepare('select summary from gd where fid=?').get(source) || {}
   const { file_count, folder_count, total_size } = summary ? JSON.parse(summary) : {}
-  const copied_files = copied ? copied.trim().split('\n').length : 0
   const copied_folders = folder_mapping ? (folder_mapping.length - 1) : 0
   let text = '任务编号：' + task_id + '\n'
   const folder_name = await get_folder_name(source)
@@ -149,18 +149,7 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
       if (!record) record = {} // 防止无限循环
       if (!info) return
       const { task_id } = info
-      const row = db.prepare('select * from task where id=?').get(task_id)
-      const { source, target, status, copied, mapping, ctime, ftime } = row
-      const { summary } = db.prepare('select summary from gd where fid=?').get(source) || {}
-      const { file_count, folder_count, total_size } = summary ? JSON.parse(summary) : {}
-      const copied_files = copied ? copied.trim().split('\n').length : 0
-      const copied_folders = mapping ? (mapping.trim().split('\n').length - 1) : 0
-
-      let text = `任务 ${task_id} 复制完成\n`
-      const name = await get_folder_name(source)
-      text += '源文件夹：' + gen_link(source, name) + '\n'
-      text += '目录完成数：' + copied_folders + '/' + folder_count + '\n'
-      text += '文件完成数：' + copied_files + '/' + file_count + '\n'
+      const { text } = await get_task_info(task_id)
       sm({ chat_id, text, parse_mode: 'HTML' })
     })
     .catch(err => {
@@ -242,7 +231,7 @@ function extract_fid (text) {
     if (!text.startsWith('http')) text = 'https://' + text
     const u = new URL(text)
     if (u.pathname.includes('/folders/')) {
-      const reg = /[^\/?]+$/
+      const reg = /[^/?]+$/
       const match = u.pathname.match(reg)
       return match && match[0]
     }
