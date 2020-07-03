@@ -11,11 +11,11 @@ const counting = {}
 const router = new Router()
 
 router.get('/api/gdurl/count', async ctx => {
-  if (!ROUTER_PASSKEY) return ctx.body = 'gd-utils 成功启动'
+  if (!ROUTER_PASSKEY) return ctx.body = 'gd-utils 成功啟動'
   const { query, headers } = ctx.request
   let { fid, type, update, passkey } = query
   if (passkey !== ROUTER_PASSKEY) return ctx.body = 'invalid passkey'
-  if (!validate_fid(fid)) throw new Error('无效的分享ID')
+  if (!validate_fid(fid)) throw new Error('無效的分享ID')
 
   let ua = headers['user-agent'] || ''
   ua = ua.toLowerCase()
@@ -52,17 +52,22 @@ router.post('/api/gdurl/tgbot', async ctx => {
     const chat_id = callback_query.from.id
     const [action, fid] = data.split(' ')
     if (action === 'count') {
-      if (counting[fid]) return sm({ chat_id, text: fid + ' 正在统计，请稍等片刻' })
+      if (counting[fid]) return sm({ chat_id, text: fid + ' 正在統計，請稍候' })
       counting[fid] = true
       send_count({ fid, chat_id }).catch(err => {
         console.error(err)
-        sm({ chat_id, text: fid + ' 统计失败：' + err.message })
+        sm({ chat_id, text: fid + ' 統計失敗：' + err.message })
       }).finally(() => {
         delete counting[fid]
       })
     } else if (action === 'copy') {
       tg_copy({ fid, chat_id }).then(task_id => {
-        task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
+        task_id && sm({ chat_id, text: `開始複製，任務ID: ${task_id} 可輸入 /task ${task_id} 查詢進度` })
+      })
+    } else if (action === 'disCopy') {
+      const target = '11231'  //儲存目的地2
+      tg_copy({ fid, target, chat_id }).then(task_id => {
+        task_id && sm({ chat_id, text: `開始複製，任務ID: ${task_id} 可輸入 /task ${task_id} 查詢進度` })
       })
     }
     return reply_cb_query({ id, data }).catch(console.error)
@@ -77,32 +82,32 @@ router.post('/api/gdurl/tgbot', async ctx => {
   if (!chat_id || !text || !tg_whitelist.some(v => {
     v = String(v).toLowerCase()
     return v === username || v === user_id
-  })) return console.warn('异常请求')
+  })) return console.warn('異常請求')
 
   const fid = extract_fid(text) || extract_from_text(text)
   const no_fid_commands = ['/task', '/help']
   if (!no_fid_commands.some(cmd => text.startsWith(cmd)) && !validate_fid(fid)) {
-    return sm({ chat_id, text: '未识别出分享ID' })
+    return sm({ chat_id, text: '未辨識到分享ID' })
   }
   if (text.startsWith('/help')) return send_help(chat_id)
   if (text.startsWith('/count')) {
-    if (counting[fid]) return sm({ chat_id, text: fid + ' 正在统计，请稍等片刻' })
+    if (counting[fid]) return sm({ chat_id, text: fid + ' 正在統計，請稍候' })
     try {
       counting[fid] = true
       const update = text.endsWith(' -u')
       await send_count({ fid, chat_id, update })
     } catch (err) {
       console.error(err)
-      sm({ chat_id, text: fid + ' 统计失败：' + err.message })
+      sm({ chat_id, text: fid + ' 統計失敗：' + err.message })
     } finally {
       delete counting[fid]
     }
   } else if (text.startsWith('/copy')) {
     const target = text.replace('/copy', '').replace(' -u', '').trim().split(' ').map(v => v.trim())[1]
-    if (target && !validate_fid(target)) return sm({ chat_id, text: `目标ID ${target} 格式不正确` })
+    if (target && !validate_fid(target)) return sm({ chat_id, text: `目標ID ${target} 格式不正確` })
     const update = text.endsWith(' -u')
     tg_copy({ fid, target, chat_id, update }).then(task_id => {
-      task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
+      task_id && sm({ chat_id, text: `開始複製，任務ID: ${task_id} 可輸入 /task ${task_id} 查詢進度` })
     })
   } else if (text.startsWith('/task')) {
     let task_id = text.replace('/task', '').trim()
@@ -119,7 +124,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
   } else if (text.includes('drive.google.com/') || validate_fid(text)) {
     return send_choice({ fid: fid || text, chat_id }).catch(console.error)
   } else {
-    sm({ chat_id, text: '暂不支持此命令' })
+    sm({ chat_id, text: '暫不支持此命令' })
   }
 })
 
