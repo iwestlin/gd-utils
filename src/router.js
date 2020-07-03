@@ -2,21 +2,25 @@ const Router = require('@koa/router')
 
 const { db } = require('../db')
 const { validate_fid, gen_count_body } = require('./gd')
-const { send_count, send_help, send_choice, send_task_info, sm, extract_fid, reply_cb_query, tg_copy, send_all_tasks } = require('./tg')
+const { send_count, send_help, send_choice, send_task_info, sm, extract_fid, extract_from_text, reply_cb_query, tg_copy, send_all_tasks } = require('./tg')
 
-const { AUTH } = require('../config')
+const { AUTH, ROUTER_PASSKEY, TG_IPLIST } = require('../config')
 const { tg_whitelist } = AUTH
 
 const counting = {}
 const router = new Router()
 
 router.get('/api/gdurl/count', async ctx => {
+  if (!ROUTER_PASSKEY) return ctx.body = 'gd-utils 成功启动'
   const { query, headers } = ctx.request
-  let { fid, type, update } = query
+  let { fid, type, update, passkey } = query
+  if (passkey !== ROUTER_PASSKEY) return ctx.body = 'invalid passkey'
   if (!validate_fid(fid)) throw new Error('无效的分享ID')
+
   let ua = headers['user-agent'] || ''
   ua = ua.toLowerCase()
   type = (type || '').toLowerCase()
+  // todo type=tree
   if (!type) {
     if (ua.includes('curl')) {
       type = 'curl'
@@ -38,6 +42,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
   const { body } = ctx.request
   console.log('ctx.ip', ctx.ip) // 可以只允许tg服务器的ip
   console.log('tg message:', body)
+  if (TG_IPLIST && !TG_IPLIST.includes(ctx.ip)) return ctx.body = 'invalid ip'
   ctx.body = '' // 早点释放连接
   const message = body.message || body.edited_message
 
@@ -65,23 +70,27 @@ router.post('/api/gdurl/tgbot', async ctx => {
 
   const chat_id = message && message.chat && message.chat.id
   const text = message && message.text && message.text.trim()
-  const username = message && message.from && message.from.username
-  if (!chat_id || !text || !tg_whitelist.includes(username)) return console.warn('异常请求')
+  let username = message && message.from && message.from.username
+  username = username && String(username).toLowerCase()
+  let user_id = message && message.from && message.from.id
+  user_id = user_id && String(user_id).toLowerCase()
+  if (!chat_id || !text || !tg_whitelist.some(v => {
+    v = String(v).toLowerCase()
+    return v === username || v === user_id
+  })) return console.warn('异常请求')
 
-  const fid = extract_fid(text)
+  const fid = extract_fid(text) || extract_from_text(text)
   const no_fid_commands = ['/task', '/help']
   if (!no_fid_commands.some(cmd => text.startsWith(cmd)) && !validate_fid(fid)) {
     return sm({ chat_id, text: '未识别出分享ID' })
   }
   if (text.startsWith('/help')) return send_help(chat_id)
-  if (text.startsWith('https://drive.google.com/')) {
-    return send_choice({ fid, chat_id }).catch(console.error)
-  }
   if (text.startsWith('/count')) {
     if (counting[fid]) return sm({ chat_id, text: fid + ' 正在统计，请稍等片刻' })
     try {
       counting[fid] = true
-      await send_count({ fid, chat_id })
+      const update = text.endsWith(' -u')
+      await send_count({ fid, chat_id, update })
     } catch (err) {
       console.error(err)
       sm({ chat_id, text: fid + ' 统计失败：' + err.message })
@@ -89,9 +98,10 @@ router.post('/api/gdurl/tgbot', async ctx => {
       delete counting[fid]
     }
   } else if (text.startsWith('/copy')) {
-    const target = text.replace('/copy', '').trim().split(' ').map(v => v.trim())[1]
+    const target = text.replace('/copy', '').replace(' -u', '').trim().split(' ').map(v => v.trim())[1]
     if (target && !validate_fid(target)) return sm({ chat_id, text: `目标ID ${target} 格式不正确` })
-    tg_copy({ fid, target, chat_id }).then(task_id => {
+    const update = text.endsWith(' -u')
+    tg_copy({ fid, target, chat_id, update }).then(task_id => {
       task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
     })
   } else if (text.startsWith('/task')) {
@@ -106,6 +116,8 @@ router.post('/api/gdurl/tgbot', async ctx => {
       return running_tasks.forEach(v => send_task_info({ chat_id, task_id: v.id }).catch(console.error))
     }
     send_task_info({ task_id, chat_id }).catch(console.error)
+  } else if (text.includes('drive.google.com/') || validate_fid(text)) {
+    return send_choice({ fid: fid || text, chat_id }).catch(console.error)
   } else {
     sm({ chat_id, text: '暂不支持此命令' })
   }
