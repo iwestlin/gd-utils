@@ -16,7 +16,7 @@ const FOLDER_TYPE = 'application/vnd.google-apps.folder'
 const { https_proxy } = process.env
 const axins = axios.create(https_proxy ? { httpsAgent: new HttpsProxyAgent(https_proxy) } : {})
 
-const SA_BATCH_SIZE = 300
+const SA_BATCH_SIZE = 50
 const SA_FILES = fs.readdirSync(path.join(__dirname, '../sa')).filter(v => v.endsWith('.json'))
 SA_FILES.flag = 0
 let SA_TOKENS = get_sa_batch()
