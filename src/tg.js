@@ -227,8 +227,8 @@ ${table}</pre>`
 function sm (data) {
   const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
   return axins.post(url, data).catch(err => {
-    console.error('fail to post', url, data)
-    console.error(err)
+    // console.error('fail to post', url, data)
+    console.error('fail to send message to tg:', err.message)
   })
 }
 

@@ -516,24 +516,18 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
     const message = `${now} | 已复制文件数 ${count} | 网络请求 进行中${limit.activeCount}/排队${limit.pendingCount}`
     print_progress(message)
   }, 1000)
-  await Promise.all(files.map(async file => {
-    try {
-      const { id, parent } = file
-      const target = mapping[parent] || root
-      const new_file = await limit(() => copy_file(id, target, service_account))
-      if (new_file) {
-        db.prepare('update task set status=?, copied = copied || ? where id=?')
-          .run('copying', id + '\n', task_id)
-      }
+  return Promise.all(files.map(async file => {
+    const { id, parent } = file
+    const target = mapping[parent] || root
+    const new_file = await limit(() => copy_file(id, target, service_account, limit))
+    if (new_file) {
       count++
-    } catch (e) {
-      console.error(e)
+      db.prepare('update task set status=?, copied = copied || ? where id=?').run('copying', id + '\n', task_id)
     }
-  }))
-  clearInterval(loop)
+  })).finally(() => clearInterval(loop))
 }
 
-async function copy_file (id, parent, use_sa) {
+async function copy_file (id, parent, use_sa, limit) {
   let url = `https://www.googleapis.com/drive/v3/files/${id}/copy`
   let params = { supportsAllDrives: true }
   url += '?' + params_to_query(params)
@@ -556,6 +550,10 @@ async function copy_file (id, parent, use_sa) {
       handle_error(err)
       const data = err && err.response && err.response.data
       const message = data && data.error && data.error.message
+      if (message && message.toLowerCase().includes('file limit')) {
+        if (limit) limit.clearQueue()
+        throw new Error('您的团队盘文件数已超限，停止复制')
+      }
       if (message && message.toLowerCase().includes('rate limit')) {
         SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== gtoken)
         if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
@@ -564,6 +562,7 @@ async function copy_file (id, parent, use_sa) {
     }
   }
   if (!SA_TOKENS.length) {
+    if (limit) limit.clearQueue()
     throw new Error('所有SA帐号流量已用完')
   } else {
     console.warn('复制文件失败，文件id: ' + id)
