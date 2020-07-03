@@ -14,7 +14,6 @@
 > 更新方法：在 gd-utils 目录下，执行 `git pull` 拉取最新代码，如果你使用了 pm2 守护进程，执行`pm2 reload server`刷新生效。
 
 [2020-07-03]  
-- 解决sa同时使用过多触发的[限制](https://developers.google.com/identity/protocols/oauth2#expiration)，建议所有在sa目录下放置授权文件数超过300个的用户更新。
 - 给命令行 ./copy 命令添加了 `-D` 选项，表示不在目的地创建同名文件夹，直接将源文件夹中的文件原样复制到目的文件夹中
 
 [2020-07-02]  

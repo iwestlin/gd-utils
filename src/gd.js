@@ -12,11 +12,12 @@ const { AUTH, RETRY_LIMIT, PARALLEL_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY,
 const { db } = require('../db')
 const { make_table, make_tg_table, make_html, summary } = require('./summary')
 
+const FILE_EXCEED_MSG = '您的团队盘文件数已超限(40万)，停止复制'
 const FOLDER_TYPE = 'application/vnd.google-apps.folder'
 const { https_proxy } = process.env
 const axins = axios.create(https_proxy ? { httpsAgent: new HttpsProxyAgent(https_proxy) } : {})
 
-const SA_BATCH_SIZE = 50
+const SA_BATCH_SIZE = 1000
 const SA_FILES = fs.readdirSync(path.join(__dirname, '../sa')).filter(v => v.endsWith('.json'))
 SA_FILES.flag = 0
 let SA_TOKENS = get_sa_batch()
@@ -335,7 +336,7 @@ function validate_fid (fid) {
   return fid.match(reg)
 }
 
-async function create_folder (name, parent, use_sa) {
+async function create_folder (name, parent, use_sa, limit) {
   let url = `https://www.googleapis.com/drive/v3/files`
   const params = { supportsAllDrives: true }
   url += '?' + params_to_query(params)
@@ -345,18 +346,25 @@ async function create_folder (name, parent, use_sa) {
     parents: [parent]
   }
   let retry = 0
-  let data
+  let err_message
   while (!data && (retry < RETRY_LIMIT)) {
     try {
       const headers = await gen_headers(use_sa)
-      data = (await axins.post(url, post_data, { headers })).data
+      return (await axins.post(url, post_data, { headers })).data
     } catch (err) {
+      err_message = err.message
       retry++
       handle_error(err)
+      const data = err && err.response && err.response.data
+      const message = data && data.error && data.error.message
+      if (message && message.toLowerCase().includes('file limit')) {
+        if (limit) limit.clearQueue()
+        throw new Error(FILE_EXCEED_MSG)
+      }
       console.log('创建目录重试中：', name, '重试次数：', retry)
     }
   }
-  return data
+  throw new Error(err_message + ' 目录名：' + name)
 }
 
 async function get_name_by_id (fid) {
@@ -459,7 +467,6 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
       return { id: root, task_id: record.id }
     } else if (choice === 'restart') {
       const new_root = await get_new_root()
-      if (!new_root) throw new Error('创建目录失败，请检查您的帐号是否有相应的权限')
       const root_mapping = source + ' ' + new_root.id + '\n'
       db.prepare('update task set status=?, copied=?, mapping=? where id=?')
         .run('copying', '', root_mapping, record.id)
@@ -485,7 +492,6 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
     }
   } else {
     const new_root = await get_new_root()
-    if (!new_root) throw new Error('创建目录失败，请检查您的帐号是否有相应的权限')
     const root_mapping = source + ' ' + new_root.id + '\n'
     const { lastInsertRowid } = db.prepare('insert into task (source, target, status, mapping, ctime) values (?, ?, ?, ?, ?)').run(source, target, 'copying', root_mapping, Date.now())
     const arr = await walk_and_save({ fid: source, update, not_teamdrive, service_account })
@@ -591,14 +597,17 @@ async function create_folders ({ source, old_mapping, folders, root, task_id, se
       try {
         const { name, id, parent } = v
         const target = mapping[parent] || root
-        const new_folder = await limit(() => create_folder(name, target, service_account))
-        if (!new_folder) throw new Error(name + '创建失败')
+        const new_folder = await limit(() => create_folder(name, target, service_account, limit))
         count++
         mapping[id] = new_folder.id
         const mapping_record = id + ' ' + new_folder.id + '\n'
         db.prepare('update task set status=?, mapping = mapping || ? where id=?').run('copying', mapping_record, task_id)
       } catch (e) {
-        console.error('创建目录出错:', v, e)
+        if (e.message === FILE_EXCEED_MSG) {
+          clearInterval(loop)
+          throw new Error(FILE_EXCEED_MSG)
+        }
+        console.error('创建目录出错:', e.message)
       }
     }))
     folders = folders.filter(v => !mapping[v.id])
