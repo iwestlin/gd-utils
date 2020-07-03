@@ -426,7 +426,7 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
 
   const record = db.prepare('select * from task where source=? and target=?').get(source, target)
   if (record) {
-    const copied = db.prepare('select fileid from copied where taskid=?').all(record.id)
+    const copied = db.prepare('select fileid from copied where taskid=?').all(record.id).map(v => v.fileid)
     let choice
     if (!copied.length) {
       choice = 'restart'
