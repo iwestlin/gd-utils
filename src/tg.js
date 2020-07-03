@@ -116,7 +116,7 @@ async function send_task_info ({ task_id, chat_id }) {
   } catch (e) {
     console.log('fail to send message to tg', e.message)
   }
-  // get_task_info 在task目录数超大时比较吃cpu，如果超1万就不每10秒更新了
+  // get_task_info 在task目录数超大时比较吃cpu，如果超1万就不每10秒更新了，以后如果把mapping 也另存一张表可以取消此限制
   if (!message_id || status !== 'copying' || folder_count > 10000) return
   const loop = setInterval(async () => {
     const url = `https://api.telegram.org/bot${tg_token}/editMessageText`

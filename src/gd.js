@@ -460,6 +460,7 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
       const new_root = await get_new_root()
       const root_mapping = source + ' ' + new_root.id + '\n'
       db.prepare('update task set status=?, mapping=? where id=?').run('copying', root_mapping, record.id)
+      db.prepare('delete from copied where taskid=?').run(record.id)
       const arr = await walk_and_save({ fid: source, update: true, not_teamdrive, service_account })
       let files = arr.filter(v => v.mimeType !== FOLDER_TYPE)
       if (min_size) files = files.filter(v => v.size >= min_size)
