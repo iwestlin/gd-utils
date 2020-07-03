@@ -100,7 +100,7 @@ async function get_task_info (task_id) {
   text += '创建时间：' + dayjs(ctime).format('YYYY-MM-DD HH:mm:ss') + '\n'
   text += '完成时间：' + (ftime ? dayjs(ftime).format('YYYY-MM-DD HH:mm:ss') : '未完成') + '\n'
   text += '目录进度：' + copied_folders + '/' + (folder_count === undefined ? '未知数量' : folder_count) + '\n'
-  text += '文件进度：' + copied_files + '/' + (file_count === undefined ? '未知数量' : file_count) + '\n'
+  text += '文件进度：' + copied_files.length + '/' + (file_count === undefined ? '未知数量' : file_count) + '\n'
   text += '合计大小：' + (total_size || '未知大小')
   const total_count = (folder_count || 0) + (file_count || 0)
   return { text, status, total_count }
