@@ -1,6 +1,7 @@
 # Google Drive 百宝箱
 
 > 不只是最快的 google drive 拷贝工具 [与其他工具的对比](./compare.md)
+
 > 我就懶的翻譯readme了, 大家自己看吧, 主要新增/修改/翻譯tg_bot介面的部分
 
 ## 一键安装脚本    
