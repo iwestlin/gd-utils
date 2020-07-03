@@ -85,7 +85,7 @@ async function get_task_info (task_id) {
   const record = db.prepare('select * from task where id=?').get(task_id)
   if (!record) return {}
   const { source, target, status, mapping, ctime, ftime } = record
-  const copied_files = db.prepare('select fileid from copied where taskid=?').all(task_id)
+  const {copied_files} = db.prepare('select count(fileid) as copied_files from copied where taskid=?').get(task_id)
   const folder_mapping = mapping && mapping.trim().split('\n')
   const new_folder = folder_mapping && folder_mapping[0].split(' ')[1]
   const { summary } = db.prepare('select summary from gd where fid=?').get(source) || {}
@@ -100,14 +100,13 @@ async function get_task_info (task_id) {
   text += '创建时间：' + dayjs(ctime).format('YYYY-MM-DD HH:mm:ss') + '\n'
   text += '完成时间：' + (ftime ? dayjs(ftime).format('YYYY-MM-DD HH:mm:ss') : '未完成') + '\n'
   text += '目录进度：' + copied_folders + '/' + (folder_count === undefined ? '未知数量' : folder_count) + '\n'
-  text += '文件进度：' + copied_files.length + '/' + (file_count === undefined ? '未知数量' : file_count) + '\n'
+  text += '文件进度：' + copied_files + '/' + (file_count === undefined ? '未知数量' : file_count) + '\n'
   text += '合计大小：' + (total_size || '未知大小')
-  const total_count = (folder_count || 0) + (file_count || 0)
-  return { text, status, total_count }
+  return { text, status, folder_count }
 }
 
 async function send_task_info ({ task_id, chat_id }) {
-  const { text, status, total_count } = await get_task_info(task_id)
+  const { text, status, folder_count } = await get_task_info(task_id)
   if (!text) return sm({ chat_id, text: '数据库不存在此任务ID：' + task_id })
   const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
   let message_id
@@ -117,8 +116,8 @@ async function send_task_info ({ task_id, chat_id }) {
   } catch (e) {
     console.log('fail to send message to tg', e.message)
   }
-  // get_task_info 在task文件数超大时比较吃cpu，如果超5万就不每10秒更新了
-  if (!message_id || status !== 'copying' || total_count > 50000) return
+  // get_task_info 在task目录数超大时比较吃cpu，如果超1万就不每10秒更新了
+  if (!message_id || status !== 'copying' || folder_count > 10000) return
   const loop = setInterval(async () => {
     const url = `https://api.telegram.org/bot${tg_token}/editMessageText`
     const { text, status } = await get_task_info(task_id)
