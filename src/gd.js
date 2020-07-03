@@ -347,7 +347,7 @@ async function create_folder (name, parent, use_sa, limit) {
   }
   let retry = 0
   let err_message
-  while (!data && (retry < RETRY_LIMIT)) {
+  while (retry < RETRY_LIMIT) {
     try {
       const headers = await gen_headers(use_sa)
       return (await axins.post(url, post_data, { headers })).data
@@ -424,7 +424,7 @@ async function copy ({ source, target, name, min_size, update, not_teamdrive, se
 // 待解决：如果用户手动ctrl+c中断进程，那么已经发出的请求，就算完成了也不会记录到本地数据库中，所以可能产生重复文件（夹）
 async function real_copy ({ source, target, name, min_size, update, dncnr, not_teamdrive, service_account, is_server }) {
   async function get_new_root () {
-    if (dncnr) return {id: target}
+    if (dncnr) return { id: target }
     if (name) {
       return create_folder(name, target, service_account)
     } else {
