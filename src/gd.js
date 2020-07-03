@@ -16,15 +16,23 @@ const FOLDER_TYPE = 'application/vnd.google-apps.folder'
 const { https_proxy } = process.env
 const axins = axios.create(https_proxy ? { httpsAgent: new HttpsProxyAgent(https_proxy) } : {})
 
+const SA_BATCH_SIZE = 300
 const SA_FILES = fs.readdirSync(path.join(__dirname, '../sa')).filter(v => v.endsWith('.json'))
+SA_FILES.flag = 0
+let SA_TOKENS = get_sa_batch()
 
-let SA_TOKENS = SA_FILES.map(filename => {
-  const gtoken = new GoogleToken({
-    keyFile: path.join(__dirname, '../sa', filename),
-    scope: ['https://www.googleapis.com/auth/drive']
+function get_sa_batch () {
+  const new_flag = SA_FILES.flag + SA_BATCH_SIZE
+  const files = SA_FILES.slice(SA_FILES.flag, new_flag)
+  SA_FILES.flag = new_flag
+  return files.map(filename => {
+    const gtoken = new GoogleToken({
+      keyFile: path.join(__dirname, '../sa', filename),
+      scope: ['https://www.googleapis.com/auth/drive']
+    })
+    return { gtoken, expires: 0 }
   })
-  return { gtoken, expires: 0 }
-})
+}
 
 handle_exit(() => {
   // console.log('handle_exit running')
@@ -250,7 +258,7 @@ async function ls_folder ({ fid, not_teamdrive, service_account }) {
 }
 
 async function gen_headers (use_sa) {
-  use_sa = use_sa && SA_TOKENS.length
+  // use_sa = use_sa && SA_TOKENS.length
   const access_token = use_sa ? (await get_sa_token()).access_token : (await get_access_token())
   return { authorization: 'Bearer ' + access_token }
 }
@@ -278,15 +286,17 @@ async function get_access_token () {
   return data.access_token
 }
 
+// get_sa_token().catch(console.error)
 async function get_sa_token () {
-  let tk
+  if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
   while (SA_TOKENS.length) {
-    tk = get_random_element(SA_TOKENS)
+    const tk = get_random_element(SA_TOKENS)
     try {
       return await real_get_sa_token(tk)
     } catch (e) {
       console.log(e)
       SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== tk.gtoken)
+      if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
     }
   }
   throw new Error('没有可用的SA帐号')
@@ -351,7 +361,7 @@ async function create_folder (name, parent, use_sa) {
 
 async function get_name_by_id (fid) {
   try {
-    const {name} = await get_info_by_id(fid, true)
+    const { name } = await get_info_by_id(fid, true)
     return name
   } catch (e) {
     return fid
@@ -443,7 +453,7 @@ async function real_copy ({ source, target, name, min_size, update, not_teamdriv
         root,
         task_id: record.id
       })
-      await copy_files({ files, mapping: all_mapping, root, task_id: record.id })
+      await copy_files({ files, service_account, root, mapping: all_mapping, task_id: record.id })
       db.prepare('update task set status=?, ftime=? where id=?').run('finished', Date.now(), record.id)
       return { id: root, task_id: record.id }
     } else if (choice === 'restart') {
@@ -465,7 +475,7 @@ async function real_copy ({ source, target, name, min_size, update, not_teamdriv
         root: new_root.id,
         task_id: record.id
       })
-      await copy_files({ files, mapping, root: new_root.id, task_id: record.id })
+      await copy_files({ files, mapping, service_account, root: new_root.id, task_id: record.id })
       db.prepare('update task set status=?, ftime=? where id=?').run('finished', Date.now(), record.id)
       return { id: new_root.id, task_id: record.id }
     } else {
@@ -490,13 +500,13 @@ async function real_copy ({ source, target, name, min_size, update, not_teamdriv
       root: new_root.id,
       task_id: lastInsertRowid
     })
-    await copy_files({ files, mapping, root: new_root.id, task_id: lastInsertRowid })
+    await copy_files({ files, mapping, service_account, root: new_root.id, task_id: lastInsertRowid })
     db.prepare('update task set status=?, ftime=? where id=?').run('finished', Date.now(), lastInsertRowid)
     return { id: new_root.id, task_id: lastInsertRowid }
   }
 }
 
-async function copy_files ({ files, mapping, root, task_id }) {
+async function copy_files ({ files, mapping, service_account, root, task_id }) {
   console.log('\n开始复制文件，总数：', files.length)
   const limit = pLimit(PARALLEL_LIMIT)
   let count = 0
@@ -509,7 +519,7 @@ async function copy_files ({ files, mapping, root, task_id }) {
     try {
       const { id, parent } = file
       const target = mapping[parent] || root
-      const new_file = await limit(() => copy_file(id, target))
+      const new_file = await limit(() => copy_file(id, target, service_account))
       if (new_file) {
         db.prepare('update task set status=?, copied = copied || ? where id=?')
           .run('copying', id + '\n', task_id)
@@ -522,7 +532,7 @@ async function copy_files ({ files, mapping, root, task_id }) {
   clearInterval(loop)
 }
 
-async function copy_file (id, parent) {
+async function copy_file (id, parent, use_sa) {
   let url = `https://www.googleapis.com/drive/v3/files/${id}/copy`
   let params = { supportsAllDrives: true }
   url += '?' + params_to_query(params)
@@ -530,7 +540,7 @@ async function copy_file (id, parent) {
   let retry = 0
   while (retry < RETRY_LIMIT) {
     let gtoken
-    if (SA_TOKENS.length) { // 如果有sa文件则优先使用
+    if (use_sa) {
       const temp = await get_sa_token()
       gtoken = temp.gtoken
       config.headers = { authorization: 'Bearer ' + temp.access_token }
@@ -547,6 +557,7 @@ async function copy_file (id, parent) {
       const message = data && data.error && data.error.message
       if (message && message.toLowerCase().includes('rate limit')) {
         SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== gtoken)
+        if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
         console.log('此帐号触发使用限额，剩余可用service account帐号数量：', SA_TOKENS.length)
       }
     }
@@ -649,10 +660,10 @@ async function confirm_dedupe ({ file_number, folder_number }) {
 }
 
 // 将文件或文件夹移入回收站，需要 sa 为 content manager 权限及以上
-async function trash_file ({fid, service_account}) {
+async function trash_file ({ fid, service_account }) {
   const url = `https://www.googleapis.com/drive/v3/files/${fid}?supportsAllDrives=true`
   const headers = await gen_headers(service_account)
-  return axins.patch(url, {trashed: true}, {headers})
+  return axins.patch(url, { trashed: true }, { headers })
 }
 
 // 直接删除文件或文件夹，不会进入回收站，需要 sa 为 manager 权限

@@ -29,7 +29,7 @@ if (validate_fid(source)) {
   if (file) {
     target = target || DEFAULT_TARGET
     if (!validate_fid(target)) throw new Error('target id 格式不正确')
-    return copy_file(source, target).then(r => {
+    return copy_file(source, target, service_account).then(r => {
       const link = 'https://drive.google.com/drive/folders/' + target
       console.log('任务完成，文件所在位置：\n', link)
     }).catch(console.error)
