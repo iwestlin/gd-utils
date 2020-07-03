@@ -426,14 +426,21 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
 
   const record = db.prepare('select * from task where source=? and target=?').get(source, target)
   if (record) {
-    const choice = is_server ? 'continue' : await user_choose()
+    const copied = db.prepare('select fileid from copied where taskid=?').all(record.id)
+    let choice
+    if (!copied.length) {
+      choice = 'restart'
+    } else if (is_server) {
+      choice = 'continue'
+    } else {
+      choice = await user_choose()
+    }
     if (choice === 'exit') {
       return console.log('退出程序')
     } else if (choice === 'continue') {
       let { mapping } = record
-      const copied_ids = {}
       const old_mapping = {}
-      const copied = db.prepare('select fileid from copied where taskid=?').all(record.id)
+      const copied_ids = {}
       copied.forEach(id => copied_ids[id] = true)
       mapping = mapping.trim().split('\n').map(line => line.split(' '))
       const root = mapping[0][1]
@@ -461,7 +468,9 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
       const root_mapping = source + ' ' + new_root.id + '\n'
       db.prepare('update task set status=?, mapping=? where id=?').run('copying', root_mapping, record.id)
       db.prepare('delete from copied where taskid=?').run(record.id)
-      const arr = await walk_and_save({ fid: source, update: true, not_teamdrive, service_account })
+      // const arr = await walk_and_save({ fid: source, update: true, not_teamdrive, service_account })
+      const arr = await walk_and_save({ fid: source, update, not_teamdrive, service_account })
+
       let files = arr.filter(v => v.mimeType !== FOLDER_TYPE)
       if (min_size) files = files.filter(v => v.size >= min_size)
       const folders = arr.filter(v => v.mimeType === FOLDER_TYPE)
@@ -575,6 +584,8 @@ async function create_folders ({ source, old_mapping, folders, root, task_id, se
   console.log('开始复制文件夹，总数：', folders.length)
   const limit = pLimit(PARALLEL_LIMIT)
   let count = 0
+  // todo
+  // 这里需要注意，如果创建目录被中途打断，那么下次继续的时候按下一行的方法拿到的 same_levels 就不完全
   let same_levels = folders.filter(v => v.parent === folders[0].parent)
 
   const loop = setInterval(() => {
