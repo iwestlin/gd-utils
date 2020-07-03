@@ -12,7 +12,7 @@ const { AUTH, RETRY_LIMIT, PARALLEL_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY,
 const { db } = require('../db')
 const { make_table, make_tg_table, make_html, summary } = require('./summary')
 
-const FILE_EXCEED_MSG = '您的团队盘文件数已超限(40万)，停止复制'
+const FILE_EXCEED_MSG = '您的小組雲端硬碟文件數量已超過限制(40萬)，停止複製'
 const FOLDER_TYPE = 'application/vnd.google-apps.folder'
 const { https_proxy } = process.env
 const axins = axios.create(https_proxy ? { httpsAgent: new HttpsProxyAgent(https_proxy) } : {})
