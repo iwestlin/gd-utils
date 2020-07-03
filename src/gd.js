@@ -397,7 +397,7 @@ async function user_choose () {
   return answer.value
 }
 
-async function copy ({ source, target, name, min_size, update, not_teamdrive, service_account, is_server }) {
+async function copy ({ source, target, name, min_size, update, not_teamdrive, service_account, dncnr, is_server }) {
   target = target || DEFAULT_TARGET
   if (!target) throw new Error('目标位置不能为空')
 
@@ -405,7 +405,7 @@ async function copy ({ source, target, name, min_size, update, not_teamdrive, se
   if (record && record.status === 'copying') return console.log('已有相同源和目的地的任务正在运行，强制退出')
 
   try {
-    return await real_copy({ source, target, name, min_size, update, not_teamdrive, service_account, is_server })
+    return await real_copy({ source, target, name, min_size, update, dncnr, not_teamdrive, service_account, is_server })
   } catch (err) {
     console.error('复制文件夹出错', err)
     const record = db.prepare('select id, status from task where source=? and target=?').get(source, target)
@@ -414,8 +414,9 @@ async function copy ({ source, target, name, min_size, update, not_teamdrive, se
 }
 
 // 待解决：如果用户手动ctrl+c中断进程，那么已经发出的请求，就算完成了也不会记录到本地数据库中，所以可能产生重复文件（夹）
-async function real_copy ({ source, target, name, min_size, update, not_teamdrive, service_account, is_server }) {
+async function real_copy ({ source, target, name, min_size, update, dncnr, not_teamdrive, service_account, is_server }) {
   async function get_new_root () {
+    if (dncnr) return {id: target}
     if (name) {
       return create_folder(name, target, service_account)
     } else {
