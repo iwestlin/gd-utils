@@ -6,6 +6,11 @@
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
 ## 更新日志
+> 更新方法：在 gd-utils 目录下，执行 `git pull` 拉取最新代码，如果你使用了 pm2 守护进程，执行`pm2 reload server`刷新生效。
+
+[2020-07-03]  
+- 解决sa同时使用过多触发的[限制](https://developers.google.com/identity/protocols/oauth2#expiration)，建议所有在sa目录下放置授权文件数超过300个的用户更新。
+
 [2020-07-02]  
 - 机器人 /task 命令返回的进度信息每 10 秒更新一次
 - `./dedupe` 改为将重复文件移动到回收站（需要内容管理者及以上权限）
