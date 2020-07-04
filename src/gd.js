@@ -165,7 +165,7 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account }) {
 
   const loop = setInterval(() => {
     const now = dayjs().format('HH:mm:ss')
-    const message = `${now} | 已获取对象 ${result.length} | 网络请求 进行中${limit.activeCount}/排队${limit.pendingCount}`
+    const message = `${now} | 已获取对象 ${result.length} | 网络请求 进行中${limit.activeCount}/排队中${limit.pendingCount}`
     print_progress(message)
   }, 1000)
 
@@ -228,7 +228,8 @@ async function ls_folder ({ fid, not_teamdrive, service_account }) {
   params.orderBy = 'folder,name desc'
   params.fields = 'nextPageToken, files(id, name, mimeType, size, md5Checksum)'
   params.pageSize = Math.min(PAGE_SIZE, 1000)
-  const use_sa = (fid !== 'root') && (service_account || !not_teamdrive) // 不带参数默认使用sa
+  // const use_sa = (fid !== 'root') && (service_account || !not_teamdrive) // 不带参数默认使用sa
+  const use_sa = (fid !== 'root') && service_account
   const headers = await gen_headers(use_sa)
   do {
     if (pageToken) params.pageToken = pageToken
@@ -427,14 +428,7 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
   const record = db.prepare('select * from task where source=? and target=?').get(source, target)
   if (record) {
     const copied = db.prepare('select fileid from copied where taskid=?').all(record.id).map(v => v.fileid)
-    let choice
-    if (!copied.length) {
-      choice = 'restart'
-    } else if (is_server) {
-      choice = 'continue'
-    } else {
-      choice = await user_choose()
-    }
+    const choice = is_server ? 'continue' : await user_choose()
     if (choice === 'exit') {
       return console.log('退出程序')
     } else if (choice === 'continue') {
@@ -449,7 +443,7 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
       const arr = await walk_and_save({ fid: source, update, not_teamdrive, service_account })
       let files = arr.filter(v => v.mimeType !== FOLDER_TYPE).filter(v => !copied_ids[v.id])
       if (min_size) files = files.filter(v => v.size >= min_size)
-      const folders = arr.filter(v => v.mimeType === FOLDER_TYPE).filter(v => !old_mapping[v.id])
+      const folders = arr.filter(v => v.mimeType === FOLDER_TYPE)
       console.log('待复制的目录数：', folders.length)
       console.log('待复制的文件数：', files.length)
       const all_mapping = await create_folders({
@@ -519,7 +513,7 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
   let count = 0
   const loop = setInterval(() => {
     const now = dayjs().format('HH:mm:ss')
-    const message = `${now} | 已复制文件数 ${count} | 网络请求 进行中${limit.activeCount}/排队${limit.pendingCount}`
+    const message = `${now} | 已复制文件数 ${count} | 网络请求 进行中${limit.activeCount}/排队中${limit.pendingCount}`
     print_progress(message)
   }, 1000)
   return Promise.all(files.map(async file => {
@@ -581,21 +575,21 @@ async function create_folders ({ source, old_mapping, folders, root, task_id, se
   mapping[source] = root
   if (!folders.length) return mapping
 
-  console.log('开始复制文件夹，总数：', folders.length)
+  const missed_folders = folders.filter(v => !mapping[v.id])
+  console.log('开始复制文件夹，总数：', missed_folders.length)
   const limit = pLimit(PARALLEL_LIMIT)
   let count = 0
-  // todo
-  // 这里需要注意，如果创建目录被中途打断，那么下次继续的时候按下一行的方法拿到的 same_levels 就不完全
   let same_levels = folders.filter(v => v.parent === folders[0].parent)
 
   const loop = setInterval(() => {
     const now = dayjs().format('HH:mm:ss')
-    const message = `${now} | 已创建目录数 ${count} | 网络请求 进行中${limit.activeCount}/排队${limit.pendingCount}`
+    const message = `${now} | 已创建目录 ${count} | 网络请求 进行中${limit.activeCount}/排队中${limit.pendingCount}`
     print_progress(message)
   }, 1000)
 
   while (same_levels.length) {
-    await Promise.all(same_levels.map(async v => {
+    const same_levels_missed = same_levels.filter(v => !mapping[v.id])
+    await Promise.all(same_levels_missed.map(async v => {
       try {
         const { name, id, parent } = v
         const target = mapping[parent] || root
@@ -612,7 +606,7 @@ async function create_folders ({ source, old_mapping, folders, root, task_id, se
         console.error('创建目录出错:', e.message)
       }
     }))
-    folders = folders.filter(v => !mapping[v.id])
+    // folders = folders.filter(v => !mapping[v.id])
     same_levels = [].concat(...same_levels.map(v => folders.filter(vv => vv.parent === v.id)))
   }
 
@@ -744,7 +738,7 @@ function handle_error (err) {
 function print_progress (msg) {
   if (process.stdout.cursorTo) {
     process.stdout.cursorTo(0)
-    process.stdout.write(msg)
+    process.stdout.write(msg + ' ')
   } else {
     console.log(msg)
   }

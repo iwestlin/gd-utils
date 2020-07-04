@@ -85,7 +85,7 @@ async function get_task_info (task_id) {
   const record = db.prepare('select * from task where id=?').get(task_id)
   if (!record) return {}
   const { source, target, status, mapping, ctime, ftime } = record
-  const {copied_files} = db.prepare('select count(fileid) as copied_files from copied where taskid=?').get(task_id)
+  const { copied_files } = db.prepare('select count(fileid) as copied_files from copied where taskid=?').get(task_id)
   const folder_mapping = mapping && mapping.trim().split('\n')
   const new_folder = folder_mapping && folder_mapping[0].split(' ')[1]
   const { summary } = db.prepare('select summary from gd where fid=?').get(source) || {}
@@ -180,6 +180,7 @@ function reply_cb_query ({ id, data }) {
 }
 
 async function send_count ({ fid, chat_id, update }) {
+  sm({ chat_id, text: `开始获取 ${fid} 所有文件信息，请稍后，建议统计完成前先不要开始复制，因为复制也需要先获取源文件夹信息` })
   const table = await gen_count_body({ fid, update, type: 'tg', service_account: true })
   if (!table) return sm({ chat_id, parse_mode: 'HTML', text: gen_link(fid) + ' 信息获取失败' })
   const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
