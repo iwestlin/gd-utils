@@ -562,7 +562,7 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
       }
     }
   }
-  if (!SA_TOKENS.length) {
+  if (use_sa && !SA_TOKENS.length) {
     if (limit) limit.clearQueue()
     if (task_id) db.prepare('update task set status=? where id=?').run('error', task_id)
     throw new Error('所有SA帐号流量已用完')
