@@ -519,7 +519,7 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
   return Promise.all(files.map(async file => {
     const { id, parent } = file
     const target = mapping[parent] || root
-    const new_file = await limit(() => copy_file(id, target, service_account, limit))
+    const new_file = await limit(() => copy_file(id, target, service_account, limit, task_id))
     if (new_file) {
       count++
       db.prepare('INSERT INTO copied (taskid, fileid) VALUES (?, ?)').run(task_id, id)
@@ -527,7 +527,7 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
   })).finally(() => clearInterval(loop))
 }
 
-async function copy_file (id, parent, use_sa, limit) {
+async function copy_file (id, parent, use_sa, limit, task_id) {
   let url = `https://www.googleapis.com/drive/v3/files/${id}/copy`
   let params = { supportsAllDrives: true }
   url += '?' + params_to_query(params)
@@ -552,6 +552,7 @@ async function copy_file (id, parent, use_sa, limit) {
       const message = data && data.error && data.error.message
       if (message && message.toLowerCase().includes('file limit')) {
         if (limit) limit.clearQueue()
+        if (task_id) db.prepare('update task set status=? where id=?').run('error', task_id)
         throw new Error('您的团队盘文件数已超限，停止复制')
       }
       if (message && message.toLowerCase().includes('rate limit')) {
@@ -563,6 +564,7 @@ async function copy_file (id, parent, use_sa, limit) {
   }
   if (!SA_TOKENS.length) {
     if (limit) limit.clearQueue()
+    if (task_id) db.prepare('update task set status=? where id=?').run('error', task_id)
     throw new Error('所有SA帐号流量已用完')
   } else {
     console.warn('复制文件失败，文件id: ' + id)
