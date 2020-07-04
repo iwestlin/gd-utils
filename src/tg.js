@@ -5,7 +5,7 @@ const HttpsProxyAgent = require('https-proxy-agent')
 
 const { db } = require('../db')
 const { gen_count_body, validate_fid, real_copy, get_name_by_id } = require('./gd')
-const { AUTH, DEFAULT_TARGET } = require('../config')
+const { AUTH, DEFAULT_TARGET, USE_PERSONAL_AUTH } = require('../config')
 const { tg_token } = AUTH
 const gen_link = (fid, text) => `<a href="https://drive.google.com/drive/folders/${fid}">${text || fid}</a>`
 
@@ -143,7 +143,7 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
     }
   }
 
-  real_copy({ source: fid, update, target, not_teamdrive: true, service_account: true, is_server: true })
+  real_copy({ source: fid, update, target, not_teamdrive: true, service_account: !USE_PERSONAL_AUTH, is_server: true })
     .then(async info => {
       if (!record) record = {} // 防止无限循环
       if (!info) return
@@ -181,7 +181,7 @@ function reply_cb_query ({ id, data }) {
 
 async function send_count ({ fid, chat_id, update }) {
   sm({ chat_id, text: `开始获取 ${fid} 所有文件信息，请稍后，建议统计完成前先不要开始复制，因为复制也需要先获取源文件夹信息` })
-  const table = await gen_count_body({ fid, update, type: 'tg', service_account: true })
+  const table = await gen_count_body({ fid, update, type: 'tg', service_account: !USE_PERSONAL_AUTH })
   if (!table) return sm({ chat_id, parse_mode: 'HTML', text: gen_link(fid) + ' 信息获取失败' })
   const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
   const gd_link = `https://drive.google.com/drive/folders/${fid}`
@@ -197,7 +197,7 @@ ${table}</pre>`
     // const too_long_msgs = ['request entity too large', 'message is too long']
     // if (description && too_long_msgs.some(v => description.toLowerCase().includes(v))) {
     if (true) {
-      const smy = await gen_count_body({ fid, type: 'json', service_account: true })
+      const smy = await gen_count_body({ fid, type: 'json', service_account: !USE_PERSONAL_AUTH })
       const { file_count, folder_count, total_size } = JSON.parse(smy)
       return sm({
         chat_id,
