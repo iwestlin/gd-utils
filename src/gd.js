@@ -555,7 +555,7 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
         if (task_id) db.prepare('update task set status=? where id=?').run('error', task_id)
         throw new Error('您的团队盘文件数已超限，停止复制')
       }
-      if (message && message.toLowerCase().includes('rate limit')) {
+      if (use_sa && message && message.toLowerCase().includes('rate limit')) {
         SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== gtoken)
         if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
         console.log('此帐号触发使用限额，剩余可用service account帐号数量：', SA_TOKENS.length)
