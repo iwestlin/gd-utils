@@ -13,6 +13,9 @@
 ## 更新日志
 > 更新方法：在 gd-utils 目录下，执行 `git pull` 拉取最新代码，如果你使用了 pm2 守护进程，执行`pm2 reload server`刷新生效。
 
+[2020-07-05]  
+- pm2 启动脚本换成 `pm2 start server.js --node-args="--max-old-space-size=4096"`，避免任务文件数超大时内存占用太高被node干掉。
+
 [2020-07-04]**【重要更新】**  
 - 解决了长时间拷贝命令突然出现 `Invalid Credentials` 错误的问题。
 原因是依赖的[gtoken](https://www.npmjs.com/package/gtoken)在过期时间后并不返回新的access_token...之前有不少朋友遇到过，一开始我还以为是sa同时使用太多触发了Google限制，直到我自己将sa分批使用量降到了50却也依然遇到了这种报错……
