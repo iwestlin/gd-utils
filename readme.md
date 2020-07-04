@@ -1,4 +1,4 @@
-# Google Drive 百宝箱
+# gd-utils-cht
 
 > 不只是最快的 google drive 拷贝工具 [与其他工具的对比](./compare.md)
 
