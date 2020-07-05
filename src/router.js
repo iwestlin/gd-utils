@@ -7,6 +7,7 @@ const { send_count, send_help, send_choice, send_task_info, sm, extract_fid, ext
 const { AUTH, ROUTER_PASSKEY, TG_IPLIST } = require('../config')
 const { tg_whitelist } = AUTH
 
+const COPYING_FIDS = {}
 const counting = {}
 const router = new Router()
 
@@ -61,9 +62,11 @@ router.post('/api/gdurl/tgbot', async ctx => {
         delete counting[fid]
       })
     } else if (action === 'copy') {
+      if (COPYING_FIDS[fid]) return sm({ chat_id, text: `正在处理 ${fid} 的复制命令`})
+      COPYING_FIDS[fid] = true
       tg_copy({ fid, chat_id }).then(task_id => {
         task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
-      })
+      }).finally(() => COPYING_FIDS[fid] = false)
     }
     return reply_cb_query({ id, data }).catch(console.error)
   }
