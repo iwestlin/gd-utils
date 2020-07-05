@@ -289,7 +289,7 @@ async function get_access_token () {
 
 // get_sa_token().catch(console.error)
 async function get_sa_token () {
-  if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
+  if (use_sa && !SA_TOKENS.length) SA_TOKENS = get_sa_batch()
   while (SA_TOKENS.length) {
     const tk = get_random_element(SA_TOKENS)
     try {
