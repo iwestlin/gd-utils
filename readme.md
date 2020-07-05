@@ -18,7 +18,7 @@
 > 這邊說一下我用的服務及配置(免費配置): always-free gcp Compute Engine + zerossl + 免費的domain
 > hosting 
 >注意我的配置沒有用到cloudflare
-## 一鍵安裝腳本
+## 一鍵安裝腳本(感谢 脚本制作者 @vitaminx)
 - 這邊的安裝腳本我有稍作修改 與fork過來的原版不一樣
   - 不使用cloudflare解析
   - ssl另外配置在nginx服務當中(後面會說明證書放置路徑)
