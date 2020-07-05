@@ -289,7 +289,7 @@ async function get_access_token () {
 
 // get_sa_token().catch(console.error)
 async function get_sa_token () {
-  if (use_sa && !SA_TOKENS.length) SA_TOKENS = get_sa_batch()
+  if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
   while (SA_TOKENS.length) {
     const tk = get_random_element(SA_TOKENS)
     try {
@@ -567,8 +567,9 @@ async function copy_file (id, parent, use_sa, limit) {
       }
     }
   }
-  if (!SA_TOKENS.length) {
+  if (use_sa && !SA_TOKENS.length) {
     if (limit) limit.clearQueue()
+    if (task_id) db.prepare('update task set status=? where id=?').run('error', task_id)
     throw new Error('所有SA帐号流量已用完')
   } else {
     console.warn('复制文件失败，文件id: ' + id)
