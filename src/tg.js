@@ -157,7 +157,7 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
     }
   }
 
-  real_copy({ source: fid, update, target, not_teamdrive: true, service_account: true, is_server: true })
+  real_copy({ source: fid, update, target, service_account: !USE_PERSONAL_AUTH, is_server: true })
     .then(async info => {
       if (!record) record = {} // 防止无限循环
       if (!info) return
