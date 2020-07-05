@@ -50,8 +50,13 @@ function send_choice ({ fid, chat_id }) {
           { text: '文件統計', callback_data: `count ${fid}` }
         ],
         [
-          { text: '開始複製(預設)', callback_data: `copy ${fid}` },
-          { text: '開始複製(discord)', callback_data: `disCopy ${fid}` }
+          { text: '開始複製(預設)', callback_data: `copy ${fid}` }
+        ],
+        [
+          { text: '開始複製(1)', callback_data: `copy2 ${fid}` }
+        ],
+        [
+          { text: '開始複製(2)', callback_data: `copy3 ${fid}` }
         ]
       ]
     }
@@ -169,6 +174,7 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
       text += '源資料夾：' + gen_link(source, name) + '\n'
       text += '目錄完成數：' + copied_folders + '/' + folder_count + '\n'
       text += '文件完成數：' + copied_files + '/' + file_count + '\n'
+      text += '合計大小：' + (total_size || '未知大小') + '\n'
       sm({ chat_id, text, parse_mode: 'HTML' })
     })
     .catch(err => {

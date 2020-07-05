@@ -64,8 +64,13 @@ router.post('/api/gdurl/tgbot', async ctx => {
       tg_copy({ fid, chat_id }).then(task_id => {
         task_id && sm({ chat_id, text: `開始複製，任務ID: ${task_id} 可輸入 /task ${task_id} 查詢進度` })
       })
-    } else if (action === 'disCopy') {
-      const target = '11231'  //儲存目的地2
+    } else if (action === 'copy2') {
+      const target = ''
+      tg_copy({ fid, target, chat_id }).then(task_id => {
+        task_id && sm({ chat_id, text: `開始複製，任務ID: ${task_id} 可輸入 /task ${task_id} 查詢進度` })
+      })
+    } else if (action === 'copy3') {
+      const target = ''
       tg_copy({ fid, target, chat_id }).then(task_id => {
         task_id && sm({ chat_id, text: `開始複製，任務ID: ${task_id} 可輸入 /task ${task_id} 查詢進度` })
       })
@@ -117,7 +122,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     task_id = parseInt(task_id)
     if (!task_id) {
       const running_tasks = db.prepare('select id from task where status=?').all('copying')
-      if (!running_tasks.length) return sm({ chat_id, text: '当前暂无运行中的任务' })
+      if (!running_tasks.length) return sm({ chat_id, text: '目前沒有執行中的任務' })
       return running_tasks.forEach(v => send_task_info({ chat_id, task_id: v.id }).catch(console.error))
     }
     send_task_info({ task_id, chat_id }).catch(console.error)

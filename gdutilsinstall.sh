@@ -196,10 +196,19 @@ echo -e "\033[1;32m“nginx”起一个web服务......\033[0m"
 
 cd $nginx_conf
 echo "server {
-listen 80;
-server_name $YOUR_DOMAIN_NAME;
-location / {
-    proxy_pass http://127.0.0.1:23333/;
+    listen 80;
+    server_name ecbot.nctu.me;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    ssl on;
+    ssl_certificate    /etc/ssl/certificate.crt;
+    ssl_certificate_key    /etc/ssl/private.key;
+    server_name $YOUR_DOMAIN_NAME;
+    location / {
+         proxy_pass http://127.0.0.1:23333/;
     }
 }" >${nginx_conf}gdutilsbot.conf &&
     $rm_nginx_default

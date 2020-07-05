@@ -139,7 +139,7 @@ echo "server {
 server {
     listen 443 ssl;
     ssl on;
-    ssl_certificate    /etc/ssl/certificate-all.crt;
+    ssl_certificate    /etc/ssl/certificate.crt;
     ssl_certificate_key    /etc/ssl/private.key;
     server_name $YOUR_DOMAIN_NAME;
     location / {

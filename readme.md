@@ -2,16 +2,28 @@
 
 > 不只是最快的 google drive 拷贝工具 [与其他工具的对比](./compare.md)
 
-> 我就懶的翻譯readme了, 大家自己看吧, 主要新增/修改/翻譯tg_bot介面的部分
+> 我就只寫我修改過的部分吧 具體說明還是看[這邊](https://github.com/iwestlin/gd-utils)和[這邊](https://github.com/vitaminx/gd-utils)吧
+## tg_bot 修改部分
+- 執行/task命令時, 會回傳完成度百分比
+  
+  ![](./pic/example2.png)
+- 貼上分享連結時, 新增更多可用的常用選項, 不用每次都另外輸入dst ID
+  - 這邊預設三個複製目的地都相同, 皆為`config.js`中的`DEFAULT_TARGET`
+  - 修改處在[`router.js`](router.js)的Line 68. Line 73, 給target賦值上對應的dst ID就行了
+  ![](./pic/example1.png)
+- 複製完成時, 跳出的通知會顯示文件大小
 
-## 一键安装脚本    
-- 安装机器人需准备好以下四个条件：    
-  - 在Telegram上注册好机器人并取得并记录下该机器人TOKEN     
-  - 一个域名在cloudflare解析到该机器人所在VPS的IP     
-  - 向机器人@userinfobot获取个人TG账号ID并记录    
-  - 注册好一个Google team drive加入sa并记录下该盘ID    
-- 准备好以上四个条件后，复制以下全部内容粘贴到VPS命令行窗口回车即可    
-  - gdutils项目一键部署脚本（包括“查询转存”和“TG机器人”两部分）    
+  ![](./pic/example3.png)
+> 這邊說一下我用的服務及配置(免費配置): always-free gcp Compute Engine + zerossl + 免費的domain
+> hosting 
+>注意我的配置沒有用到cloudflare
+## 一鍵安裝腳本
+- 這邊的安裝腳本我有稍作修改 與fork過來的原版不一樣
+  - 不使用cloudflare解析
+  - ssl另外配置在nginx服務當中(後面會說明證書放置路徑)
+- 具體安裝條件、限制請去參考[腳本原作者的專案](https://github.com/vitaminx/gd-utils)
+- 這邊放了貼上就能用的命令
+  - gdutils项目一键部署脚本（包括“查询转存”和“TG机器人”两部分）
   ```    
   bash -c "$(curl -fsSL https://raw.githubusercontent.com/vitaminx/gd-utils/master/gdutilsinstall.sh)"
   ```    
@@ -33,78 +45,16 @@
 - 测试可用完美安装系统：    
   - Centos 7/8    
   - debian 9/10
-  - ubuntu 16.04/18.04/19.10/20.04     
-  
-## demo
-[https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
+  - ubuntu 16.04/18.04/19.10/20.04
 
-## 更新日志
-[2020-06-30]
-
-- 命令行操作时，不换行输出进度信息，同时将进度信息输出间隔调整为1秒
-- 隐藏 timeout exceed 报错信息
-
-## 重要更新（2020-06-29）
-如果你遇到了以下几种问题，请务必阅读此节：
-
-- 任务异常中断
-- 命令行日志无限循环输出但进度不变
-- 复制完发现丢文件
-
-有不少网友遇到这些问题，但是作者一直无法复现，直到有tg网友发了张运行日志截图：
-![](./static/error-log.png)
-报错日志的意思是找不到对应的目录ID，这种情况会发生在SA没有对应目录的阅读权限的时候。
-当进行server side copy时，需要向Google的服务器提交要复制的文件ID，和复制的位置，也就是新创建的目录ID，由于在请求时是随机选取的SA，所以当选中没有权限的SA时，这次拷贝请求没有对应目录的权限，就会发生图中的错误。
-
-**所以，上述这些问题的源头是，sa目录下，混杂了没有权限的json文件！**
-
-以下是解决办法：
-- 在项目目录下，执行 `git pull` 拉取最新代码
-- 执行 `./validate-sa.js -h` 查看使用说明
-- 选择一个你的sa拥有阅读权限的目录ID，执行 `./validate-sa.js 你的目录ID`
-
-程序会读取sa目录下所有json文件，依次检查它们是否拥有对 `你的目录ID` 的阅读权限，如果最后发现了无效的SA，程序会提供选项允许用户将无效的sa json移动到特定目录。
-
-将无效sa文件移动以后，如果你使用了pm2启动，需要 `pm2 reload server` 重启下进程。
-
-操作示例： [https://drive.google.com/drive/folders/1iiTAzWF_v9fo_IxrrMYiRGQ7QuPrnxHf](https://drive.google.com/drive/folders/1iiTAzWF_v9fo_IxrrMYiRGQ7QuPrnxHf)
-
-## 常见问题
-下面是一些网友的踩坑心得，如果你配置的时候也不小心掉进坑里，可以进去找找有没有解决办法：
-
-- [ikarosone 基于宝塔的搭建过程](https://www.ikarosone.top/archives/195.html)
-
-- [@greathappyforest 踩的坑](doc/tgbot-appache2-note.md)
-
-在命令行操作时如果输出 `timeout exceed` 这样的消息，是正常情况，不会影响最终结果，因为程序对每个请求都有7次重试的机制。
-如果timeout的消息比较多，可以考虑降低并行请求数，下文有具体方法。
-
-复制结束后，如果最后输出的消息里有 `未读取完毕的目录ID`，只需要在命令行执行上次同样的拷贝命令，选continue即可继续。
-
-如果你成功复制完以后，统计新的文件夹链接发现文件数比源文件夹少，说明Google正在更新数据库，请给它一点时间。。一般等半小时再统计数据会比较完整。
-
-如果你使用tg操作时，发送拷贝命令以后，/task 进度始终未开始（在复制文件数超多的文件夹时常会发生），是正常现象。
-这是因为程序正在获取源文件夹的所有文件信息。它的运行机制严格按照以下顺序：
-
-1、获取源文件夹所有文件信息
-2、根据源文件夹的目录结构，在目标文件夹创建目录
-3、所有目录创建完成后，开始复制文件
-
-**如果源文件夹的文件数非常多（一百万以上），请一定在命令行进行操作**，因为程序运行的时候会把文件信息保存在内存中，文件数太多的话容易内存占用太多被nodejs干掉。可以像这样执行命令：
-```
- node --max-old-space-size=4096 count folder-id -S
- ```
-这样进程就能最大占用4G内存了。
-
-
-## 搭建过程
-[https://drive.google.com/drive/folders/1Lu7Cwh9lIJkfqYDIaJrFpzi8Lgdxr4zT](https://drive.google.com/drive/folders/1Lu7Cwh9lIJkfqYDIaJrFpzi8Lgdxr4zT)
-
-需要注意的地方：
-
-- 视频中省略了一个比较重要的步骤就是**从本地上传service account授权文件到 sa 目录下**，tg机器人的所有操作都是通过sa授权的，所以你们别忘了。。
-- 视频中**nginx的配置里，server_name就是你的二级域名，需要和cloudflare的设置一样**的（mybbbottt），我分开录的视频所以没做到一致。
-- 还有省略的步骤就是注册域名和把域名托管到cloudflare了，这一步网上太多资料了，甚至也有免费注册（一年）域名的地方（ https://www.freenom.com/ ），具体教程大家搜搜看吧。
+## 搭建步驟
+1. 啟用一台主機, VPS、私人伺服器都行(私人伺服器如果沒有設定硬撥, 必須去路由器設定端口對應)
+2. 確認固定ip, 或是用ddns服務 都行
+3. 使用domain hosting服務解析到動態域名, 或新增A record指定到固定ip
+4. 用domain hosting設定好的固定域名, 去申請ssl證書
+5. 將證書放到對應路徑 /etc/ssl/certificate.crt 和 /etc/ssl/private.key
+6. 設定完成後, 確認主機的端口開放
+7. 執行安裝腳本, 就會自動以nginx起動服務, 特別設定了http轉https的跳轉
 
 ## 功能简介
 本工具目前支持以下功能：
@@ -173,53 +123,6 @@ http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy
 `tg_whitelist: ['viegg']`，就代表只允许我自己使用这个机器人了。
 
 如果想把机器人的使用权限分享给别的用户，只需要改成这样子： `tg_whitelist: ['viegg', '其他人的username']`
-
-接下来需要将代码部署到服务器上。
-如果你一开始就是在服务器上配置的，可以直接执行`npm i pm2 -g`
-
-如果你之前是在本地操作的，请在服务器上同样重复一遍，配置好相关参数后，执行`npm i pm2 -g`安装进程守护程序pm2
-
-安装好pm2之后，执行 `pm2 start server.js`，代码运行后会在服务器上监听`23333`端口。
-
-如果你启动程序后想看运行日志，执行 `pm2 logs`
-
-查看 pm2 守护的进程列表，执行 `pm2 l`
-
-停止运行中的进程，执行 `pm2 stop 对应的进程名称`
-
-**如果你修改了代码中的配置，需要 `pm2 reload server` 才能生效**。
-
-> 如果你不想用nginx，可以将`server.js`中的`23333`改成`80`直接监听80端口（可能需要root权限）
-
-接下来可通过nginx或其他工具起一个web服务，示例nginx配置：
-```
-server {
-  listen 80;
-  server_name your.server.name;
-
-  location / {
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_pass http://127.0.0.1:23333/;
-  }
-}
-```
-配置好nginx后，可以再套一层cloudflare，具体教程请自行搜索。
-
-检查网站是否部署成功，可以命令行执行（请将YOUR_WEBSITE_URL替换成你的网址）
-```
-curl 'YOUR_WEBSITE_URL/api/gdurl/count?fid=124pjM5LggSuwI1n40bcD5tQ13wS0M6wg'
-```
-![](./static/count.png)
-
-如果返回了这样的文件统计，说明部署成功了。
-
-最后，在命令行执行（请将[YOUR_WEBSITE]和[YOUR_BOT_TOKEN]分别替换成你自己的网址和bot token）
-```
-curl -F "url=[YOUR_WEBSITE]/api/gdurl/tgbot" 'https://api.telegram.org/bot[YOUR_BOT_TOKEN]/setWebhook'
-```
-这样，就将你的服务器连接上你的 telegram bot 了，试着给bot发送个 `/help`，如果它回复给你使用说明，那就配置成功了。
 
 ## 补充说明
 在`config.js`文件里，还有另外的几个参数：
