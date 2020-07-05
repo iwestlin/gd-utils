@@ -118,7 +118,7 @@ echo -e "\033[1;32m“进程守护程序pm2”开始安装......\033[0m"
 cd /root/gd-utils &&
     npm i pm2 -g && pm2 l
 echo -e "\033[1;32m启动守护进程......\033[0m"
-pm2 start server.js
+pm2 start server.js --node-args="--max-old-space-size=4096"
 echo -e "\033[1;32m----------------------------------------------------------\033[0m"
 
 echo -e "\033[1;32m“nginx”开始安装......\033[0m"
@@ -132,7 +132,7 @@ echo -e "\033[1;32m“nginx”起一个web服务......\033[0m"
 cd $nginx_conf
 echo "server {
     listen 80;
-    server_name ecbot.nctu.me;
+    server_name $YOUR_DOMAIN_NAME;
     return 301 https://$host$request_uri;
 }
 
