@@ -9,7 +9,7 @@ const { AUTH, DEFAULT_TARGET } = require('../config')
 const { tg_token } = AUTH
 const gen_link = (fid, text) => `<a href="https://drive.google.com/drive/folders/${fid}">${text || fid}</a>`
 
-if (!tg_token) throw new Error('請先在auth.js中設定tg_token')
+if (!tg_token) throw new Error('請先在config.js中設定tg_token')
 const { https_proxy } = process.env
 const axins = axios.create(https_proxy ? { httpsAgent: new HttpsProxyAgent(https_proxy) } : {})
 
