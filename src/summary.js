@@ -26,7 +26,7 @@ function make_table ({ file_count, folder_count, total_size, details }) {
     return arr.map(content => ({ content, hAlign }))
   })
   const total_count = file_count + folder_count
-  const tails = ['总计', total_count, total_size].map(v => ({ content: colors.bold(v), hAlign }))
+  const tails = ['總計', total_count, total_size].map(v => ({ content: colors.bold(v), hAlign }))
   tb.push(headers, ...records)
   tb.push(tails)
   return tb.toString() + '\n'
