@@ -98,7 +98,9 @@ function send_choice ({ fid, chat_id }) {
     reply_markup: {
       inline_keyboard: [
         [
-          { text: '文件統計', callback_data: `count ${fid}` },
+          { text: '文件統計', callback_data: `count ${fid}` }
+        ],
+        [
           { text: '開始複製', callback_data: `copy ${fid}` }
         ]
       ].concat(gen_bookmark_choices(fid))
@@ -111,9 +113,8 @@ function gen_bookmark_choices (fid) {
   const gen_choice = v => ({text: `複製到 ${v.alias}`, callback_data: `copy ${fid} ${v.alias}`})
   const records = db.prepare('select * from bookmark').all()
   const result = []
-  for (let i = 0; i < records.length; i += 2) {
+  for (let i = 0; i < records.length; i++) {
     const line = [gen_choice(records[i])]
-    if (records[i + 1]) line.push(gen_choice(records[i + 1]))
     result.push(line)
   }
   return result
