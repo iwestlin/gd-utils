@@ -22,21 +22,73 @@ async function get_folder_name (fid) {
   return FID_TO_NAME[fid] = name
 }
 
-module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy, extract_from_text }
-
 function send_help (chat_id) {
   const text = `<pre>[使用帮助]
 命令 ｜ 说明
-
+=====================
 /help | 返回本条使用说明
-
-/count shareID [-u] | 返回sourceID的文件统计信息, sourceID可以是google drive分享网址本身，也可以是分享ID。如果命令最后加上 -u，则无视之前的记录强制从线上获取，适合一段时候后才更新完毕的分享链接。
-
-/copy sourceID targetID [-u] | 将sourceID的文件复制到targetID里（会新建一个文件夹），若不填targetID，则会复制到默认位置（在config.js里设置）。如果命令最后加上 -u，则无视本地缓存强制从线上获取源文件夹信息。返回拷贝任务的taskID
-
-/task taskID | 返回对应任务的进度信息，若不填则返回所有正在运行的任务进度，若填 all 则返回所有任务列表
+=====================
+/count shareID [-u] | 返回sourceID的文件统计信息
+sourceID可以是google drive分享网址本身，也可以是分享ID。如果命令最后加上 -u，则无视之前的记录强制从线上获取，适合一段时候后才更新完毕的分享链接。
+=====================
+/copy sourceID targetID [-u] | 将sourceID的文件复制到targetID里（会新建一个文件夹）
+若不填targetID，则会复制到默认位置（在config.js里设置）。
+如果设置了bookmark，那么targetID可以是bookmark的别名。
+如果命令最后加上 -u，则无视本地缓存强制从线上获取源文件夹信息。
+命令开始执行后会回复此次任务的taskID。
+=====================
+/task taskID | 返回对应任务的进度信息
+若不填则返回所有正在运行的任务进度，若填 all 则返回所有任务列表
+=====================
+/bm [action] [alias] [target] | bookmark，添加常用目的文件夹ID
+会在输入网址后返回的「文件统计」「开始复制」这两个按钮的下方出现，方便复制到常用位置。
+用例：
+/bm | 返回所有设置的收藏夹
+/bm set movie folder-id | 将folder-id添加到收藏夹，别名设为movie
+/bm unset movie | 删除此收藏夹
 </pre>`
   return sm({ chat_id, text, parse_mode: 'HTML' })
+}
+
+function send_bm_help (chat_id) {
+  const text = `<pre>/bm [action] [alias] [target] | bookmark，添加常用目的文件夹ID
+会在输入网址后返回的「文件统计」「开始复制」这两个按钮的下方出现，方便复制到常用位置。
+用例：
+/bm | 返回所有设置的收藏夹
+/bm set movie folder-id | 将folder-id添加到收藏夹，别名设为movie
+/bm unset movie | 删除此收藏夹
+</pre>`
+  return sm({ chat_id, text, parse_mode: 'HTML' })
+}
+
+function send_all_bookmarks (chat_id) {
+  let records = db.prepare('select alias, target from bookmark').all()
+  if (!records.length) return sm({ chat_id, text: '数据库中没有收藏记录' })
+  const tb = new Table({ style: { head: [], border: [] } })
+  const headers = ['别名', '目录ID']
+  records = records.map(v => [v.alias, v.target])
+  tb.push(headers, ...records)
+  const text = tb.toString().replace(/─/g, '—')
+  return sm({ chat_id, text: `<pre>${text}</pre>`, parse_mode: 'HTML' })
+}
+
+function set_bookmark ({ chat_id, alias, target }) {
+  const record = db.prepare('select alias from bookmark where alias=?').get(alias)
+  if (record) return sm({ chat_id, text: '数据库中已有同名的收藏' })
+  db.prepare('INSERT INTO bookmark (alias, target) VALUES (?, ?)').run(alias, target)
+  return sm({ chat_id, text: `成功设置收藏：${alias} | ${target}` })
+}
+
+function unset_bookmark ({ chat_id, alias }) {
+  const record = db.prepare('select alias from bookmark where alias=?').get(alias)
+  if (!record) return sm({ chat_id, text: '未找到此别名的收藏' })
+  db.prepare('delete from bookmark where alias=?').run(alias)
+  return sm({ chat_id, text: '成功删除收藏 ' + alias })
+}
+
+function get_target_by_alias (alias) {
+  const record = db.prepare('select target from bookmark where alias=?').get(alias)
+  return record && record.target
 }
 
 function send_choice ({ fid, chat_id }) {
@@ -49,9 +101,22 @@ function send_choice ({ fid, chat_id }) {
           { text: '文件统计', callback_data: `count ${fid}` },
           { text: '开始复制', callback_data: `copy ${fid}` }
         ]
-      ]
+      ].concat(gen_bookmark_choices(fid))
     }
   })
+}
+
+// console.log(gen_bookmark_choices())
+function gen_bookmark_choices (fid) {
+  const gen_choice = v => ({text: `复制到 ${v.alias}`, callback_data: `copy ${fid} ${v.target}`})
+  const records = db.prepare('select * from bookmark').all()
+  const result = []
+  for (let i = 0; i < records.length; i += 2) {
+    const line = [gen_choice(records[i])]
+    if (records[i + 1]) line.push(gen_choice(records[i + 1]))
+    result.push(line)
+  }
+  return result
 }
 
 async function send_all_tasks (chat_id) {
@@ -246,3 +311,5 @@ function extract_from_text (text) {
   const m = text.match(reg)
   return m && extract_fid(m[0])
 }
+
+module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy, extract_from_text, get_target_by_alias, send_bm_help, send_all_bookmarks, set_bookmark, unset_bookmark }
