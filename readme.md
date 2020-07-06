@@ -15,8 +15,7 @@
 - 複製完成時, 跳出的通知會顯示文件大小
 
   ![](./pic/example3.png)
-> 這邊說一下我用的服務及配置(免費配置): always-free gcp Compute Engine + zerossl + 免費的domain
-> hosting 
+> 這邊說一下我用的服務及配置(免費配置): always-free gcp Compute Engine + zerossl + 免費的domain hosting 
 >注意我的配置沒有用到cloudflare
 ## 一鍵安裝腳本(感謝 腳本製作者 [@vitaminx](https://github.com/vitaminx))
 - 這邊的安裝腳本我有稍作修改 與fork過來的原版不一樣
