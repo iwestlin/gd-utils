@@ -23,5 +23,5 @@ const AUTH = { // 如果您拥有service account的json授权文件，可将其�
 
 //-------------------MOD-------------------
 const SA_PATH = '../sa' //sa路徑配置, 給定絕對路徑或是以src為當前路徑給定相對路徑, 預設為'../sa'
-
-module.exports = { AUTH, PARALLEL_LIMIT, RETRY_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET, SA_PATH }
+const BUTTON_LEVEL = 1 //預設為1, 填入大於2皆視為2
+module.exports = { AUTH, PARALLEL_LIMIT, RETRY_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET, SA_PATH, BUTTON_LEVEL }
