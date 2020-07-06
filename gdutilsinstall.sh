@@ -117,7 +117,7 @@ $cmd_install install $cmd_install_rely -y
 curl -sL $nodejs_curl | bash -
 $cmd_install install nodejs -y
 $cmd_install_rpm_build
-git clone https://github.com/iwestlin/gd-utils && cd gd-utils
+git clone https://github.com/liaojack8/gd-utils-cht && cd gd-utils-cht
 npm config set unsafe-perm=true
 npm i
 
