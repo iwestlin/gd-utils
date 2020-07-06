@@ -51,7 +51,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
   if (callback_query) {
     const { id, data } = callback_query
     const chat_id = callback_query.from.id
-    const [action, fid] = data.split(' ')
+    const [action, fid, target] = data.split(' ')
     if (action === 'count') {
       if (counting[fid]) return sm({ chat_id, text: fid + ' 正在统计，请稍等片刻' })
       counting[fid] = true
@@ -64,7 +64,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     } else if (action === 'copy') {
       if (COPYING_FIDS[fid]) return sm({ chat_id, text: `正在处理 ${fid} 的复制命令` })
       COPYING_FIDS[fid] = true
-      tg_copy({ fid, chat_id }).then(task_id => {
+      tg_copy({ fid, target, chat_id }).then(task_id => {
         task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
       }).finally(() => COPYING_FIDS[fid] = false)
     }

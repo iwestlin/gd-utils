@@ -101,14 +101,14 @@ function send_choice ({ fid, chat_id }) {
           { text: '文件统计', callback_data: `count ${fid}` },
           { text: '开始复制', callback_data: `copy ${fid}` }
         ]
-      ].concat(gen_bookmark_choices())
+      ].concat(gen_bookmark_choices(fid))
     }
   })
 }
 
 // console.log(gen_bookmark_choices())
-function gen_bookmark_choices () {
-  const gen_choice = v => ({text: `复制到 ${v.alias}`, callback_data: `copy ${v.target}`})
+function gen_bookmark_choices (fid) {
+  const gen_choice = v => ({text: `复制到 ${v.alias}`, callback_data: `copy ${fid} ${v.target}`})
   const records = db.prepare('select * from bookmark').all()
   const result = []
   for (let i = 0; i < records.length; i += 2) {
