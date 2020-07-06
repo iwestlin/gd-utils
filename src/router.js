@@ -116,7 +116,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     }
   } else if (text.startsWith('/copy')) {
     let target = text.replace('/copy', '').replace(' -u', '').trim().split(' ').map(v => v.trim())[1]
-    target = target || get_target_by_alias(target)
+    target = get_target_by_alias(target) || target
     if (target && !validate_fid(target)) return sm({ chat_id, text: `目标ID ${target} 格式不正确` })
     const update = text.endsWith(' -u')
     tg_copy({ fid, target, chat_id, update }).then(task_id => {
