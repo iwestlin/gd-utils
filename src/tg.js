@@ -65,7 +65,7 @@ function send_all_bookmarks (chat_id) {
   let records = db.prepare('select alias, target from bookmark').all()
   if (!records.length) return sm({ chat_id, text: '数据库中没有收藏记录' })
   const tb = new Table({ style: { head: [], border: [] } })
-  const headers = ['别名', '目的ID']
+  const headers = ['alias', 'target']
   records = records.map(v => [v.alias, v.target])
   tb.push(headers, ...records)
   const text = tb.toString().replace(/─/g, '—')
