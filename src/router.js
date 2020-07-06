@@ -88,7 +88,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     return sm({ chat_id, text: '未识别出分享ID' })
   }
   if (text.startsWith('/help')) return send_help(chat_id)
-  if (text.startsWith('/bm ')) {
+  if (text.startsWith('/bm')) {
     const [cmd, action, alias, target] = text.split(' ').map(v => v.trim())
     if (!action) return send_all_bookmarks(chat_id)
     if (action === 'set') {
