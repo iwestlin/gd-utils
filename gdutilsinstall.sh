@@ -117,12 +117,12 @@ $cmd_install install $cmd_install_rely -y
 curl -sL $nodejs_curl | bash -
 $cmd_install install nodejs -y
 $cmd_install_rpm_build
-git clone https://github.com/iwestlin/gd-utils && cd gd-utils
+git clone https://github.com/liaojack8/gd-utils-cht && cd gd-utils-cht
 npm config set unsafe-perm=true
 npm i
 
 echo
-echo -e "\033[1;32m★★★ 恭喜您!gdutils统计转存系统已经正确安装完成，请上传sa到“./gd-utils/sa/”目录下完成最后的配置 ★★★\033[0m"
+echo -e "\033[1;32m★★★ 恭喜您!gdutils统计转存系统已经正确安装完成，请上传sa到“./gd-utils-cht/sa/”目录下完成最后的配置 ★★★\033[0m"
 echo
 
 #################################################################################################
@@ -174,13 +174,13 @@ while [[ "${#YOUR_GOOGLE_TEAM_DRIVE_ID}" != 19 ]]; do
 done
 
 cd ~ &&
-    sed -i "s/bot_token/$YOUR_BOT_TOKEN/g" ./gd-utils/config.js &&
-    sed -i "s/your_tg_username/$YOUR_TELEGRAM_ID/g" ./gd-utils/config.js && 
-    sed -i "s/DEFAULT_TARGET = ''/DEFAULT_TARGET = '$YOUR_GOOGLE_TEAM_DRIVE_ID'/g" ./gd-utils/config.js
+    sed -i "s/bot_token/$YOUR_BOT_TOKEN/g" ./gd-utils-cht/config.js &&
+    sed -i "s/your_tg_username/$YOUR_TELEGRAM_ID/g" ./gd-utils-cht/config.js && 
+    sed -i "s/DEFAULT_TARGET = ''/DEFAULT_TARGET = '$YOUR_GOOGLE_TEAM_DRIVE_ID'/g" ./gd-utils-cht/config.js
 echo -e "\033[1;32m----------------------------------------------------------\033[0m"
 
 echo -e "\033[1;32m“进程守护程序pm2”开始安装......\033[0m"
-cd /root/gd-utils &&
+cd /root/gd-utils-cht &&
     npm i pm2 -g && pm2 l
 echo -e "\033[1;32m启动守护进程......\033[0m"
 pm2 start server.js --node-args="--max-old-space-size=4096"
