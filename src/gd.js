@@ -22,6 +22,11 @@ const SA_FILES = fs.readdirSync(path.join(__dirname, '../sa')).filter(v => v.end
 SA_FILES.flag = 0
 let SA_TOKENS = get_sa_batch()
 
+setInterval(() => {
+  SA_FILES.flag = 0
+  SA_TOKENS = get_sa_batch()
+}, 1000 * 3600 * 12)
+
 function get_sa_batch () {
   const new_flag = SA_FILES.flag + SA_BATCH_SIZE
   const files = SA_FILES.slice(SA_FILES.flag, new_flag)
