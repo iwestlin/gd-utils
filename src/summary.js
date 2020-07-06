@@ -5,10 +5,10 @@ const { escape } = require('html-escaper')
 module.exports = { make_table, summary, make_html, make_tg_table }
 
 function make_html ({ file_count, folder_count, total_size, details }) {
-  const head = ['類型', '數量', '大小']
+  const head = ['类型', '数量', '大小']
   const th = '<tr>' + head.map(k => `<th>${k}</th>`).join('') + '</tr>'
   const td = details.map(v => '<tr>' + [escape(v.ext), v.count, v.size].map(k => `<td>${k}</td>`).join('') + '</tr>').join('')
-  let tail = ['合計', file_count + folder_count, total_size]
+  let tail = ['合计', file_count + folder_count, total_size]
   tail = '<tr style="font-weight:bold">' + tail.map(k => `<td>${k}</td>`).join('') + '</tr>'
   const table = `<table border="1" cellpadding="12" style="border-collapse:collapse;font-family:serif;font-size:22px;margin:10px auto;text-align: center">
     ${th}
@@ -26,7 +26,7 @@ function make_table ({ file_count, folder_count, total_size, details }) {
     return arr.map(content => ({ content, hAlign }))
   })
   const total_count = file_count + folder_count
-  const tails = ['總計', total_count, total_size].map(v => ({ content: colors.bold(v), hAlign }))
+  const tails = ['总计', total_count, total_size].map(v => ({ content: colors.bold(v), hAlign }))
   tb.push(headers, ...records)
   tb.push(tails)
   return tb.toString() + '\n'
@@ -56,8 +56,8 @@ function make_tg_table ({ file_count, folder_count, total_size, details }) {
   const hAlign = 'center'
   const headers = ['Type', 'Count', 'Size'].map(v => ({ content: v, hAlign }))
   details.forEach(v => {
-    if (v.ext === '資料夾') v.ext = '[Folder]'
-    if (v.ext === '無副檔名') v.ext = '[NoExt]'
+    if (v.ext === '文件夹') v.ext = '[Folder]'
+    if (v.ext === '无扩展名') v.ext = '[NoExt]'
   })
   const records = details.map(v => [v.ext, v.count, v.size]).map(arr => arr.map(content => ({ content, hAlign })))
   const total_count = file_count + folder_count
@@ -107,8 +107,8 @@ function summary (info, sort_by) {
   } else {
     details.sort((a, b) => b.count - a.count)
   }
-  if (no_ext) details.push({ ext: '無副檔名', count: no_ext, size: format_size(no_ext_size), raw_size: no_ext_size })
-  if (folder_count) details.push({ ext: '資料夾', count: folder_count, size: 0, raw_size: 0 })
+  if (no_ext) details.push({ ext: '无扩展名', count: no_ext, size: format_size(no_ext_size), raw_size: no_ext_size })
+  if (folder_count) details.push({ ext: '文件夹', count: folder_count, size: 0, raw_size: 0 })
   return { file_count, folder_count, total_size, details }
 }
 

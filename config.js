@@ -21,7 +21,6 @@ const AUTH = { // 如果您拥有service account的json授权文件，可将其�
   tg_whitelist: ['your_tg_username'] // 你的tg username(t.me/username)，bot只会执行这个列表里的用户所发送的指令
 }
 
-//-------------------MOD-------------------
-const SA_PATH = '../sa' //sa路徑配置, 給定絕對路徑或是以src為當前路徑給定相對路徑, 預設為'../sa'
-const BUTTON_LEVEL = 1 //預設為1, 填入大於2皆視為2
-module.exports = { AUTH, PARALLEL_LIMIT, RETRY_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET, SA_PATH, BUTTON_LEVEL }
+const BUTTON_LEVEL = 1 // Default as 1, all number large than 2 will be judge as 2.
+
+module.exports = { AUTH, PARALLEL_LIMIT, RETRY_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET, BUTTON_LEVEL }

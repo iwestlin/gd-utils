@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const { argv } = require('yargs')
-  .usage('用法: ./$0 folder-id [options]\nfolder-id 是你想检测SA是否对其有阅读权限的目录ID')
+  .usage('用法: ./$0 folder-id\nfolder-id 是你想检测SA是否对其有阅读权限的目录ID')
   .help('h')
   .alias('h', 'help')
 
