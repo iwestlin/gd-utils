@@ -92,7 +92,6 @@ function get_target_by_alias (alias) {
 }
 
 function send_choice ({ fid, chat_id }) {
-  const records = db.prepare('select * from bookmark').all()
   return sm({
     chat_id,
     text: `识别出分享ID ${fid}，请选择动作`,
@@ -102,14 +101,22 @@ function send_choice ({ fid, chat_id }) {
           { text: '文件统计', callback_data: `count ${fid}` },
           { text: '开始复制', callback_data: `copy ${fid}` }
         ]
-      ].concat(records.map(v => {
-        return [{
-          text: `复制到 ${v.alias}`,
-          callback_data: `copy ${v.target}`
-        }]
-      }))
+      ].concat(gen_bookmark_choices())
     }
   })
+}
+
+console.log(gen_bookmark_choices())
+function gen_bookmark_choices () {
+  const gen_choice = v => ({text: `复制到 ${v.alias}`, callback_data: `copy ${v.target}`})
+  const records = db.prepare('select * from bookmark').all()
+  const result = []
+  for (let i = 0; i < records.length; i += 2) {
+    const line = [gen_choice(records[i])]
+    if (records[i + 1]) line.push(gen_choice(records[i + 1]))
+    result.push(line)
+  }
+  return result
 }
 
 async function send_all_tasks (chat_id) {
