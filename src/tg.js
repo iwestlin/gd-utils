@@ -92,7 +92,7 @@ function get_target_by_alias (alias) {
 }
 
 function send_choice ({ fid, chat_id }) {
-  const records = db.prepare('select * from bookmarks').all()
+  const records = db.prepare('select * from bookmark').all()
   return sm({
     chat_id,
     text: `识别出分享ID ${fid}，请选择动作`,
