@@ -3,6 +3,8 @@
 > 不只是最快的 google drive 拷贝工具 [与其他工具的对比](./compare.md)
 
 > 我就只寫我修改過的部分吧 具體說明還是看[這邊](https://github.com/iwestlin/gd-utils)和[這邊](https://github.com/vitaminx/gd-utils)吧
+## 更新紀錄
+2020.07.07 整體繁體化, 新增用戶可以在config.js自訂按鈕顯示的個數(每列), 可設定為1或2
 ## tg_bot 修改部分
 - 執行/task命令時, 會回傳完成度百分比
   
