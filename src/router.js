@@ -83,7 +83,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
   })) return console.warn('异常请求')
 
   const fid = extract_fid(text) || extract_from_text(text)
-  const no_fid_commands = ['/task', '/help']
+  const no_fid_commands = ['/task', '/help', '/bm']
   if (!no_fid_commands.some(cmd => text.startsWith(cmd)) && !validate_fid(fid)) {
     return sm({ chat_id, text: '未识别出分享ID' })
   }
