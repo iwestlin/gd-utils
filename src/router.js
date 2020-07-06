@@ -4,7 +4,7 @@ const { db } = require('../db')
 const { validate_fid, gen_count_body } = require('./gd')
 const { send_count, send_help, send_choice, send_task_info, sm, extract_fid, extract_from_text, reply_cb_query, tg_copy, send_all_tasks } = require('./tg')
 
-const { AUTH, ROUTER_PASSKEY, TG_IPLIST } = require('../config')
+const { AUTH, ROUTER_PASSKEY, TG_IPLIST, COPY_TARGET2, COPY_TARGET3 } = require('../config')
 const { tg_whitelist } = AUTH
 
 const counting = {}
@@ -65,12 +65,12 @@ router.post('/api/gdurl/tgbot', async ctx => {
         task_id && sm({ chat_id, text: `開始複製，任務ID: ${task_id} 可輸入 /task ${task_id} 查詢進度` })
       })
     } else if (action === 'copy2') {
-      const target = ''
+      const target = COPY_TARGET2
       tg_copy({ fid, target, chat_id }).then(task_id => {
         task_id && sm({ chat_id, text: `開始複製，任務ID: ${task_id} 可輸入 /task ${task_id} 查詢進度` })
       })
     } else if (action === 'copy3') {
-      const target = ''
+      const target = COPY_TARGET3
       tg_copy({ fid, target, chat_id }).then(task_id => {
         task_id && sm({ chat_id, text: `開始複製，任務ID: ${task_id} 可輸入 /task ${task_id} 查詢進度` })
       })
