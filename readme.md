@@ -26,15 +26,15 @@
 - 這邊放了貼上就能用的命令
   - gdutils项目一键部署脚本（包括“查询转存”和“TG机器人”两部分）
   ```    
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/vitaminx/gd-utils/master/gdutilsinstall.sh)"
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/liaojack8/gd-utils-cht/master/gdutilsinstall.sh)"
   ```    
   - gdutils项目一键部署脚本之“转存查询部分”    
   ```    
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/vitaminx/gd-utils/master/gdutilscsinstall.sh)"
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/liaojack8/gd-utils-cht/master/gdutilscsinstall.sh)"
   ```    
   - gdutils项目一键部署脚本之“TG机器人部分”    
   ```    
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/vitaminx/gd-utils/master/gdutilsbotinstall.sh)"
+  bash -c "$(curl -fsSL https://raw.githubusercontent.com/liaojack8/gd-utils-cht/master/gdutilsbotinstall.sh)"
   ```  
 - 安装过程中需要输入一下四个参数：    
   - 机器人TOKEN：这个在Telegram里面找“@BotFather”注册即可获得    
