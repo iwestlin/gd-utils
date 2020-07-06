@@ -9,7 +9,7 @@
   ![](./pic/example2.png)
 - 貼上分享連結時, 新增更多可用的常用選項, 不用每次都另外輸入dst ID
   - 這邊預設三個複製目的地都相同, 皆為`config.js`中的`DEFAULT_TARGET`
-  - 修改處在[`router.js`](./src/router.js)的Line 68. Line 73, 給target賦值上對應的dst ID就行了
+  - 修改處在[`config.js`](./config.js), `COPY_TARGET2` `COPY_TARGET2`, 賦值上對應的dstID就行
   
   ![](./pic/example1.png)
 - 複製完成時, 跳出的通知會顯示文件大小
