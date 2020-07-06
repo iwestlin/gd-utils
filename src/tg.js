@@ -108,7 +108,7 @@ function send_choice ({ fid, chat_id }) {
 
 // console.log(gen_bookmark_choices())
 function gen_bookmark_choices (fid) {
-  const gen_choice = v => ({text: `复制到 ${v.alias}`, callback_data: `copy ${fid} ${v.target}`})
+  const gen_choice = v => ({text: `复制到 ${v.alias}`, callback_data: `copy ${fid} ${v.alias}`})
   const records = db.prepare('select * from bookmark').all()
   const result = []
   for (let i = 0; i < records.length; i += 2) {

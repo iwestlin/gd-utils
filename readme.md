@@ -14,7 +14,7 @@
 > 更新方法：在 gd-utils 目录下，执行 `git pull` 拉取最新代码，如果你使用了 pm2 守护进程，执行`pm2 reload server`刷新生效。
 
 [2020-07-06]  
-- 给机器人添加收藏功能，[使用示例](https://drive.google.com/drive/u/0/folders/1sW8blrDT8o7882VOpXXr3pzXR73d4yGX)
+- 给机器人添加收藏功能，[使用示例](https://drive.google.com/drive/folders/1sW8blrDT8o7882VOpXXr3pzXR73d4yGX)
 
 [2020-07-05]  
 - pm2 启动脚本换成 `pm2 start server.js --node-args="--max-old-space-size=4096"`，避免任务文件数超大时内存占用太高被node干掉。
