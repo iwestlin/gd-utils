@@ -65,11 +65,11 @@ function send_all_bookmarks (chat_id) {
   let records = db.prepare('select alias, target from bookmark').all()
   if (!records.length) return sm({ chat_id, text: '数据库中没有收藏记录' })
   const tb = new Table({ style: { head: [], border: [] } })
-  const headers = ['alias', 'target']
+  const headers = ['别名', '目录ID']
   records = records.map(v => [v.alias, v.target])
   tb.push(headers, ...records)
   const text = tb.toString().replace(/─/g, '—')
-  return sm({ chat_id, text, parse_mode: 'HTML' })
+  return sm({ chat_id, text: `<pre>${text}</pre>`, parse_mode: 'HTML' })
 }
 
 function set_bookmark ({ chat_id, alias, target }) {
@@ -92,6 +92,7 @@ function get_target_by_alias (alias) {
 }
 
 function send_choice ({ fid, chat_id }) {
+  const records = db.prepare('select * from bookmarks').all()
   return sm({
     chat_id,
     text: `识别出分享ID ${fid}，请选择动作`,
@@ -101,7 +102,12 @@ function send_choice ({ fid, chat_id }) {
           { text: '文件统计', callback_data: `count ${fid}` },
           { text: '开始复制', callback_data: `copy ${fid}` }
         ]
-      ]
+      ].concat(records.map(v => {
+        return [{
+          text: `复制到 ${v.alias}`,
+          callback_data: `copy ${v.target}`
+        }]
+      }))
     }
   })
 }
