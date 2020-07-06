@@ -117,7 +117,7 @@ $cmd_install install $cmd_install_rely -y
 curl -sL $nodejs_curl | bash -
 $cmd_install install nodejs -y
 $cmd_install_rpm_build
-git clone https://github.com/liaojack8/gd-utils-cht && cd gd-utils-cht
+git clone https://github.com/iwestlin/gd-utils && cd gd-utils
 npm config set unsafe-perm=true
 npm i
 
@@ -197,10 +197,9 @@ echo -e "\033[1;32m“nginx”起一个web服务......\033[0m"
 cd $nginx_conf
 echo "server {
     listen 80;
-    server_name ecbot.nctu.me;
+    server_name $YOUR_DOMAIN_NAME;
     return 301 https://$host$request_uri;
 }
-
 server {
     listen 443 ssl;
     ssl on;
