@@ -22,10 +22,17 @@ const SA_FILES = fs.readdirSync(path.join(__dirname, '../sa')).filter(v => v.end
 SA_FILES.flag = 0
 let SA_TOKENS = get_sa_batch()
 
-setInterval(() => {
-  SA_FILES.flag = 0
-  SA_TOKENS = get_sa_batch()
-}, 1000 * 3600 * 12)
+if (is_pm2()) {
+  setInterval(() => {
+    SA_FILES.flag = 0
+    SA_TOKENS = get_sa_batch()
+  }, 1000 * 3600 * 12)
+}
+
+// https://github.com/Leelow/is-pm2/blob/master/index.js
+function is_pm2 () {
+  return 'PM2_HOME' in process.env || 'PM2_JSON_PROCESSING' in process.env || 'PM2_CLI' in process.env
+}
 
 function get_sa_batch () {
   const new_flag = SA_FILES.flag + SA_BATCH_SIZE
@@ -47,6 +54,7 @@ handle_exit(() => {
     db.prepare('update task set status=? where id=?').run('interrupt', v.id)
   })
   records.length && console.log(records.length, 'task interrupted')
+  db.close()
 })
 
 async function gen_count_body ({ fid, type, update, service_account }) {

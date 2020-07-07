@@ -5,7 +5,7 @@ const HttpsProxyAgent = require('https-proxy-agent')
 
 const { db } = require('../db')
 const { gen_count_body, validate_fid, real_copy, get_name_by_id } = require('./gd')
-const { AUTH, DEFAULT_TARGET, USE_PERSONAL_AUTH, BUTTON_LEVEL } = require('../config')
+const { AUTH, DEFAULT_TARGET, USE_PERSONAL_AUTH } = require('../config')
 const { tg_token } = AUTH
 const gen_link = (fid, text) => `<a href="https://drive.google.com/drive/folders/${fid}">${text || fid}</a>`
 
@@ -141,6 +141,19 @@ function gen_bookmark_choices (fid) {
       if (records[i+1]) line.push(gen_choice(records[i+1]))
         i++
     }
+    result.push(line)
+  }
+  return result
+}
+
+// console.log(gen_bookmark_choices())
+function gen_bookmark_choices (fid) {
+  const gen_choice = v => ({text: `复制到 ${v.alias}`, callback_data: `copy ${fid} ${v.alias}`})
+  const records = db.prepare('select * from bookmark').all()
+  const result = []
+  for (let i = 0; i < records.length; i += 2) {
+    const line = [gen_choice(records[i])]
+    if (records[i + 1]) line.push(gen_choice(records[i + 1]))
     result.push(line)
   }
   return result
