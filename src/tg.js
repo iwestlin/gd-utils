@@ -91,6 +91,11 @@ function get_target_by_alias (alias) {
   return record && record.target
 }
 
+function get_alias_by_target (target) {
+  const record = db.prepare('select alias from bookmark where target=?').get(target)
+  return record && record.alias
+}
+
 function send_choice ({ fid, chat_id }) {
   return sm({
     chat_id,
@@ -155,17 +160,19 @@ async function get_task_info (task_id) {
   const new_folder = folder_mapping && folder_mapping[0].split(' ')[1]
   const { summary } = db.prepare('select summary from gd where fid=?').get(source) || {}
   const { file_count, folder_count, total_size } = summary ? JSON.parse(summary) : {}
+  const total_count = (file_count || 0) + (folder_count || 0)
   const copied_folders = folder_mapping ? (folder_mapping.length - 1) : 0
   let text = '任务编号：' + task_id + '\n'
   const folder_name = await get_folder_name(source)
   text += '源文件夹：' + gen_link(source, folder_name) + '\n'
-  text += '目的位置：' + gen_link(target) + '\n'
+  text += '目的位置：' + gen_link(target, get_alias_by_target(target)) + '\n'
   text += '新文件夹：' + (new_folder ? gen_link(new_folder) : '暂未创建') + '\n'
   text += '任务状态：' + status + '\n'
   text += '创建时间：' + dayjs(ctime).format('YYYY-MM-DD HH:mm:ss') + '\n'
   text += '完成时间：' + (ftime ? dayjs(ftime).format('YYYY-MM-DD HH:mm:ss') : '未完成') + '\n'
   text += '目录进度：' + copied_folders + '/' + (folder_count === undefined ? '未知数量' : folder_count) + '\n'
   text += '文件进度：' + copied_files + '/' + (file_count === undefined ? '未知数量' : file_count) + '\n'
+  text += '总百分比：' + ((copied_files + copied_folders) * 100 / total_count).toFixed(2) + '%\n'
   text += '合计大小：' + (total_size || '未知大小')
   return { text, status, folder_count }
 }
@@ -181,8 +188,8 @@ async function send_task_info ({ task_id, chat_id }) {
   } catch (e) {
     console.log('fail to send message to tg', e.message)
   }
-  // get_task_info 在task目录数超大时比较吃cpu，如果超1万就不每10秒更新了，以后如果把mapping 也另存一张表可以取消此限制
-  if (!message_id || status !== 'copying' || folder_count > 10000) return
+  // get_task_info 在task目录数超大时比较吃cpu，以后如果最好把mapping也另存一张表
+  if (!message_id || status !== 'copying') return
   const loop = setInterval(async () => {
     const url = `https://api.telegram.org/bot${tg_token}/editMessageText`
     const { text, status } = await get_task_info(task_id)
