@@ -14,6 +14,7 @@ const { make_table, make_tg_table, make_html, summary } = require('./summary')
 
 const FILE_EXCEED_MSG = '您的团队盘文件数已超限(40万)，停止复制'
 const FOLDER_TYPE = 'application/vnd.google-apps.folder'
+const sleep = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
 const { https_proxy } = process.env
 const axins = axios.create(https_proxy ? { httpsAgent: new HttpsProxyAgent(https_proxy) } : {})
 
@@ -522,22 +523,58 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
 
 async function copy_files ({ files, mapping, service_account, root, task_id }) {
   console.log('\n开始复制文件，总数：', files.length)
-  const limit = pLimit(PARALLEL_LIMIT)
-  let count = 0
+
   const loop = setInterval(() => {
     const now = dayjs().format('HH:mm:ss')
-    const message = `${now} | 已复制文件数 ${count} | 网络请求 进行中${limit.activeCount}/排队中${limit.pendingCount}`
+    const message = `${now} | 已复制文件数 ${count} | 排队中文件数 ${files.length}`
     print_progress(message)
   }, 1000)
-  return Promise.all(files.map(async file => {
+
+  let count = 0
+  let concurrency = 0
+  let err
+  while (true) {
+    if (err) {
+      clearInterval(loop)
+      throw err
+    }
+    if (concurrency > PARALLEL_LIMIT) {
+      await sleep(10)
+      continue
+    }
+    const file = files.shift()
+    if (!file) break
+    concurrency++
     const { id, parent } = file
     const target = mapping[parent] || root
-    const new_file = await limit(() => copy_file(id, target, service_account, limit, task_id))
-    if (new_file) {
-      count++
-      db.prepare('INSERT INTO copied (taskid, fileid) VALUES (?, ?)').run(task_id, id)
-    }
-  })).finally(() => clearInterval(loop))
+    copy_file(id, target, service_account, null, task_id).then(new_file => {
+      concurrency--
+      if (new_file) {
+        count++
+        db.prepare('INSERT INTO copied (taskid, fileid) VALUES (?, ?)').run(task_id, id)
+      }
+    }).catch(e => {
+      err = e
+    })
+  }
+  clearInterval(loop)
+  // const limit = pLimit(PARALLEL_LIMIT)
+  // let count = 0
+  // const loop = setInterval(() => {
+  //   const now = dayjs().format('HH:mm:ss')
+  //   const {activeCount, pendingCount} = limit
+  //   const message = `${now} | 已复制文件数 ${count} | 网络请求 进行中${activeCount}/排队中${pendingCount}`
+  //   print_progress(message)
+  // }, 1000)
+  // return Promise.all(files.map(async file => {
+  //   const { id, parent } = file
+  //   const target = mapping[parent] || root
+  //   const new_file = await limit(() => copy_file(id, target, service_account, limit, task_id))
+  //   if (new_file) {
+  //     count++
+  //     db.prepare('INSERT INTO copied (taskid, fileid) VALUES (?, ?)').run(task_id, id)
+  //   }
+  // })).finally(() => clearInterval(loop))
 }
 
 async function copy_file (id, parent, use_sa, limit, task_id) {
