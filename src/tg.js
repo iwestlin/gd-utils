@@ -108,7 +108,7 @@ function send_choice ({ fid, chat_id }) {
 
 // console.log(gen_bookmark_choices())
 function gen_bookmark_choices (fid) {
-  const gen_choice = v => ({text: `复制到 ${v.alias}`, callback_data: `copy ${fid} ${v.target}`})
+  const gen_choice = v => ({text: `复制到 ${v.alias}`, callback_data: `copy ${fid} ${v.alias}`})
   const records = db.prepare('select * from bookmark').all()
   const result = []
   for (let i = 0; i < records.length; i += 2) {
@@ -217,6 +217,8 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
       sm({ chat_id, text, parse_mode: 'HTML' })
     })
     .catch(err => {
+      const task_id = record && record.id
+      if (task_id) db.prepare('update task set status=? where id=?').run('error', task_id)
       if (!record) record = {}
       console.error('复制失败', fid, '-->', target)
       console.error(err)

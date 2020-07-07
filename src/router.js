@@ -64,7 +64,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     } else if (action === 'copy') {
       if (COPYING_FIDS[fid]) return sm({ chat_id, text: `正在处理 ${fid} 的复制命令` })
       COPYING_FIDS[fid] = true
-      tg_copy({ fid, target, chat_id }).then(task_id => {
+      tg_copy({ fid, target: get_target_by_alias(target), chat_id }).then(task_id => {
         task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
       }).finally(() => COPYING_FIDS[fid] = false)
     }
@@ -93,6 +93,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     if (!action) return send_all_bookmarks(chat_id)
     if (action === 'set') {
       if (!alias || !target) return sm({ chat_id, text: '别名和目标ID不能为空' })
+      if (alias.length > 24) return sm({ chat_id, text: '别名不要超过24个英文字符长度' })
       if (!validate_fid(target)) return sm({ chat_id, text: '目标ID格式有误' })
       set_bookmark({ chat_id, alias, target })
     } else if (action === 'unset') {
@@ -115,7 +116,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     }
   } else if (text.startsWith('/copy')) {
     let target = text.replace('/copy', '').replace(' -u', '').trim().split(' ').map(v => v.trim())[1]
-    target = target || get_target_by_alias(target)
+    target = get_target_by_alias(target) || target
     if (target && !validate_fid(target)) return sm({ chat_id, text: `目标ID ${target} 格式不正确` })
     const update = text.endsWith(' -u')
     tg_copy({ fid, target, chat_id, update }).then(task_id => {
