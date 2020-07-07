@@ -522,6 +522,7 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
 }
 
 async function copy_files ({ files, mapping, service_account, root, task_id }) {
+  if (!files.length) return
   console.log('\n开始复制文件，总数：', files.length)
 
   const loop = setInterval(() => {
@@ -533,7 +534,7 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
   let count = 0
   let concurrency = 0
   let err
-  while (true) {
+  do {
     if (err) {
       clearInterval(loop)
       throw err
@@ -543,20 +544,24 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
       continue
     }
     const file = files.shift()
-    if (!file) break
+    if (!file) {
+      await sleep(1000)
+      continue
+    }
     concurrency++
     const { id, parent } = file
     const target = mapping[parent] || root
     copy_file(id, target, service_account, null, task_id).then(new_file => {
-      concurrency--
       if (new_file) {
         count++
         db.prepare('INSERT INTO copied (taskid, fileid) VALUES (?, ?)').run(task_id, id)
       }
     }).catch(e => {
       err = e
+    }).finally(() => {
+      concurrency--
     })
-  }
+  } while (concurrency)
   clearInterval(loop)
   // const limit = pLimit(PARALLEL_LIMIT)
   // let count = 0
