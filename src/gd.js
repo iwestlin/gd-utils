@@ -540,7 +540,7 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
       throw err
     }
     if (concurrency > PARALLEL_LIMIT) {
-      await sleep(10)
+      await sleep(100)
       continue
     }
     const file = files.shift()
