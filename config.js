@@ -23,4 +23,6 @@ const AUTH = { // 如果您拥有service account的json授权文件，可将其�
 
 const BUTTON_LEVEL = 1 // Default as 1, all number large than 2 will be judge as 2.
 
-module.exports = { AUTH, PARALLEL_LIMIT, RETRY_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET, BUTTON_LEVEL }
+const SA_PATH = '../sa' // Default as '../sa'
+
+module.exports = { AUTH, PARALLEL_LIMIT, RETRY_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET, BUTTON_LEVEL, SA_PATH }
