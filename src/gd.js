@@ -54,6 +54,7 @@ handle_exit(() => {
     db.prepare('update task set status=? where id=?').run('interrupt', v.id)
   })
   records.length && console.log(records.length, 'task interrupted')
+  db.close()
 })
 
 async function gen_count_body ({ fid, type, update, service_account }) {
