@@ -5,74 +5,18 @@
 ## demo
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
+## colab脚本（省去安装步骤，直接可用，感谢贡献者[@orange2008](https://github.com/orange2008)）
+[https://colab.research.google.com/drive/1i1W9nAzgiDtfA_rmTBcpMpwxVUhwgLsq](https://colab.research.google.com/drive/1i1W9nAzgiDtfA_rmTBcpMpwxVUhwgLsq)
+
+> 打开上面链接后，保存到自己的云端硬盘（请一定要保存，因为上面的共享链接操作记录所有人可见）
+然后在自己的个人盘账号下建立一个 accounts 文件夹，然后将自己的SA授权文件上传到里面。最后点击下图中红框内的按钮，即可使用。
+
+![](static/colab.png)
+
 ## 一键安装脚本(感谢 脚本制作者 [@vitaminx](https://github.com/vitaminx))
 > 如果你没有Linux操作经验或者是新开的vps，可尝试使用此脚本
 
 请访问 [https://github.com/vitaminx/gd-utils](https://github.com/vitaminx/gd-utils) 获取安装方法
-
-## 更新日志
-> 更新方法：在 gd-utils 目录下，执行 `git pull` 拉取最新代码，如果你使用了 pm2 守护进程，执行`pm2 reload server`刷新生效。
-
-[2020-07-06]  
-- 给机器人添加收藏功能，[使用示例](https://drive.google.com/drive/folders/1sW8blrDT8o7882VOpXXr3pzXR73d4yGX)
-
-[2020-07-05]  
-- pm2 启动脚本换成 `pm2 start server.js --node-args="--max-old-space-size=4096"`，避免任务文件数超大时内存占用太高被node干掉。
-
-[2020-07-04]**【重要更新】**  
-- 解决了长时间拷贝命令突然出现 `Invalid Credentials` 错误的问题。
-原因是依赖的[gtoken](https://www.npmjs.com/package/gtoken)在过期时间后并不返回新的access_token...之前有不少朋友遇到过，一开始我还以为是sa同时使用太多触发了Google限制，直到我自己将sa分批使用量降到了50却也依然遇到了这种报错……
-- 提升了拷贝大量文件时数据库的操作效率，大大减少了cpu占用。(由于更改了数据库的结构，所以如果有未完成的任务，请先跑完任务再更新。如果更新代码后再继续之前未完成的任务，会导致无法接上进度。)
-- 如果触发团队盘40万文件数限制，会返回明确的错误消息，而不是之前的 `创建目录失败，请检查您的账号是否有相关权限`
-- 如果创建目录未完成被中断，相同命令重新开始执行后，会保留原始目录的结构继续创建目录。（之前会导致结构被打乱）
-
-[2020-07-03]  
-- 给命令行 ./copy 命令添加了 `-D` 选项，表示不在目的地创建同名文件夹，直接将源文件夹中的文件原样复制到目的文件夹中
-
-[2020-07-02]  
-- 机器人 /task 命令返回的进度信息每 10 秒更新一次
-- `./dedupe` 改为将重复文件移动到回收站（需要内容管理者及以上权限）
-- 给 sqlite 打开 WAL 模式提升效率
-- 提前5分钟将access_token判定为过期，减少未授权错误
-
-[2020-07-01]（建议所有使用tg机器人的用户更新）  
-- 给机器人的 `/count` 和 `/copy` 命令添加了 `-u` 参数的支持，命令最后加上 -u 表示强制从线上获取源文件夹信息
-- 允许继续状态为已完成的任务（适合搭配 -u 参数，增量复制刚分享出来的未更新完毕的文件夹）
-- 支持识别转发的 [@gdurl](https://t.me/s/gdurl) 频道消息中的google drive链接
-- 机器人回复任务完成消息时，携带 `成功拷贝目录（文件）数/总目录（文件）数`
-- 机器人回复统计消息时，携带文件夹名称
-- 机器人回复`/task`消息时，携带源文件夹名称链接和新文件夹链接
-- 当统计表格太长导致机器人发送消息失败时，发送统计概要
-- 增加了 [专家设置](#专家设置) 一节，保障HTTPS接口安全
-
-[2020-06-30]  
-- 命令行操作时，不换行输出进度信息，同时将进度信息输出间隔调整为1秒
-- 隐藏 timeout exceed 报错信息
-
-## 重要更新（2020-06-29）
-如果你遇到了以下几种问题，请务必阅读此节：
-
-- 任务异常中断
-- 命令行日志无限循环输出但进度不变
-- 复制完发现丢文件
-
-有不少网友遇到这些问题，但是作者一直无法复现，直到有tg网友发了张运行日志截图：
-![](./static/error-log.png)
-报错日志的意思是找不到对应的目录ID，这种情况会发生在SA没有对应目录的阅读权限的时候。
-当进行server side copy时，需要向Google的服务器提交要复制的文件ID，和复制的位置，也就是新创建的目录ID，由于在请求时是随机选取的SA，所以当选中没有权限的SA时，这次拷贝请求没有对应目录的权限，就会发生图中的错误。
-
-**所以，上述这些问题的源头是，sa目录下，混杂了没有权限的json文件！**
-
-以下是解决办法：
-- 在项目目录下，执行 `git pull` 拉取最新代码
-- 执行 `./validate-sa.js -h` 查看使用说明
-- 选择一个你的sa拥有阅读权限的目录ID，执行 `./validate-sa.js 你的目录ID`
-
-程序会读取sa目录下所有json文件，依次检查它们是否拥有对 `你的目录ID` 的阅读权限，如果最后发现了无效的SA，程序会提供选项允许用户将无效的sa json移动到特定目录。
-
-将无效sa文件移动以后，如果你使用了pm2启动，需要 `pm2 reload server` 重启下进程。
-
-操作示例： [https://drive.google.com/drive/folders/1iiTAzWF_v9fo_IxrrMYiRGQ7QuPrnxHf](https://drive.google.com/drive/folders/1iiTAzWF_v9fo_IxrrMYiRGQ7QuPrnxHf)
 
 ## 常见问题
 下面是一些网友的踩坑心得，如果你配置的时候也不小心掉进坑里，可以进去找找有没有解决办法：
