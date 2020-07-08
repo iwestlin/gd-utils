@@ -2,7 +2,7 @@ const Router = require('@koa/router')
 
 const { db } = require('../db')
 const { validate_fid, gen_count_body } = require('./gd')
-const { send_count, send_help, send_choice, send_task_info, sm, extract_fid, extract_from_text, reply_cb_query, tg_copy, send_all_tasks, send_bm_help, get_target_by_alias, send_all_bookmarks, set_bookmark, unset_bookmark } = require('./tg')
+const { send_count, send_help, send_choice, send_task_info, sm, extract_fid, extract_from_text, reply_cb_query, tg_copy, send_all_tasks, send_bm_help, get_target_by_alias, send_all_bookmarks, set_bookmark, unset_bookmark, clear_tasks, send_task_help, rm_task } = require('./tg')
 
 const { AUTH, ROUTER_PASSKEY, TG_IPLIST } = require('../config')
 const { tg_whitelist } = AUTH
@@ -126,6 +126,15 @@ router.post('/api/gdurl/tgbot', async ctx => {
     let task_id = text.replace('/task', '').trim()
     if (task_id === 'all') {
       return send_all_tasks(chat_id)
+    } else if (task_id === 'clear') {
+      return clear_tasks(chat_id)
+    } else if (task_id === '-h') {
+      return send_task_help(chat_id)
+    } else if (task_id.startsWith('rm ')) {
+      task_id = task_id.replace('rm ', '')
+      task_id = parseInt(task_id)
+      if (!task_id) return send_task_help(chat_id)
+      return rm_task({ task_id, chat_id })
     }
     task_id = parseInt(task_id)
     if (!task_id) {

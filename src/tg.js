@@ -61,6 +61,32 @@ function send_bm_help (chat_id) {
   return sm({ chat_id, text, parse_mode: 'HTML' })
 }
 
+function send_task_help (chat_id) {
+  const text = `<pre>/task [action/id] [id] | 查询或管理任务进度
+用例：
+/task | 返回所有正在运行的任务详情
+/task 7 | 返回编号为 7 的任务详情
+/task all | 返回所有任务记录列表
+/task clear | 清除所有状态为已完成的任务记录
+/task rm 7 | 删除编号为 7 的任务记录
+</pre>`
+  return sm({ chat_id, text, parse_mode: 'HTML' })
+}
+
+function clear_tasks (chat_id) {
+  const finished_tasks = db.prepare('select id from task where status=?').all('finished')
+  finished_tasks.forEach(task => rm_task({ task_id: task.id }))
+  sm({ chat_id, text: '已清除所有状态为已完成的任务记录' })
+}
+
+function rm_task ({ task_id, chat_id }) {
+  const exist = db.prepare('select id from task where id=?').get(task_id)
+  if (!exist) return sm({ chat_id, text: `不存在编号为 ${task_id} 的任务记录` })
+  db.prepare('delete from task where id=?').run(task_id)
+  db.prepare('delete from copied where taskid=?').run(task_id)
+  if (chat_id) sm({ chat_id, text: `已删除任务 ${task_id} 记录` })
+}
+
 function send_all_bookmarks (chat_id) {
   let records = db.prepare('select alias, target from bookmark').all()
   if (!records.length) return sm({ chat_id, text: '数据库中没有收藏记录' })
@@ -113,7 +139,7 @@ function send_choice ({ fid, chat_id }) {
 
 // console.log(gen_bookmark_choices())
 function gen_bookmark_choices (fid) {
-  const gen_choice = v => ({text: `复制到 ${v.alias}`, callback_data: `copy ${fid} ${v.alias}`})
+  const gen_choice = v => ({ text: `复制到 ${v.alias}`, callback_data: `copy ${fid} ${v.alias}` })
   const records = db.prepare('select * from bookmark').all()
   const result = []
   for (let i = 0; i < records.length; i += 2) {
@@ -321,4 +347,4 @@ function extract_from_text (text) {
   return m && extract_fid(m[0])
 }
 
-module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy, extract_from_text, get_target_by_alias, send_bm_help, send_all_bookmarks, set_bookmark, unset_bookmark }
+module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy, extract_from_text, get_target_by_alias, send_bm_help, send_all_bookmarks, set_bookmark, unset_bookmark, clear_tasks, send_task_help, rm_task }
