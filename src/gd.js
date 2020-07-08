@@ -12,7 +12,7 @@ const { AUTH, RETRY_LIMIT, PARALLEL_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY,
 const { db } = require('../db')
 const { make_table, make_tg_table, make_html, summary } = require('./summary')
 
-const FILE_EXCEED_MSG = '您的团队盘文件数已超限(40万)，停止复制'
+const FILE_EXCEED_MSG = '您的团队盘文件数已超限(40万)，停止复制，请将未复制完成的文件夹移到另一个团队盘中，再执行一遍复制指令即可接上进度继续复制'
 const FOLDER_TYPE = 'application/vnd.google-apps.folder'
 const sleep = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
 const { https_proxy } = process.env
@@ -388,7 +388,7 @@ async function get_info_by_id (fid, use_sa) {
     includeItemsFromAllDrives: true,
     supportsAllDrives: true,
     corpora: 'allDrives',
-    fields: 'id,name'
+    fields: 'id,name, parents'
   }
   url += '?' + params_to_query(params)
   const headers = await gen_headers(use_sa)
@@ -719,6 +719,22 @@ async function confirm_dedupe ({ file_number, folder_number }) {
     initial: 0
   })
   return answer.value
+}
+
+// 需要sa是源文件夹所在盘的manager
+async function mv_file ({ fid, new_parent, service_account }) {
+  const file = await get_info_by_id(fid)
+  if (!file) return
+  const removeParents = file.parents[0]
+  let url = `https://www.googleapis.com/drive/v3/files/${fid}`
+  const params = {
+    removeParents,
+    supportsAllDrives: true,
+    addParents: new_parent
+  }
+  url += '?' + params_to_query(params)
+  const headers = await gen_headers(service_account)
+  return axins.patch(url, {}, { headers })
 }
 
 // 将文件或文件夹移入回收站，需要 sa 为 content manager 权限及以上
