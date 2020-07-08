@@ -2,16 +2,18 @@
 
 > 不只是最快的 google drive 拷贝工具 [与其他工具的对比](./compare.md)
 
+## [更新日志](./changelog.md)
+
 ## demo
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
-## colab脚本（省去安装步骤，直接可用，感谢贡献者[@orange2008](https://github.com/orange2008)）
+## colab脚本（省去本地安装步骤，直接网页可用，感谢贡献者[@orange2008](https://github.com/orange2008)）
 [https://colab.research.google.com/drive/1i1W9nAzgiDtfA_rmTBcpMpwxVUhwgLsq](https://colab.research.google.com/drive/1i1W9nAzgiDtfA_rmTBcpMpwxVUhwgLsq)
 
 > 打开上面链接后，保存到自己的云端硬盘（请一定要保存，因为上面的共享链接操作记录所有人可见）
-然后在自己的个人盘账号下建立一个 accounts 文件夹，然后将自己的SA授权文件上传到里面。最后点击下图中红框内的按钮，即可使用。
+然后在自己的个人盘账号下建立一个 accounts 文件夹，将自己的SA授权文件上传到里面，就可以开始使用了。
 
-![](static/colab.png)
+colab使用录屏：[https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanKp9LvORjJLEp_x](https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanKp9LvORjJLEp_x)
 
 ## 一键安装脚本(感谢 脚本制作者 [@vitaminx](https://github.com/vitaminx))
 > 如果你没有Linux操作经验或者是新开的vps，可尝试使用此脚本
