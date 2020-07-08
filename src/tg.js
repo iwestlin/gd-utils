@@ -61,6 +61,32 @@ function send_bm_help (chat_id) {
   return sm({ chat_id, text, parse_mode: 'HTML' })
 }
 
+function send_task_help (chat_id) {
+  const text = `<pre>/task [action/id] [id] | 查询或管理任务进度
+用例：
+/task | 返回所有正在运行的任务详情
+/task 7 | 返回编号为 7 的任务详情
+/task all | 返回所有任务记录列表
+/task clear | 清除所有状态为已完成的任务记录
+/task rm 7 | 删除编号为 7 的任务记录
+</pre>`
+  return sm({ chat_id, text, parse_mode: 'HTML' })
+}
+
+function clear_tasks (chat_id) {
+  const finished_tasks = db.prepare('select id from task where status=?').all('finished')
+  finished_tasks.forEach(task => rm_task({ task_id: task.id }))
+  sm({ chat_id, text: '已清除所有状态为已完成的任务记录' })
+}
+
+function rm_task ({ task_id, chat_id }) {
+  const exist = db.prepare('select id from task where id=?').get(task_id)
+  if (!exist) return sm({ chat_id, text: `不存在编号为 ${task_id} 的任务记录` })
+  db.prepare('delete from task where id=?').run(task_id)
+  db.prepare('delete from copied where taskid=?').run(task_id)
+  if (chat_id) sm({ chat_id, text: `已删除任务 ${task_id} 记录` })
+}
+
 function send_all_bookmarks (chat_id) {
   let records = db.prepare('select alias, target from bookmark').all()
   if (!records.length) return sm({ chat_id, text: '数据库中没有收藏记录' })
@@ -91,6 +117,11 @@ function get_target_by_alias (alias) {
   return record && record.target
 }
 
+function get_alias_by_target (target) {
+  const record = db.prepare('select alias from bookmark where target=?').get(target)
+  return record && record.alias
+}
+
 function send_choice ({ fid, chat_id }) {
   return sm({
     chat_id,
@@ -108,7 +139,7 @@ function send_choice ({ fid, chat_id }) {
 
 // console.log(gen_bookmark_choices())
 function gen_bookmark_choices (fid) {
-  const gen_choice = v => ({text: `复制到 ${v.alias}`, callback_data: `copy ${fid} ${v.alias}`})
+  const gen_choice = v => ({ text: `复制到 ${v.alias}`, callback_data: `copy ${fid} ${v.alias}` })
   const records = db.prepare('select * from bookmark').all()
   const result = []
   for (let i = 0; i < records.length; i += 2) {
@@ -155,17 +186,19 @@ async function get_task_info (task_id) {
   const new_folder = folder_mapping && folder_mapping[0].split(' ')[1]
   const { summary } = db.prepare('select summary from gd where fid=?').get(source) || {}
   const { file_count, folder_count, total_size } = summary ? JSON.parse(summary) : {}
+  const total_count = (file_count || 0) + (folder_count || 0)
   const copied_folders = folder_mapping ? (folder_mapping.length - 1) : 0
   let text = '任务编号：' + task_id + '\n'
   const folder_name = await get_folder_name(source)
   text += '源文件夹：' + gen_link(source, folder_name) + '\n'
-  text += '目的位置：' + gen_link(target) + '\n'
+  text += '目的位置：' + gen_link(target, get_alias_by_target(target)) + '\n'
   text += '新文件夹：' + (new_folder ? gen_link(new_folder) : '暂未创建') + '\n'
   text += '任务状态：' + status + '\n'
   text += '创建时间：' + dayjs(ctime).format('YYYY-MM-DD HH:mm:ss') + '\n'
   text += '完成时间：' + (ftime ? dayjs(ftime).format('YYYY-MM-DD HH:mm:ss') : '未完成') + '\n'
   text += '目录进度：' + copied_folders + '/' + (folder_count === undefined ? '未知数量' : folder_count) + '\n'
   text += '文件进度：' + copied_files + '/' + (file_count === undefined ? '未知数量' : file_count) + '\n'
+  text += '总百分比：' + ((copied_files + copied_folders) * 100 / total_count).toFixed(2) + '%\n'
   text += '合计大小：' + (total_size || '未知大小')
   return { text, status, folder_count }
 }
@@ -181,8 +214,8 @@ async function send_task_info ({ task_id, chat_id }) {
   } catch (e) {
     console.log('fail to send message to tg', e.message)
   }
-  // get_task_info 在task目录数超大时比较吃cpu，如果超1万就不每10秒更新了，以后如果把mapping 也另存一张表可以取消此限制
-  if (!message_id || status !== 'copying' || folder_count > 10000) return
+  // get_task_info 在task目录数超大时比较吃cpu，以后如果最好把mapping也另存一张表
+  if (!message_id || status !== 'copying') return
   const loop = setInterval(async () => {
     const url = `https://api.telegram.org/bot${tg_token}/editMessageText`
     const { text, status } = await get_task_info(task_id)
@@ -314,4 +347,4 @@ function extract_from_text (text) {
   return m && extract_fid(m[0])
 }
 
-module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy, extract_from_text, get_target_by_alias, send_bm_help, send_all_bookmarks, set_bookmark, unset_bookmark }
+module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy, extract_from_text, get_target_by_alias, send_bm_help, send_all_bookmarks, set_bookmark, unset_bookmark, clear_tasks, send_task_help, rm_task }
