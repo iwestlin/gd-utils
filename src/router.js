@@ -130,8 +130,8 @@ router.post('/api/gdurl/tgbot', async ctx => {
       return clear_tasks(chat_id)
     } else if (task_id === '-h') {
       return send_task_help(chat_id)
-    } else if (task_id.startsWith('rm ')) {
-      task_id = task_id.replace('rm ', '')
+    } else if (task_id.startsWith('rm')) {
+      task_id = task_id.replace('rm', '')
       task_id = parseInt(task_id)
       if (!task_id) return send_task_help(chat_id)
       return rm_task({ task_id, chat_id })
