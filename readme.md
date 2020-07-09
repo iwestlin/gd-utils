@@ -15,6 +15,9 @@
 
 colab使用录屏：[https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanKp9LvORjJLEp_x](https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanKp9LvORjJLEp_x)
 
+这里还有另一位网友[@iErics](https://github.com/iErics)制作的colab脚本，界面更加规整，功能也更完整些（比如可以选择是否继续任务等），使用方法大同小异：
+[https://colab.research.google.com/github/iErics/gd-utils/blob/master/Colab_gd_utils.ipynb](https://colab.research.google.com/github/iErics/gd-utils/blob/master/Colab_gd_utils.ipynb)
+
 ## 一键安装脚本(感谢 脚本制作者 [@vitaminx](https://github.com/vitaminx))
 > 如果你没有Linux操作经验或者是新开的vps，可尝试使用此脚本
 
