@@ -310,7 +310,7 @@ async function get_sa_token () {
     try {
       return await real_get_sa_token(tk)
     } catch (e) {
-      console.log(e)
+      console.warn('SA获取access_token失败：', e.message)
       SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== tk.gtoken)
       if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
     }
