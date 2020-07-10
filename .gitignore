@@ -3,3 +3,4 @@ gdurl.sqlite*
 config.js
 sa/*.json
 backup/*.sqlite
+package-lock.json

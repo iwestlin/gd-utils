@@ -4,7 +4,6 @@ const dayjs = require('dayjs')
 const prompts = require('prompts')
 const pLimit = require('p-limit')
 const axios = require('@viegg/axios')
-const HttpsProxyAgent = require('https-proxy-agent')
 const { GoogleToken } = require('gtoken')
 const handle_exit = require('signal-exit')
 
@@ -15,8 +14,23 @@ const { make_table, make_tg_table, make_html, summary } = require('./summary')
 const FILE_EXCEED_MSG = '您的团队盘文件数已超限(40万)，停止复制，请将未复制完成的文件夹移到另一个团队盘中，再执行一遍复制指令即可接上进度继续复制'
 const FOLDER_TYPE = 'application/vnd.google-apps.folder'
 const sleep = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
-const { https_proxy } = process.env
-const axins = axios.create(https_proxy ? { httpsAgent: new HttpsProxyAgent(https_proxy) } : {})
+
+const { https_proxy, http_proxy, all_proxy } = process.env
+const proxy_url = https_proxy || http_proxy || all_proxy
+
+let axins
+if (proxy_url) {
+  console.log('使用代理：', proxy_url)
+  let ProxyAgent
+  try {
+    ProxyAgent = require('proxy-agent')
+  } catch (e) { // 没执行 npm i proxy-agent
+    ProxyAgent = require('https-proxy-agent')
+  }
+  axins = axios.create({ httpsAgent: new ProxyAgent(proxy_url) })
+} else {
+  axins = axios.create({})
+}
 
 const SA_BATCH_SIZE = 1000
 const SA_FILES = fs.readdirSync(path.join(__dirname, '../sa')).filter(v => v.endsWith('.json'))
