@@ -1,6 +1,14 @@
 ## 更新日志
 > 更新方法：在 gd-utils 目录下，执行 `git pull` 拉取最新代码，如果你使用了 pm2 守护进程，执行`pm2 reload server`刷新生效。
 
+[2020-07-10]  
+- 添加树形导出类型，示例用法： `./count folder-id -S -t tree -o tree.html`
+
+`tree.html`可直接用浏览器打开：
+![](./static/tree.png)
+
+前端源码：[https://github.com/iwestlin/foldertree/blob/master/app.jsx](https://github.com/iwestlin/foldertree/blob/master/app.jsx)
+
 [2020-07-08]
 - 添加[colab脚本](https://github.com/iwestlin/gd-utils/issues/50#issuecomment-655298073)
 
