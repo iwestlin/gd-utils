@@ -106,7 +106,10 @@ http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy
 
 ## Service Account 配置
 强烈建议使用service account（后称SA），因为机器人的所有操作默认都用的SA权限。
-SA授权文件获取方法请参见 [https://gsuitems.com/index.php/archives/13/](https://gsuitems.com/index.php/archives/13/#%E6%AD%A5%E9%AA%A42%E7%94%9F%E6%88%90serviceaccounts)
+SA授权文件获取方法请参见  
+- 英文[https://github.com/xyou365/AutoRclone](https://github.com/xyou365/AutoRclone)
+- 中文[http://blog.jialezi.net/?post=153](http://blog.jialezi.net/?post=153)
+
 获取到 SA 的 json 文件后，请将其拷贝到 `sa` 目录下
 
 配置好 SA 以后，如果你不需要对个人盘下的文件进行操作，可跳过[个人帐号配置]这节，而且命令行执行命令的时候，记得带上 `-S` 参数告诉程序使用SA授权进行操作。
