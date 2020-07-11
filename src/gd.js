@@ -7,7 +7,7 @@ const axios = require('@viegg/axios')
 const { GoogleToken } = require('gtoken')
 const handle_exit = require('signal-exit')
 
-const { AUTH, RETRY_LIMIT, PARALLEL_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET } = require('../config')
+const { AUTH, RETRY_LIMIT, PARALLEL_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET, SA_PATH } = require('../config')
 const { db } = require('../db')
 const { make_table, make_tg_table, make_html, summary } = require('./summary')
 const { gen_tree_html } = require('./tree')
@@ -34,7 +34,7 @@ if (proxy_url) {
 }
 
 const SA_BATCH_SIZE = 1000
-const SA_FILES = fs.readdirSync(path.join(__dirname, '../sa')).filter(v => v.endsWith('.json'))
+const SA_FILES = fs.readdirSync(path.join(__dirname, SA_PATH)).filter(v => v.endsWith('.json'))
 SA_FILES.flag = 0
 let SA_TOKENS = get_sa_batch()
 

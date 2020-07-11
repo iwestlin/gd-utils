@@ -128,7 +128,23 @@ function get_alias_by_target (target) {
 }
 
 function send_choice ({ fid, chat_id }) {
-  return sm({
+  if(BUTTON_LEVEL == 1){
+    return sm({
+    chat_id,
+    text: `识别出分享ID ${fid}，请选择动作`,
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: '文件统计', callback_data: `count ${fid}` }
+        ],
+        [
+          { text: '开始复制', callback_data: `copy ${fid}` }
+        ]
+      ].concat(gen_bookmark_choices(fid))
+    }
+    })
+  }else{
+    return sm({
     chat_id,
     text: `识别出分享ID ${fid}，请选择动作`,
     reply_markup: {
@@ -139,7 +155,31 @@ function send_choice ({ fid, chat_id }) {
         ]
       ].concat(gen_bookmark_choices(fid))
     }
-  })
+    })
+  }
+}
+
+// console.log(gen_bookmark_choices())
+function gen_bookmark_choices (fid) {
+  let level = 1
+  if (BUTTON_LEVEL > 2){
+    level = 2
+  }else{
+    level = BUTTON_LEVEL
+  }
+  const gen_choice = v => ({text: `复制到 ${v.alias}`, callback_data: `copy ${fid} ${v.alias}`})
+  const records = db.prepare('select * from bookmark').all()
+  db.close()
+  const result = []
+  for (let i = 0; i < records.length; i++) {
+    const line = [gen_choice(records[i])]
+    for(let j = 0; j < level-1; j ++){
+      if (records[i+1]) line.push(gen_choice(records[i+1]))
+        i++
+    }
+    result.push(line)
+  }
+  return result
 }
 
 // console.log(gen_bookmark_choices())
