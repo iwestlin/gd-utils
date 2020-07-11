@@ -12,7 +12,7 @@ const { db } = require('../db')
 const { make_table, make_tg_table, make_html, summary } = require('./summary')
 const { gen_tree_html } = require('./tree')
 
-const FILE_EXCEED_MSG = '您的团队盘文件数已超限(40万)，停止复制，请将未复制完成的文件夹移到另一个团队盘中，再执行一遍复制指令即可接上进度继续复制'
+const FILE_EXCEED_MSG = '您的团队盘文件数已超限(40万)，停止复制。请将未复制完成的文件夹(或者它的任意子文件夹)移到另一个(sa也有权限的)团队盘中，再执行一遍复制指令即可接上进度继续复制(是的你没看错...)'
 const FOLDER_TYPE = 'application/vnd.google-apps.folder'
 const sleep = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
 
@@ -405,7 +405,7 @@ async function get_info_by_id (fid, use_sa) {
     includeItemsFromAllDrives: true,
     supportsAllDrives: true,
     corpora: 'allDrives',
-    fields: 'id,name, parents'
+    fields: 'id, name, parents, mimeType'
   }
   url += '?' + params_to_query(params)
   const headers = await gen_headers(use_sa)
@@ -810,7 +810,8 @@ async function dedupe ({ fid, update, service_account }) {
         file_count++
       }
     } catch (e) {
-      console.log('删除失败', e.message)
+      console.log('删除失败', v)
+      handle_error(e)
     }
   }))
   return { file_count, folder_count }
@@ -834,4 +835,4 @@ function print_progress (msg) {
   }
 }
 
-module.exports = { ls_folder, count, validate_fid, copy, dedupe, copy_file, gen_count_body, real_copy, get_name_by_id }
+module.exports = { ls_folder, count, validate_fid, copy, dedupe, copy_file, gen_count_body, real_copy, get_name_by_id, get_info_by_id }
