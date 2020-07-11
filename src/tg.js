@@ -235,7 +235,7 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
     sm({ chat_id, text: '请输入目的地ID或先在config.js里设置默认复制目的地ID(DEFAULT_TARGET)' })
     return
   }
-  const file = await get_info_by_id(fid, true)
+  const file = await get_info_by_id(fid, !USE_PERSONAL_AUTH)
   if (file && file.mimeType !== 'application/vnd.google-apps.folder') {
     return copy_file(fid, target, true).then(data => {
       sm({ chat_id, parse_mode: 'HTML', text: `复制单文件成功，文件位置：${gen_link(target)}` })
