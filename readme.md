@@ -28,6 +28,9 @@ colab使用录屏：[https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanK
 
 > 目前项目处于起始阶段，尚不支持 i18n(多语言) ，所以上面繁体版是hard code的fork，如果你有兴趣让本项目增加多语言支持，欢迎PR。
 
+## Docker 版（感谢贡献者[@gdtool](https://github.com/gdtool/))
+[https://github.com/gdtool/gd-utils-docker](https://github.com/gdtool/gd-utils-docker)
+
 ## 常见问题
 下面是一些网友的踩坑心得，如果你配置的时候也不小心掉进坑里，可以进去找找有没有解决办法：
 
