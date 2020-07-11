@@ -1,10 +1,13 @@
 ## 更新日志
 > 更新方法：在 gd-utils 目录下，执行 `git pull` 拉取最新代码，如果你使用了 pm2 守护进程，执行`pm2 reload server`刷新生效。
 
+[2020-07-11]  
+- 给tg机器人添加单文件链接（`https://drive.google.com/file/d/1gfR...`）转存功能
+
 [2020-07-10]  
 - 添加树形导出类型，示例用法： `./count folder-id -S -t tree -o tree.html`
 
-`tree.html`可直接用浏览器打开：
+[tree.html](https://gdurl.viegg.com/api/gdrive/count?fid=1A35MT6auEHASo3egpZ3VINMOwvA47cJG&type=tree)可直接用浏览器打开：
 ![](./static/tree.png)
 
 前端源码：[https://github.com/iwestlin/foldertree/blob/master/app.jsx](https://github.com/iwestlin/foldertree/blob/master/app.jsx)
