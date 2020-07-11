@@ -18,7 +18,7 @@ const FID_TO_NAME = {}
 async function get_folder_name (fid) {
   let name = FID_TO_NAME[fid]
   if (name) return name
-  name = await get_name_by_id(fid)
+  name = await get_name_by_id(fid, !USE_PERSONAL_AUTH)
   return FID_TO_NAME[fid] = name
 }
 

@@ -390,9 +390,9 @@ async function create_folder (name, parent, use_sa, limit) {
   throw new Error(err_message + ' 目录名：' + name)
 }
 
-async function get_name_by_id (fid) {
+async function get_name_by_id (fid, use_sa) {
   try {
-    const { name } = await get_info_by_id(fid, true)
+    const { name } = await get_info_by_id(fid, use_sa)
     return name
   } catch (e) {
     return fid
