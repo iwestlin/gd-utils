@@ -343,10 +343,9 @@ function extract_fid (text) {
   try {
     if (!text.startsWith('http')) text = 'https://' + text
     const u = new URL(text)
-    if (u.pathname.includes('/folders/') || u.pathname.includes('/file/')) {
-      const folder_reg = /folders\/([a-zA-Z0-9_-]+)/
-      const folder_match = u.pathname.match(folder_reg)
-      if (folder_match) return folder_match[1]
+    if (u.pathname.includes('/folders/')) {
+      return u.pathname.split('/').map(v => v.trim()).filter(v => v).pop()
+    } else if (u.pathname.includes('/file/')) {
       const file_reg = /file\/d\/([a-zA-Z0-9_-]+)/
       const file_match = u.pathname.match(file_reg)
       return file_match && file_match[1]
