@@ -583,7 +583,7 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
       concurrency--
     })
   } while (concurrency || files.length)
-  clearInterval(loop)
+  return clearInterval(loop)
   // const limit = pLimit(PARALLEL_LIMIT)
   // let count = 0
   // const loop = setInterval(() => {
