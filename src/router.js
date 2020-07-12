@@ -51,7 +51,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
   if (callback_query) {
     const { id, data } = callback_query
     const chat_id = callback_query.from.id
-    const [action, fid, target] = data.split(' ')
+    const [action, fid, target] = data.split(' ').filter(v => v)
     if (action === 'count') {
       if (counting[fid]) return sm({ chat_id, text: fid + ' 正在统计，请稍等片刻' })
       counting[fid] = true
@@ -89,7 +89,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
   }
   if (text.startsWith('/help')) return send_help(chat_id)
   if (text.startsWith('/bm')) {
-    const [cmd, action, alias, target] = text.split(' ').map(v => v.trim())
+    const [cmd, action, alias, target] = text.split(' ').map(v => v.trim()).filter(v => v)
     if (!action) return send_all_bookmarks(chat_id)
     if (action === 'set') {
       if (!alias || !target) return sm({ chat_id, text: '别名和目标ID不能为空' })
@@ -115,7 +115,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
       delete counting[fid]
     }
   } else if (text.startsWith('/copy')) {
-    let target = text.replace('/copy', '').replace(' -u', '').trim().split(' ').map(v => v.trim())[1]
+    let target = text.replace('/copy', '').replace(' -u', '').trim().split(' ').map(v => v.trim()).filter(v => v)[1]
     target = get_target_by_alias(target) || target
     if (target && !validate_fid(target)) return sm({ chat_id, text: `目标ID ${target} 格式不正确` })
     const update = text.endsWith(' -u')
