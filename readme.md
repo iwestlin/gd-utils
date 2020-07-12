@@ -7,6 +7,9 @@
 ## demo
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
+## English Version (thanks to [@roshanconnor123](https://github.com/roshanconnor123))
+[https://github.com/roshanconnor123/gd-utils](https://github.com/roshanconnor123/gd-utils)
+
 ## colab脚本（省去本地安装步骤，直接网页可用，感谢贡献者[@orange2008](https://github.com/orange2008)）
 [https://colab.research.google.com/drive/1i1W9nAzgiDtfA_rmTBcpMpwxVUhwgLsq](https://colab.research.google.com/drive/1i1W9nAzgiDtfA_rmTBcpMpwxVUhwgLsq)
 
