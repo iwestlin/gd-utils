@@ -99,6 +99,8 @@ async function gen_count_body ({ fid, type, update, service_account }) {
       return (typeof smy === 'string') ? smy : JSON.stringify(smy)
     }
   }
+  const file = await get_info_by_id(fid, service_account)
+  if (file && file.mimeType !== FOLDER_TYPE) return render_smy(summary([file]), type)
 
   let info, smy
   const record = db.prepare('SELECT * FROM gd WHERE fid = ?').get(fid)
@@ -409,7 +411,7 @@ async function get_info_by_id (fid, use_sa) {
     includeItemsFromAllDrives: true,
     supportsAllDrives: true,
     corpora: 'allDrives',
-    fields: 'id, name, parents, mimeType'
+    fields: 'id, name, size, parents, mimeType'
   }
   url += '?' + params_to_query(params)
   const headers = await gen_headers(use_sa)
@@ -744,7 +746,7 @@ async function confirm_dedupe ({ file_number, folder_number }) {
 
 // 需要sa是源文件夹所在盘的manager
 async function mv_file ({ fid, new_parent, service_account }) {
-  const file = await get_info_by_id(fid)
+  const file = await get_info_by_id(fid, service_account)
   if (!file) return
   const removeParents = file.parents[0]
   let url = `https://www.googleapis.com/drive/v3/files/${fid}`
