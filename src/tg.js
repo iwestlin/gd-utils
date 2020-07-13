@@ -237,7 +237,7 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
   }
   const file = await get_info_by_id(fid, !USE_PERSONAL_AUTH)
   if (file && file.mimeType !== 'application/vnd.google-apps.folder') {
-    return copy_file(fid, target, true).then(data => {
+    return copy_file(fid, target, !USE_PERSONAL_AUTH).then(data => {
       sm({ chat_id, parse_mode: 'HTML', text: `复制单文件成功，文件位置：${gen_link(target)}` })
     }).catch(e => {
       sm({ chat_id, text: `复制单文件失败，失败消息：${e.message}` })
