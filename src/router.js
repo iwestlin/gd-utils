@@ -2,7 +2,7 @@ const Router = require('@koa/router')
 
 const { db } = require('../db')
 const { validate_fid, gen_count_body } = require('./gd')
-const { send_count, send_help, send_choice, send_task_info, sm, extract_fid, extract_from_text, reply_cb_query, tg_copy, send_all_tasks, send_bm_help, get_target_by_alias, send_all_bookmarks, set_bookmark, unset_bookmark, clear_tasks, send_task_help, rm_task } = require('./tg')
+const { send_count, send_help, send_choice, send_task_info, sm, extract_fid, extract_from_text, reply_cb_query, tg_copy, send_all_tasks, send_bm_help, get_target_by_alias, send_all_bookmarks, set_bookmark, unset_bookmark, clear_tasks, send_task_help, rm_task, clear_button } = require('./tg')
 
 const { AUTH, ROUTER_PASSKEY, TG_IPLIST } = require('../config')
 const { tg_whitelist } = AUTH
@@ -49,7 +49,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
 
   const { callback_query } = body
   if (callback_query) {
-    const { id, data } = callback_query
+    const { id, message, data } = callback_query
     const chat_id = callback_query.from.id
     const [action, fid, target] = data.split(' ').filter(v => v)
     if (action === 'count') {
@@ -67,6 +67,11 @@ router.post('/api/gdurl/tgbot', async ctx => {
       tg_copy({ fid, target: get_target_by_alias(target), chat_id }).then(task_id => {
         task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
       }).finally(() => COPYING_FIDS[fid] = false)
+    } else if (action === 'update') {
+      send_count({ fid, chat_id, update: true })
+    } else if (action === 'clear_button') {
+      const { message_id, text } = message || {}
+      if (message_id) clear_button({ message_id, text, chat_id })
     }
     return reply_cb_query({ id, data }).catch(console.error)
   }
@@ -144,7 +149,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     }
     send_task_info({ task_id, chat_id }).catch(console.error)
   } else if (text.includes('drive.google.com/') || validate_fid(text)) {
-    return send_choice({ fid: fid || text, chat_id }).catch(console.error)
+    return send_choice({ fid: fid || text, chat_id })
   } else {
     sm({ chat_id, text: '暂不支持此命令' })
   }

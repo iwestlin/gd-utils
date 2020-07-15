@@ -136,9 +136,20 @@ function send_choice ({ fid, chat_id }) {
         [
           { text: '文件统计', callback_data: `count ${fid}` },
           { text: '开始复制', callback_data: `copy ${fid}` }
+        ],
+        [
+          { text: '强制刷新', callback_data: `update ${fid}` },
+          { text: '清除按钮', callback_data: `clear_button` }
         ]
       ].concat(gen_bookmark_choices(fid))
     }
+  })
+}
+
+function clear_button ({ message_id, text, chat_id }) {
+  const url = `https://api.telegram.org/bot${tg_token}/editMessageText`
+  return axins.post(url, { chat_id, message_id, text, parse_mode: 'HTML' }).catch(e => {
+    console.error('fail to clear_button', e.message)
   })
 }
 
@@ -362,4 +373,4 @@ function extract_from_text (text) {
   return m && extract_fid(m[0])
 }
 
-module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy, extract_from_text, get_target_by_alias, send_bm_help, send_all_bookmarks, set_bookmark, unset_bookmark, clear_tasks, send_task_help, rm_task }
+module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy, extract_from_text, get_target_by_alias, send_bm_help, send_all_bookmarks, set_bookmark, unset_bookmark, clear_tasks, send_task_help, rm_task, clear_button }
