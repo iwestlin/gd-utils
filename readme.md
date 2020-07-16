@@ -35,11 +35,7 @@ colab使用录屏：[https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanK
 [https://github.com/gdtool/gd-utils-docker](https://github.com/gdtool/gd-utils-docker)
 
 ## 常见问题
-下面是一些网友的踩坑心得，如果你配置的时候也不小心掉进坑里，可以进去找找有没有解决办法：
-
-- [ikarosone 基于宝塔的搭建过程](https://www.ikarosone.top/archives/195.html)
-
-- [@greathappyforest 踩的坑](doc/tgbot-appache2-note.md)
+[如果你遇到任务完成时拷贝成功的文件少于统计的文件数，请务必点击查看](https://github.com/iwestlin/gd-utils/blob/master/changelog.md#%E9%87%8D%E8%A6%81%E6%9B%B4%E6%96%B02020-06-29)
 
 在命令行操作时如果输出 `timeout exceed` 这样的消息，是正常情况，不会影响最终结果，因为程序对每个请求都有7次重试的机制。
 如果timeout的消息比较多，可以考虑降低并行请求数，下文有具体方法。
@@ -49,19 +45,22 @@ colab使用录屏：[https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanK
 如果你成功复制完以后，统计新的文件夹链接发现文件数比源文件夹少，说明Google正在更新数据库，请给它一点时间。。一般等半小时再统计数据会比较完整。
 
 如果你使用tg操作时，发送拷贝命令以后，/task 进度始终未开始（在复制文件数超多的文件夹时常会发生），是正常现象。
-这是因为程序正在获取源文件夹的所有文件信息。它的运行机制严格按照以下顺序：
+这是因为程序正在获取源文件夹的所有文件信息。**它的运行机制严格按照以下顺序**：
 ```
 1、获取源文件夹所有文件信息
 2、根据源文件夹的目录结构，在目标文件夹创建目录
 3、所有目录创建完成后，开始复制文件
 ```
 
-**如果源文件夹的文件数非常多（一百万以上），请一定在命令行进行操作**，因为程序运行的时候会把文件信息保存在内存中，文件数太多的话容易内存占用太多被nodejs干掉。可以像这样执行命令：
+**如果源文件夹的文件数非常多（一百万以上），请尽量在命令行进行操作**，因为程序运行的时候会把文件信息保存在内存中，文件数太多的话容易内存占用太多被nodejs干掉。可以像这样执行命令：
 ```
- node --max-old-space-size=4096 count folder-id -S
+ node --max-old-space-size=1024 count folder-id -S
  ```
-这样进程就能最大占用4G内存了。
+这样进程就能最大占用 1G 内存了，我最多测试过200万+的文件数复制任务，1G 内存足以完成。
 
+这里还有一些网友的踩坑心得，如果你配置的时候也不小心掉进坑里，可以进去找找有没有解决办法：  
+- [ikarosone 基于宝塔的搭建过程](https://www.ikarosone.top/archives/195.html)
+- [@greathappyforest 踩的坑](doc/tgbot-appache2-note.md)
 
 ## 搭建过程
 [https://drive.google.com/drive/folders/1Lu7Cwh9lIJkfqYDIaJrFpzi8Lgdxr4zT](https://drive.google.com/drive/folders/1Lu7Cwh9lIJkfqYDIaJrFpzi8Lgdxr4zT)
@@ -86,7 +85,7 @@ colab使用录屏：[https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanK
 
 - 在 config.js 里完成相关配置后，可以将本项目部署在（可正常访问谷歌服务的）服务器上，提供 http api 文件统计接口
 
-- 支持 telegram bot，配置完成后，上述功能均可通过 bot 进行操作
+- 支持 telegram bot，配置完成后，上述功能大多可以通过 bot 进行操作
 
 ## 环境配置
 本工具需要安装nodejs，客户端安装请访问[https://nodejs.org/zh-cn/download/](https://nodejs.org/zh-cn/download/)，服务器安装可参考[https://github.com/nodesource/distributions/blob/master/README.md#debinstall](https://github.com/nodesource/distributions/blob/master/README.md#debinstall)
@@ -116,7 +115,8 @@ SA授权文件获取方法请参见
 - 英文[https://github.com/xyou365/AutoRclone](https://github.com/xyou365/AutoRclone)
 - 中文[http://blog.jialezi.net/?post=153](http://blog.jialezi.net/?post=153)
 
-获取到 SA 的 json 文件后，请将其拷贝到 `sa` 目录下
+获取到 SA 的 json 文件并将其加入团队盘成员后，请将文件拷贝到gd-utils的 `sa` 目录下。  
+注意，AutoRclone 将 SA 加入 group 的脚本有点问题，可能会加入不完全，而gd-utils混入未授权的SA文件会导致严重的问题，暂时的解决方法是[批量验证SA的有效性](https://github.com/iwestlin/gd-utils/blob/master/changelog.md#%E9%87%8D%E8%A6%81%E6%9B%B4%E6%96%B02020-06-29)
 
 配置好 SA 以后，如果你不需要对个人盘下的文件进行操作，可跳过[个人帐号配置]这节，而且命令行执行命令的时候，记得带上 `-S` 参数告诉程序使用SA授权进行操作。
 
@@ -149,7 +149,7 @@ SA授权文件获取方法请参见
 
 如果你之前是在本地操作的，请在服务器上同样重复一遍，配置好相关参数后，执行`npm i pm2 -g`安装进程守护程序pm2
 
-安装好pm2之后，执行 `pm2 start server.js --node-args="--max-old-space-size=4096"`，代码运行后会在服务器上监听`23333`端口。
+安装好pm2之后，执行 `pm2 start server.js --node-args="--max-old-space-size=1024"`，代码运行后会在服务器上监听`23333`端口。
 
 如果你启动程序后想看运行日志，执行 `pm2 logs`
 
@@ -237,7 +237,11 @@ module.exports = {
 ```
 
 ## 注意事项
-程序的原理是调用了[google drive官方接口](https://developers.google.com/drive/api/v3/reference/files/list)，递归获取目标文件夹下所有文件及其子文件夹信息，粗略来讲，某个目录下包含多少个文件夹，就至少需要这么多次请求才能统计完成。
+gd-utlis（以及所有GD转存工具）的原理是调用了[google drive官方接口](https://developers.google.com/drive/api/v3/reference/files/copy)
+
+gd-utils比较快的原因在[与其他工具的对比](./compare.md)有具体阐述，概括来讲，当它进行转存任务时，不会向google服务器查询目标文件是否已存在，因为它会把复制记录存储在本地数据库，这样就节省了查询所需的时间，而查询接口应该是google drive所有接口里耗时最多的。
+
+这也就导致了gd-utils无法对（别的工具拷贝的）已存在的文件进行增量更新，除非文件之前就是它拷贝的，由于它已经将记录保存在本地，所以可以对之前的记录进行增量更新。
 
 目前尚不知道google是否会对接口做频率限制，也不知道会不会影响google账号本身的安全。
 
