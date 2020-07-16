@@ -68,7 +68,11 @@ router.post('/api/gdurl/tgbot', async ctx => {
         task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
       }).finally(() => COPYING_FIDS[fid] = false)
     } else if (action === 'update') {
-      send_count({ fid, chat_id, update: true })
+      if (counting[fid]) return sm({ chat_id, text: fid + ' 正在统计，请稍等片刻' })
+      counting[fid] = true
+      send_count({ fid, chat_id, update: true }).finally(() => {
+        delete counting[fid]
+      })
     } else if (action === 'clear_button') {
       const { message_id, text } = message || {}
       if (message_id) clear_button({ message_id, text, chat_id })
