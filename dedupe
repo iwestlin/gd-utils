@@ -2,6 +2,8 @@
 
 const { argv } = require('yargs')
   .usage('用法: ./$0 <folder-id> [options]')
+  .alias('y', 'yes')
+  .describe('yes', '若发现重复项，不询问直接删除')
   .alias('u', 'update')
   .describe('u', '不使用本地缓存，强制从线上获取源文件夹信息')
   .alias('S', 'service_account')
@@ -13,8 +15,8 @@ const { dedupe, validate_fid } = require('./src/gd')
 
 const [fid] = argv._
 if (validate_fid(fid)) {
-  const { update, service_account } = argv
-  dedupe({ fid, update, service_account }).then(info => {
+  const { update, service_account, yes } = argv
+  dedupe({ fid, update, service_account, yes }).then(info => {
     if (!info) return
     const { file_count, folder_count } = info
     console.log('任务完成，共删除文件数：', file_count, '目录数：', folder_count)

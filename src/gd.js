@@ -37,8 +37,9 @@ if (proxy_url) {
   axins = axios.create({})
 }
 
+const SA_LOCATION = argv.sa || 'sa'
 const SA_BATCH_SIZE = 1000
-const SA_FILES = fs.readdirSync(path.join(__dirname, '../sa')).filter(v => v.endsWith('.json'))
+const SA_FILES = fs.readdirSync(path.join(__dirname, '..', SA_LOCATION)).filter(v => v.endsWith('.json'))
 SA_FILES.flag = 0
 let SA_TOKENS = get_sa_batch()
 
@@ -60,7 +61,7 @@ function get_sa_batch () {
   SA_FILES.flag = new_flag
   return files.map(filename => {
     const gtoken = new GoogleToken({
-      keyFile: path.join(__dirname, '../sa', filename),
+      keyFile: path.join(__dirname, '..', SA_LOCATION, filename),
       scope: ['https://www.googleapis.com/auth/drive']
     })
     return { gtoken, expires: 0 }
@@ -783,7 +784,7 @@ async function rm_file ({ fid, service_account }) {
   }
 }
 
-async function dedupe ({ fid, update, service_account }) {
+async function dedupe ({ fid, update, service_account, yes }) {
   let arr
   if (!update) {
     const info = get_all_by_fid(fid)
@@ -796,7 +797,7 @@ async function dedupe ({ fid, update, service_account }) {
   const dupes = find_dupe(arr)
   const folder_number = dupes.filter(v => v.mimeType === FOLDER_TYPE).length
   const file_number = dupes.length - folder_number
-  const choice = await confirm_dedupe({ file_number, folder_number })
+  const choice = yes || await confirm_dedupe({ file_number, folder_number })
   if (choice === 'no') {
     return console.log('退出程序')
   } else if (!choice) {
