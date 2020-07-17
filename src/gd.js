@@ -278,10 +278,11 @@ async function ls_folder ({ fid, not_teamdrive, service_account }) {
     url += '?' + params_to_query(params)
     let retry = 0
     let data
+    const payload = { timeout: TIMEOUT_BASE }
     while (!data && (retry < RETRY_LIMIT)) {
       const access_token = gtoken ? (await gtoken.getToken()).access_token : (await get_access_token())
       const headers = { authorization: 'Bearer ' + access_token }
-      const payload = { headers, timeout: TIMEOUT_BASE }
+      payload.headers = headers
       try {
         data = (await axins.get(url, payload)).data
       } catch (err) {
