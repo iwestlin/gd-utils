@@ -197,7 +197,7 @@ function get_all_by_fid (fid) {
 }
 
 async function walk_and_save ({ fid, not_teamdrive, update, service_account }) {
-  const result = []
+  let result = []
   const not_finished = []
   const limit = pLimit(PARALLEL_LIMIT)
 
@@ -226,7 +226,7 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account }) {
     should_save && save_files_to_db(parent, files)
     const folders = files.filter(v => v.mimeType === FOLDER_TYPE)
     files.forEach(v => v.parent = parent)
-    result.push(...files)
+    result = result.concat(files)
     return Promise.all(folders.map(v => recur(v.id)))
   }
   try {
@@ -268,15 +268,20 @@ async function ls_folder ({ fid, not_teamdrive, service_account }) {
   params.pageSize = Math.min(PAGE_SIZE, 1000)
   // const use_sa = (fid !== 'root') && (service_account || !not_teamdrive) // 不带参数默认使用sa
   const use_sa = (fid !== 'root') && service_account
-  const headers = await gen_headers(use_sa)
+  // const headers = await gen_headers(use_sa)
+  // 对于直接子文件数超多的目录（1ctMwpIaBg8S1lrZDxdynLXJpMsm5guAl），可能还没列完，access_token就过期了
+  // 由于需要nextPageToken才能获取下一页的数据，所以无法用并行请求，测试发现每次获取1000个文件的请求大多需要20秒以上才能完成
+  const gtoken = use_sa && (await get_sa_token()).gtoken
   do {
     if (pageToken) params.pageToken = pageToken
     let url = 'https://www.googleapis.com/drive/v3/files'
     url += '?' + params_to_query(params)
-    const payload = { headers, timeout: TIMEOUT_BASE }
     let retry = 0
     let data
     while (!data && (retry < RETRY_LIMIT)) {
+      const access_token = gtoken ? (await gtoken.getToken()).access_token : (await get_access_token())
+      const headers = { authorization: 'Bearer ' + access_token }
+      const payload = { headers, timeout: TIMEOUT_BASE }
       try {
         data = (await axins.get(url, payload)).data
       } catch (err) {
