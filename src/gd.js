@@ -291,6 +291,7 @@ async function ls_folder ({ fid, not_teamdrive, service_account }) {
       return files
     }
     files = files.concat(data.files)
+    argv.sfl && console.log('files.length:', files.length)
     pageToken = data.nextPageToken
   } while (pageToken)
 
