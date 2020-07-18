@@ -79,6 +79,7 @@ async function get_invalid_sa (arr, fid) {
       await get_info(fid, access_token)
       good++
     } catch (e) {
+      console.error(e.message)
       const status = e && e.response && e.response.status
       if (Number(status) === 400) fails.push(filename) // access_token 获取失败
 
