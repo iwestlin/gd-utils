@@ -2,6 +2,28 @@
 
 > 不只是最快的 google drive 拷贝工具 [与其他工具的对比](./compare.md)
 
+## 目录
+* [Google Drive 百宝箱](#google-drive-百宝箱)
+      * [目录](#目录)
+      * [<a href="./changelog.md">更新日志</a>](#更新日志)
+      * [demo](#demo)
+      * [English Version (thanks to <a href="https://github.com/roshanconnor123">@roshanconnor123</a>)](#english-version-thanks-to-roshanconnor123)
+      * [colab脚本（省去本地安装步骤，直接网页可用，感谢贡献者<a href="https://github.com/orange2008">@orange2008</a>）](#colab脚本省去本地安装步骤直接网页可用感谢贡献者orange2008)
+      * [一键安装脚本(感谢 脚本制作者 <a href="https://github.com/vitaminx">@vitaminx</a>)](#一键安装脚本感谢-脚本制作者-vitaminx)
+      * [繁体中文版（感谢贡献者<a href="https://github.com/liaojack8/">@liaojack8</a>）](#繁体中文版感谢贡献者liaojack8)
+      * [Docker 版（感谢贡献者<a href="https://github.com/gdtool/">@gdtool</a>)](#docker-版感谢贡献者gdtool)
+      * [常见问题](#常见问题)
+      * [搭建过程](#搭建过程)
+      * [功能简介](#功能简介)
+      * [环境配置](#环境配置)
+      * [依赖安装](#依赖安装)
+      * [Service Account 配置](#service-account-配置)
+      * [个人帐号配置](#个人帐号配置)
+      * [Bot配置](#bot配置)
+      * [补充说明](#补充说明)
+      * [专家设置](#专家设置)
+      * [注意事项](#注意事项)
+
 ## [更新日志](./changelog.md)
 
 ## demo
@@ -14,7 +36,6 @@
 [https://colab.research.google.com/drive/1i1W9nAzgiDtfA_rmTBcpMpwxVUhwgLsq](https://colab.research.google.com/drive/1i1W9nAzgiDtfA_rmTBcpMpwxVUhwgLsq)
 
 > 打开上面链接后，保存到自己的云端硬盘（请一定要保存，因为上面的共享链接操作记录所有人可见）
-然后在自己的个人盘账号下建立一个 accounts 文件夹，将自己的SA授权文件上传到里面，就可以开始使用了。
 
 colab使用录屏：[https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanKp9LvORjJLEp_x](https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanKp9LvORjJLEp_x)
 
@@ -35,7 +56,7 @@ colab使用录屏：[https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanK
 [https://github.com/gdtool/gd-utils-docker](https://github.com/gdtool/gd-utils-docker)
 
 ## 常见问题
-[如果你遇到任务完成时拷贝成功的文件少于统计的文件数，请务必点击查看](https://github.com/iwestlin/gd-utils/blob/master/changelog.md#%E9%87%8D%E8%A6%81%E6%9B%B4%E6%96%B02020-06-29)
+**[如果你遇到任务完成时拷贝成功的文件少于统计的文件数，请务必点击查看](https://github.com/iwestlin/gd-utils/blob/master/changelog.md#%E9%87%8D%E8%A6%81%E6%9B%B4%E6%96%B02020-06-29)**
 
 在命令行操作时如果输出 `timeout exceed` 这样的消息，是正常情况，不会影响最终结果，因为程序对每个请求都有7次重试的机制。
 如果timeout的消息比较多，可以考虑降低并行请求数，下文有具体方法。
@@ -52,7 +73,7 @@ colab使用录屏：[https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanK
 3、所有目录创建完成后，开始复制文件
 ```
 
-**如果源文件夹的文件数非常多（一百万以上），请尽量在命令行进行操作**，因为程序运行的时候会把文件信息保存在内存中，文件数太多的话容易内存占用太多被nodejs干掉。可以像这样执行命令：
+如果源文件夹的文件数非常多（一百万以上），请尽量在命令行进行操作，因为程序运行的时候会把文件信息保存在内存中，文件数太多的话容易内存占用太多被nodejs干掉。可以像这样执行命令：
 ```
  node --max-old-space-size=1024 count folder-id -S
  ```
@@ -80,7 +101,7 @@ colab使用录屏：[https://drive.google.com/drive/folders/19T37ARH7M1h67JGYanK
 - 拷贝任意目录所有文件到您指定目录，同样支持中断恢复。
 支持根据文件大小过滤，可输入 `./copy -h` 查看使用帮助
 
-- 对任意目录进行去重，删除同一目录下的md5值相同的文件（只保留一个），删除空目录。
+- 对任意目录进行去重，删除同一目录下的md5值相同的文件（只保留一个），删除同名空目录。
 命令行输入 `./dedupe -h` 查看使用帮助
 
 - 在 config.js 里完成相关配置后，可以将本项目部署在（可正常访问谷歌服务的）服务器上，提供 http api 文件统计接口
@@ -142,7 +163,10 @@ SA授权文件获取方法请参见
 然后获取自己的 telegram username，这个username不是显示的名称，而是tg个人网址后面的那串字符，比如，我的tg个人网址是 `https://t.me/viegg` ，用户名就是 `viegg`，获取用户名的目的是在代码里配置白名单，只允许特定的用户调用机器人。将username填入 `config.js`里的配置，像这样：
 `tg_whitelist: ['viegg']`，就代表只允许我自己使用这个机器人了。
 
-如果想把机器人的使用权限分享给别的用户，只需要改成这样子： `tg_whitelist: ['viegg', '其他人的username']`
+如果想把机器人的使用权限分享给别的用户，只需要改成：
+```
+tg_whitelist: ['viegg', '其他人的username'],
+```
 
 接下来需要将代码部署到服务器上。
 如果你一开始就是在服务器上配置的，可以直接执行`npm i pm2 -g`
@@ -183,9 +207,9 @@ curl 'YOUR_WEBSITE_URL/api/gdurl/count?fid=124pjM5LggSuwI1n40bcD5tQ13wS0M6wg'
 ```
 如果返回了`gd-utils 成功启动`的消息，说明部署成功了。
 
-最后，在命令行执行（请将[YOUR_WEBSITE]和[YOUR_BOT_TOKEN]分别替换成你自己的网址和bot token）
+最后，在命令行执行（请将`YOUR_WEBSITE`和`YOUR_BOT_TOKEN`分别替换成你自己的网址和bot token）
 ```
-curl -F "url=[YOUR_WEBSITE]/api/gdurl/tgbot" 'https://api.telegram.org/bot[YOUR_BOT_TOKEN]/setWebhook'
+curl -F "url=YOUR_WEBSITE/api/gdurl/tgbot" 'https://api.telegram.org/botYOUR_BOT_TOKEN/setWebhook'
 ```
 这样，就将你的服务器连接上你的 telegram bot 了，试着给bot发送个 `/help`，如果它回复给你使用说明，那就配置成功了。
 
