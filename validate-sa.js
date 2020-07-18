@@ -79,7 +79,7 @@ async function get_invalid_sa (arr, fid) {
       await get_info(fid, access_token)
       good++
     } catch (e) {
-      console.error(e.message)
+      handle_error(e)
       const status = e && e.response && e.response.status
       if (Number(status) === 400) fails.push(filename) // access_token 获取失败
 
@@ -89,6 +89,15 @@ async function get_invalid_sa (arr, fid) {
     }
   }
   return fails
+}
+
+function handle_error (err) {
+  const data = err && err.response && err.response.data
+  if (data) {
+    console.error(JSON.stringify(data))
+  } else {
+    console.error(err.message)
+  }
 }
 
 async function get_info (fid, access_token) {
