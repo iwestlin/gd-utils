@@ -568,6 +568,7 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
   do {
     if (err) {
       clearInterval(loop)
+      files = null
       throw err
     }
     if (concurrency > PARALLEL_LIMIT) {
