@@ -639,7 +639,7 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
       if (message && message.toLowerCase().includes('file limit')) {
         if (limit) limit.clearQueue()
         if (task_id) db.prepare('update task set status=? where id=?').run('error', task_id)
-        throw new Error('您的团队盘文件数已超限，停止复制')
+        throw new Error(FILE_EXCEED_MSG)
       }
       if (use_sa && message && message.toLowerCase().includes('rate limit')) {
         SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== gtoken)
