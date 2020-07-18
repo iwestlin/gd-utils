@@ -85,7 +85,7 @@ async function get_invalid_sa (arr, fid) {
 
       const data = e && e.response && e.response.data
       const code = data && data.error && data.error.code
-      if (Number(code) === 404) fails.push(filename) // 读取文件夹信息失败
+      if ([404, 403].includes(Number(code))) fails.push(filename) // 读取文件夹信息失败
     }
   }
   return fails
