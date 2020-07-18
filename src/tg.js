@@ -279,7 +279,7 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
       if (!record) record = {}
       console.error('复制失败', fid, '-->', target)
       console.error(err)
-      sm({ chat_id, text: '复制失败，失败消息：' + err.message })
+      sm({ chat_id, text: (task_id || '') + '任务出错，错误消息：' + err.message })
     })
 
   while (!record) {
