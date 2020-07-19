@@ -7,7 +7,7 @@ const LOG_DELAY = 5000 // 日志输出时间间隔，单位毫秒
 const PAGE_SIZE = 1000 // 每次网络请求读取目录下的文件数，数值越大，越有可能超时，不得超过1000
 
 const RETRY_LIMIT = 7 // 如果某次请求失败，允许其重试的最大次数
-const PARALLEL_LIMIT = 20 // 网络请求的并行数量，可根据网络环境调整
+const PARALLEL_LIMIT = 88 // 网络请求的并行数量，可根据网络环境调整
 
 const DEFAULT_TARGET = '' // 必填，拷贝默认目的地ID，如果不指定target，则会复制到此处，建议填写团队盘ID
 
