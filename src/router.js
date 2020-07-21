@@ -42,7 +42,7 @@ router.get('/api/gdurl/count', async ctx => {
 router.post('/api/gdurl/tgbot', async ctx => {
   const { body } = ctx.request
   console.log('ctx.ip', ctx.ip) // 可以只允许tg服务器的ip
-  console.log('tg message:', body)
+  console.log('tg message:', JSON.stringify(body, null, '  '))
   if (TG_IPLIST && !TG_IPLIST.includes(ctx.ip)) return ctx.body = 'invalid ip'
   ctx.body = '' // 早点释放连接
   const message = body.message || body.edited_message
@@ -91,7 +91,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     return v === username || v === user_id
   })) return console.warn('异常请求')
 
-  const fid = extract_fid(text) || extract_from_text(text)
+  const fid = extract_fid(text) || extract_from_text(text) || extract_from_text(JSON.stringify(message))
   const no_fid_commands = ['/task', '/help', '/bm']
   if (!no_fid_commands.some(cmd => text.startsWith(cmd)) && !validate_fid(fid)) {
     return sm({ chat_id, text: '未识别出分享ID' })
