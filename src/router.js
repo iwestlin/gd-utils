@@ -46,6 +46,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
   if (TG_IPLIST && !TG_IPLIST.includes(ctx.ip)) return ctx.body = 'invalid ip'
   ctx.body = '' // 早点释放连接
   const message = body.message || body.edited_message
+  const message_str = JSON.stringify(message)
 
   const { callback_query } = body
   if (callback_query) {
@@ -81,7 +82,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
   }
 
   const chat_id = message && message.chat && message.chat.id
-  const text = message && message.text && message.text.trim() || ''
+  const text = (message && message.text && message.text.trim()) || ''
   let username = message && message.from && message.from.username
   username = username && String(username).toLowerCase()
   let user_id = message && message.from && message.from.id
@@ -94,7 +95,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     return console.warn('收到非白名单用户的请求')
   }
 
-  const fid = extract_fid(text) || extract_from_text(text) || extract_from_text(JSON.stringify(message))
+  const fid = extract_fid(text) || extract_from_text(text) || extract_from_text(message_str)
   const no_fid_commands = ['/task', '/help', '/bm']
   if (!no_fid_commands.some(cmd => text.startsWith(cmd)) && !validate_fid(fid)) {
     return sm({ chat_id, text: '未识别出分享ID' })
@@ -155,7 +156,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
       return running_tasks.forEach(v => send_task_info({ chat_id, task_id: v.id }).catch(console.error))
     }
     send_task_info({ task_id, chat_id }).catch(console.error)
-  } else if (text.includes('drive.google.com/') || validate_fid(text)) {
+  } else if (message_str.includes('drive.google.com/') || validate_fid(text)) {
     return send_choice({ fid: fid || text, chat_id })
   } else {
     sm({ chat_id, text: '暂不支持此命令' })
