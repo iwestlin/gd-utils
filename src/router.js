@@ -81,15 +81,18 @@ router.post('/api/gdurl/tgbot', async ctx => {
   }
 
   const chat_id = message && message.chat && message.chat.id
-  const text = message && message.text && message.text.trim()
+  const text = message && message.text && message.text.trim() || ''
   let username = message && message.from && message.from.username
   username = username && String(username).toLowerCase()
   let user_id = message && message.from && message.from.id
   user_id = user_id && String(user_id).toLowerCase()
-  if (!chat_id || !text || !tg_whitelist.some(v => {
+  if (!chat_id || !tg_whitelist.some(v => {
     v = String(v).toLowerCase()
     return v === username || v === user_id
-  })) return console.warn('异常请求')
+  })) {
+    chat_id && sm({ chat_id, text: '您的用户名或ID不在机器人的白名单中，如果是您配置的机器人，请先到config.js中配置自己的username' })
+    return console.warn('收到非白名单用户的请求')
+  }
 
   const fid = extract_fid(text) || extract_from_text(text) || extract_from_text(JSON.stringify(message))
   const no_fid_commands = ['/task', '/help', '/bm']
