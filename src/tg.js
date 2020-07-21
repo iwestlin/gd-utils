@@ -369,7 +369,7 @@ function extract_fid (text) {
 
 function extract_from_text (text) {
   // const reg = /https?:\/\/drive.google.com\/[^\s]+/g
-  const reg = /https?:\/\/drive.google.com\/[a-zA-Z0-9_\/?=&-]+/g
+  const reg = /https?:\/\/drive.google.com\/[a-zA-Z0-9_\\/?=&-]+/g
   const m = text.match(reg)
   return m && extract_fid(m[0])
 }
