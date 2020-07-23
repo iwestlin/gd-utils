@@ -186,8 +186,8 @@ async function send_all_tasks (chat_id) {
     // const description = err.response && err.response.data && err.response.data.description
     // if (description && description.includes('message is too long')) {
     if (true) {
-      const text = [headers].concat(records).map(v => v.join('\t')).join('\n')
-      return sm({ chat_id, parse_mode: 'HTML', text: `所有拷贝任务：\n<pre>${text}</pre>` })
+      const text = [headers].concat(records.slice(-100)).map(v => v.join('\t')).join('\n')
+      return sm({ chat_id, parse_mode: 'HTML', text: `所有拷贝任务(只显示最近100条)：\n<pre>${text}</pre>` })
     }
     console.error(err)
   })
@@ -344,6 +344,8 @@ function sm (data) {
   return axins.post(url, data).catch(err => {
     // console.error('fail to post', url, data)
     console.error('fail to send message to tg:', err.message)
+    const err_data = err.response && err.response.data
+    err_data && console.error(err_data)
   })
 }
 
