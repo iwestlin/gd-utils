@@ -2,7 +2,7 @@ const Router = require('@koa/router')
 
 const { db } = require('../db')
 const { validate_fid, gen_count_body } = require('./gd')
-const { send_count, send_help, send_choice, send_task_info, sm, extract_fid, extract_from_text, reply_cb_query, tg_copy, send_all_tasks, send_bm_help, get_target_by_alias, send_all_bookmarks, set_bookmark, unset_bookmark, clear_tasks, send_task_help, rm_task, clear_button } = require('./tg')
+const { send_count, send_help, send_choice, send_task_info, sm, extract_fid, extract_from_text, reply_cb_query, tg_copy, send_all_tasks, send_bm_help, get_target_by_alias, send_all_bookmarks, set_bookmark, unset_bookmark, clear_tasks, send_task_help, rm_task } = require('./tg')
 
 const { AUTH, ROUTER_PASSKEY, TG_IPLIST } = require('../config')
 const { tg_whitelist } = AUTH
@@ -76,7 +76,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
       })
     } else if (action === 'clear_button') {
       const { message_id, text } = message || {}
-      if (message_id) clear_button({ message_id, text, chat_id })
+      if (message_id) sm({ chat_id, message_id, text, parse_mode: 'HTML' }, 'editMessageText')
     }
     return reply_cb_query({ id, data }).catch(console.error)
   }
