@@ -19,25 +19,8 @@ bot.on('text', (msg) => {
     const chat_id = msg && msg.chat && msg.chat.id
     // console.log(msg);
     // console.log('chat_id:   '+ chat_id);
-    const id = msg.from.id;
-    if(adminUsers.indexOf(id) < 0){
-        msg.reply.text('You are not admin!');
-        return;
-    }
-
     // let prex = String(msg.text).substring(0,1);
     // console.log(prex);
-    let words = String(msg.text).split(" ");
-    let len = words.length;
-    let args = [];
-    if (len > 1 ){
-        args = words.slice(1, len);
-
-    }
-
-    // console.log('reply:'+msg.text);
-    // console.log('args:'+args);
-    let is_shell = false
 
     const text = msg && msg.text && msg.text.trim() || ''
     const message_str = text
@@ -117,33 +100,7 @@ bot.on('text', (msg) => {
         send_task_info({ task_id, chat_id }).catch(console.error)
       } else if (message_str.includes('drive.google.com/') || validate_fid(text)) {
         return send_choice({ fid: fid || text, chat_id })
-      } else {
-          is_shell = true
-      }
-
-  if (is_shell) {
-      console.log('run shell')
-      msg.reply.text('$:   '+msg.text);
-      const shell = spawn(words[0],args).on('error', function( err ){
-          msg.reply.text('error while executing:'+words[0]);
-          msg.reply.text(err);
-      });
-
-      if(shell){
-
-         shell.stdout.on('data', (data) => {
-          msg.reply.text(`stdout:\n ${data}`);
-         });
-
-         shell.stderr.on('data', (data) => {
-          msg.reply.text(`stderr: ${data}`);
-         });
-
-         shell.on('close', (code) => {
-          msg.reply.text(`shell exited with code ${code}`);
-         });
-    }
-    }
+      } 
 });
 
 // Inline button callback
@@ -187,6 +144,80 @@ bot.on('callbackQuery', msg => {
     return reply_cb_query({ id, data }).catch(console.error)
   }
     return bot.answerCallbackQuery(msg.id, `Inline button callback: ${ msg.data }`, true);
+});
+
+bot.sendMessage(854331334,"you gdutils_bot ins online!") 
+
+bot.on('/start', (msg) => {
+  msg.reply.text(`your chat id:\n ${msg.from.id}`);
+  return bot.sendMessage(msg.from.id, "You gdutils_bot ins online!!");
+});
+
+
+bot.on('/restart', (msg) => {
+  console.log('run update')
+  const shell = spawn('pm2','restart all').on('error', function( err ){
+      msg.reply.text(err);
+  });
+  if(shell){
+     shell.stdout.on('data', (data) => {
+      msg.reply.text(`stdout:\n ${data}`);
+     });
+  }
+});
+
+bot.on('/update', msg => {
+  console.log('run update')
+  const shell = spawn('git','pull').on('error', function( err ){
+      msg.reply.text(err);
+  });
+
+  if(shell){
+     shell.stdout.on('data', (data) => {
+      msg.reply.text(`stdout:\n ${data}`);
+     });
+  }
+
+});
+
+bot.on(/^!.*/, (msg, props) => {
+  // let prex = String(msg.text).substring(0,1);
+  // console.log(prex);
+  const id = msg.from.id;
+  if(adminUsers.indexOf(id) < 0){
+      msg.reply.text('You are not admin!');
+      return;
+  }
+
+  let words = String(msg.text).split(" ");
+  let len = words.length;
+  let args = [];
+  if (len > 2 ){
+      args = words.slice(2, len);
+
+  }
+    console.log('run shell2    ')
+    msg.reply.text('$: '+words[1] + "  " + args);
+    const shell = spawn(words[1],args).on('error', function( err ){
+        msg.reply.text('error while executing:'+words[1]);
+        msg.reply.text(err);
+    });
+
+    if(shell){
+
+       shell.stdout.on('data', (data) => {
+        msg.reply.text(`stdout:\n ${data}`);
+       });
+
+       shell.stderr.on('data', (data) => {
+        msg.reply.text(`stderr: ${data}`);
+       });
+
+       shell.on('close', (code) => {
+        msg.reply.text(`shell exited with code ${code}`);
+       });
+}
+
 });
 
 bot.start();

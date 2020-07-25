@@ -6,7 +6,7 @@ color_end='\033[0m'
 
 echo -e "\n$color_yellow===== <<gdutils项目一件部署脚本要求及说明>> =====$color_end"
 echo -e "$color_yellow---------------[ v2.1 by oneking ]---------------$color_end"
-echo -e "$color_yellow 01.$color_end 本脚本是针对TG大神@viegg的gdutils项目一键部署脚本;"
+echo -e "$color_yellow 01.$color_end 本脚本是魔改的gdutils项目一键部署脚本;"
 echo -e "$color_yellow 02.$color_end 脚本包括“TD盘VPS上查询转存部署”和“Telegram机器人部署”两部分"
 echo -e "$color_yellow 03.$color_end 本脚本适应CentOS/Debian/Ubuntu三种操作系统，自动识别、自动选择对应分支一键安装部署"
 echo -e "$color_yellow 04.$color_end 三步即可完成部署：上传脚本到VPS → 设置脚本执行权限 → 运行"
@@ -15,7 +15,6 @@ echo -e "$color_yellow 06.$color_end 准备工作二：拥有一个域名绑定�
 echo -e "$color_yellow 07.$color_end 准备工作三：向机器人@userinfobot获取个人TG账号ID并记录"
 echo -e "$color_yellow 08.$color_end 准备工作四：注册好一个Google team drive加入sa并记录下该盘ID"
 echo -e "$color_yellow 09.$color_end 经测试可用完美安装系统：Centos 7/8 debian 9/10 ubuntu 16.04/18.04/19.10/20.04"
-echo -e "$color_yellow 10.$color_end 部署过程中有任何问题请把“错误截图”“部署VPS系统名称版本”信息发给TG：onekings 或 vitaminor@gmail.com"
 echo -e "$color_yellow------------------------------------------------$color_end"
 read -s -n1 -p "★★★ 如已做好以上[5/6/7/8]准备或不需要安装Telegram机器人请按任意键开始部署，如未做好准备请按“Ctrl+c”终止脚本 ★★★"
 echo -e "\n$color_yellow------------------------------------------------$color_end"
@@ -150,21 +149,21 @@ done
 read -p """请输入使用机器人的telegram账号NAME(获取NAME机器人@userinfobot)并回车
     Your Telegram NAME =>:""" YOUR_TELEGRAM_NAME
 #判断telegram NAME是否正确(通过判断是不是纯数字)
-until [[ $YOUR_TELEGRAM_NAME =~ ^-?[0-9]+$ ]]; do
-    echo -e "$color_yellow★★★ 您的TG账号NAME输入不正确，请重新输入或按“Ctrl+C”结束安装！ ★★★$color_end"
-    read -p """请输入使用机器人的telegram账号NAME(获取NAME机器人@userinfobot)并回车
-    Your Telegram NAME =>:""" YOUR_TELEGRAM_NAME
-done
+# until [[ $YOUR_TELEGRAM_NAME =~ ^-?[0-9]+$ ]]; do
+#     echo -e "$color_yellow★★★ 您的TG账号NAME输入不正确，请重新输入或按“Ctrl+C”结束安装！ ★★★$color_end"
+#     read -p """请输入使用机器人的telegram账号NAME(获取NAME机器人@userinfobot)并回车
+#     Your Telegram NAME =>:""" YOUR_TELEGRAM_NAME
+# done
 
 read -p """请输入转存默认目的地团队盘ID(不指定转存目的地默认改地址，脚本强制要求输入团队盘ID)并回车
     Your Google Team Drive ID =>:""" YOUR_GOOGLE_TEAM_DRIVE_ID
 #判断google team drive ID是否正确（团队盘ID长度19位）
-while [[ "${#YOUR_GOOGLE_TEAM_DRIVE_ID}" != 19 ]]; do
-    echo -e "$color_yellow★★★ 您的Google team drive ID输入不正确，请重新输入或按“Ctrl+C”结束安装！ ★★★$color_end"
-    read -p """请输入转存默认目的地ID(不指定转存目的地默认该地址，脚本强制要求输入团队盘ID)并回车
-    Your Google Team Drive ID =>:""" YOUR_GOOGLE_TEAM_DRIVE_ID
-done
-
+# while [[ "${#YOUR_GOOGLE_TEAM_DRIVE_ID}" != 19 ]]; do
+#     echo -e "$color_yellow★★★ 您的Google team drive ID输入不正确，请重新输入或按“Ctrl+C”结束安装！ ★★★$color_end"
+#     read -p """请输入转存默认目的地ID(不指定转存目的地默认该地址，脚本强制要求输入团队盘ID)并回车
+#     Your Google Team Drive ID =>:""" YOUR_GOOGLE_TEAM_DRIVE_ID
+# done
+cd ../
 #cd ./gd-utils &&
     sed -i "s/bot_token/$YOUR_BOT_TOKEN/g" ./gd-utils/config.js &&
     sed -i "s/your_tg_userid/$YOUR_TELEGRAM_ID/g" ./gd-utils/config.js &&
@@ -175,17 +174,9 @@ echo -e "$color_yellow----------------------------------------------------------
 echo -e "$color_yellow“进程守护程序pm2”开始安装......$color_end"
 sudo $(pwd)/node/bin/npm i pm2 -g && pm2 l
 echo -e "$color_yellow启动守护进程......$color_end"
+cd ./gd-utils
 $(pwd)/node/bin/pm2 start  index.js --node-args="--max-old-space-size=500"
 echo -e "$color_yellow----------------------------------------------------------$color_end"
-
-
-
-# 判断反向代理是否部署成功
-if [[ $print_webhook =~ "true" ]]; then
-    echo -e "$color_yellow★★★ 恭喜你！GoogleDrive查询转存机器人部署成功，请回到TG界面给bot发送个“/help”获取使用帮助 ★★★$color_end"
-else
-    echo -e "$color_yellow★★★ 很遗憾！机器人设置失败，请返回检查网站是否部署成功，并重复本安装过程 ★★★$color_end", exit!
-fi
 
 cd ~
 #rm -f gdutilsinstall.sh
