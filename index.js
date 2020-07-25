@@ -40,6 +40,7 @@ bot.on('text', (msg) => {
     let is_shell = false
 
     const text = msg && msg.text && msg.text.trim() || ''
+    const message_str = text
     let username = msg && msg.from && msg.from.username
     msgs = username && String(username).toLowerCase()
     let user_id = msgs && msgs.from && msgs.from.id
