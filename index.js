@@ -156,7 +156,7 @@ bot.on('/start', (msg) => {
 
 bot.on('/restart', (msg) => {
   console.log('run update')
-  const shell = spawn('pm2','restart all').on('error', function( err ){
+  const shell = spawn('pm2',['restart all',]).on('error', function( err ){
       msg.reply.text(err);
   });
   if(shell){
@@ -168,7 +168,7 @@ bot.on('/restart', (msg) => {
 
 bot.on('/update', msg => {
   console.log('run update')
-  const shell = spawn('git','pull').on('error', function( err ){
+  const shell = spawn('git',['pull',]).on('error', function( err ){
       msg.reply.text(err);
   });
 
