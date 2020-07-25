@@ -1,6 +1,10 @@
 ## 更新日志
 > 更新方法：在 gd-utils 目录下，执行 `git pull` 拉取最新代码，如果你使用了 pm2 守护进程，执行`pm2 reload server`刷新生效。
 
+[2020-07-25]
+- 调整shell 执行结构 在bot中输入"! ls"等即可
+- 增加 在bot中升级bot功能,在bot中依次执行"/update" "/restart" (restart 功能仅限使用pm2 启动的bot)
+
 [2020-07-21]  
 - 添加数据库clear脚本，只需在`gd-utils`目录下执行`node clear-db.js`就可以删除所有获取的文件信息（但会保留拷贝记录和bookmark）同时减小数据库文件大小了
 - 调整提取分享链接的方法，基本能够识别所有类型消息中的分享ID
