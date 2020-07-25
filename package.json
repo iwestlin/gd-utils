@@ -1,16 +1,18 @@
 {
-  "name": "gd-utils",
-  "version": "1.0.1",
-  "description": "google drive utils",
-  "repository": "iwestlin/gd-utils",
-  "main": "src/gd.js",
-  "scripts": {
-    "start": "https_proxy='http://127.0.0.1:1086' nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name": "teleshellbot",
+  "version": "1.0.0",
+  "description": "A simple Telegram Bot to run shell commands remotely",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marknote/TeleShellBot.git"
   },
-  "keywords": [],
-  "author": "viegg",
-  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "start": "https_proxy='http://127.0.0.1:1086' nodemon index.js",
+    "test": "test"
+  },
+  "author": "marknote",
+  "license": "MIT",
   "dependencies": {
     "@koa/router": "^9.0.1",
     "@viegg/axios": "^1.0.0",
@@ -18,7 +20,7 @@
     "bytes": "^3.1.0",
     "cli-table3": "^0.6.0",
     "colors": "^1.4.0",
-    "dayjs": "^1.8.28",
+    "dayjs": "^1.8.29",
     "gtoken": "^5.0.1",
     "html-escaper": "^3.0.0",
     "https-proxy-agent": "^5.0.0",
@@ -28,6 +30,8 @@
     "prompts": "^2.3.2",
     "proxy-agent": "^3.1.1",
     "signal-exit": "^3.0.3",
-    "yargs": "^15.3.1"
+    "yargs": "^15.4.0",
+    "nodemon": "^2.0.4",
+    "telebot": "^1.2.3"
   }
 }

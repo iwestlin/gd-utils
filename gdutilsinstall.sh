@@ -104,13 +104,17 @@ done
 echo -e "\n$color_yellow===== <<安装gdutils依赖-nodejs和npm/安装配置gdutils>> =====$color_end\n"
 
 $cmd_install install $cmd_install_rely -y
-curl -sL $nodejs_curl | bash -
-$cmd_install install nodejs -y
+#curl -sL $nodejs_curl | bash -
+#$cmd_install install nodejs -y
+wget https://cdn.npm.taobao.org/dist/node/v14.6.0/node-v14.6.0-linux-x64.tar.xz
+tar xvf node-v14.6.0-linux-x64.tar.xz && mv node-v14.6.0-linux-x64 node && rm -rf node-v14.6.0-linux-x64.tar.xz
+export PATH=$PATH:$(pwd)/node/bin/
+
 $cmd_install_rpm_build
 git clone https://github.com/dissipator/gd-utils-noport.git gd-utils && cd gd-utils
 pwd
-npm config set unsafe-perm=true
-npm i
+$(pwd)/node/bin/npm config set unsafe-perm=true
+$(pwd)/node/bin/npm i
 
 echo -e "\n$color_yellow★★★ 恭喜您!gdutils统计转存系统已经正确安装完成，请上传sa到“./gd-utils/sa/”目录下完成最后的配置 ★★★$color_end\n"
 
@@ -161,7 +165,7 @@ while [[ "${#YOUR_GOOGLE_TEAM_DRIVE_ID}" != 19 ]]; do
     Your Google Team Drive ID =>:""" YOUR_GOOGLE_TEAM_DRIVE_ID
 done
 
-cd ~ &&
+#cd ./gd-utils &&
     sed -i "s/bot_token/$YOUR_BOT_TOKEN/g" ./gd-utils/config.js &&
     sed -i "s/your_tg_userid/$YOUR_TELEGRAM_ID/g" ./gd-utils/config.js &&
     sed -i "s/your_tg_username/$YOUR_TELEGRAM_NAME/g" ./gd-utils/config.js &&
@@ -169,10 +173,9 @@ cd ~ &&
 echo -e "$color_yellow----------------------------------------------------------$color_end"
 
 echo -e "$color_yellow“进程守护程序pm2”开始安装......$color_end"
-cd ~/gd-utils &&
-    sudo npm i pm2 -g && pm2 l
+sudo $(pwd)/node/bin/npm i pm2 -g && pm2 l
 echo -e "$color_yellow启动守护进程......$color_end"
-pm2 start  index.js --node-args="--max-old-space-size=500"
+$(pwd)/node/bin/pm2 start  index.js --node-args="--max-old-space-size=500"
 echo -e "$color_yellow----------------------------------------------------------$color_end"
 
 
