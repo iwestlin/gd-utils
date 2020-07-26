@@ -178,7 +178,7 @@ tg_whitelist: ['viegg', '其他人的username'],
 
 如果你之前是在本地操作的，请在服务器上同样重复一遍，配置好相关参数后，执行`npm i pm2 -g`安装进程守护程序pm2
 
-安装好pm2之后，执行 `pm2 start server.js --node-args="--max-old-space-size=1024"`，代码运行后会在服务器上监听`23333`端口。
+安装好pm2之后，执行 `pm2 start server.js --node-args="--max-old-space-size=1024" --watch`，代码运行后会在服务器上监听`23333`端口。
 
 如果你启动程序后想看运行日志，执行 `pm2 logs`
 
