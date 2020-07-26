@@ -175,7 +175,7 @@ bot.on('/restart', (msg) => {
       return console.warn('收到非白名单用户的请求')
   }
   console.log('run update')
-  const shell = spawn('pm2',['restart all',]).on('error', function( err ){
+  const shell = spawn('pm2',['restart','all',]).on('error', function( err ){
       msg.reply.text(err);
   });
   if(shell){
