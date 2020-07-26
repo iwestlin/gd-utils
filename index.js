@@ -146,7 +146,7 @@ bot.on('callbackQuery', msg => {
     return bot.answerCallbackQuery(msg.id, `Inline button callback: ${ msg.data }`, true);
 });
 
-bot.sendMessage(854331334,"you gdutils_bot ins online!") 
+//bot.sendMessage(854331334,"you gdutils_bot ins online!") 
 
 bot.on('/start', (msg) => {
   msg.reply.text(`your chat id:\n ${msg.from.id}`);

@@ -106,14 +106,13 @@ $cmd_install install $cmd_install_rely -y
 #curl -sL $nodejs_curl | bash -
 #$cmd_install install nodejs -y
 wget https://cdn.npm.taobao.org/dist/node/v14.6.0/node-v14.6.0-linux-x64.tar.xz
-tar xvf node-v14.6.0-linux-x64.tar.xz && mv node-v14.6.0-linux-x64 node && rm -rf node-v14.6.0-linux-x64.tar.xz
-export PATH=$PATH:$(pwd)/node/bin/
+tar xvf node-v14.6.0-linux-x64.tar.xz && mv node-v14.6.0-linux-x64 ~/node && rm -rf node-v14.6.0-linux-x64.tar.xz
+export PATH=$PATH:~/node/bin/npm
 
 $cmd_install_rpm_build
-git clone https://github.com/dissipator/gd-utils-noport.git gd-utils && cd gd-utils
-pwd
-$(pwd)/node/bin/npm config set unsafe-perm=true
-$(pwd)/node/bin/npm i
+git clone https://github.com/dissipator/gd-utils.git gd-utils && cd gd-utils
+~/node/bin/npm config set unsafe-perm=true
+~/node/bin/npm i
 
 echo -e "\n$color_yellow★★★ 恭喜您!gdutils统计转存系统已经正确安装完成，请上传sa到“./gd-utils/sa/”目录下完成最后的配置 ★★★$color_end\n"
 
@@ -130,21 +129,21 @@ echo -e "\n$color_yellow  ===== <<开始部署gdutils查询转存TG机器人>> =
 read -p """请输入机器人token并回车
     Your Bot Token =>:""" YOUR_BOT_TOKEN
 #判断token是否输入正确
-while [[ "${#YOUR_BOT_TOKEN}" != 46 ]]; do
-    echo -e "$color_yellow★★★ 机器人TOKEN输入不正确，请重新输入或按“Ctrl+C”结束安装！ ★★★$color_end"
-    read -p """请输入机器人token并回车
-    Your Bot Token =>:""" YOUR_BOT_TOKEN
-done
+# while [[ "${#YOUR_BOT_TOKEN}" != 46 ]]; do
+#     echo -e "$color_yellow★★★ 机器人TOKEN输入不正确，请重新输入或按“Ctrl+C”结束安装！ ★★★$color_end"
+#     read -p """请输入机器人token并回车
+#     Your Bot Token =>:""" YOUR_BOT_TOKEN
+# done
 
 
 read -p """请输入使用机器人的telegram账号ID(获取ID机器人@userinfobot)并回车
     Your Telegram ID =>:""" YOUR_TELEGRAM_ID
 #判断telegram ID是否正确(通过判断是不是纯数字)
-until [[ $YOUR_TELEGRAM_ID =~ ^-?[0-9]+$ ]]; do
-    echo -e "$color_yellow★★★ 您的TG账号ID输入不正确，请重新输入或按“Ctrl+C”结束安装！ ★★★$color_end"
-    read -p """请输入使用机器人的telegram账号ID(获取ID机器人@userinfobot)并回车
-    Your Telegram ID =>:""" YOUR_TELEGRAM_ID
-done
+# until [[ $YOUR_TELEGRAM_ID =~ ^-?[0-9]+$ ]]; do
+#     echo -e "$color_yellow★★★ 您的TG账号ID输入不正确，请重新输入或按“Ctrl+C”结束安装！ ★★★$color_end"
+#     read -p """请输入使用机器人的telegram账号ID(获取ID机器人@userinfobot)并回车
+#     Your Telegram ID =>:""" YOUR_TELEGRAM_ID
+# done
 
 read -p """请输入使用机器人的telegram账号NAME(获取NAME机器人@userinfobot)并回车
     Your Telegram NAME =>:""" YOUR_TELEGRAM_NAME
@@ -172,10 +171,10 @@ cd ../
 echo -e "$color_yellow----------------------------------------------------------$color_end"
 
 echo -e "$color_yellow“进程守护程序pm2”开始安装......$color_end"
-sudo $(pwd)/node/bin/npm i pm2 -g && pm2 l
+sudo ~/node/bin/npm i pm2 -g && pm2 l
 echo -e "$color_yellow启动守护进程......$color_end"
 cd ./gd-utils
-$(pwd)/node/bin/pm2 start  index.js --node-args="--max-old-space-size=500"
+~/node/bin/pm2 start  index.js --node-args="--max-old-space-size=500"
 echo -e "$color_yellow----------------------------------------------------------$color_end"
 
 cd ~
