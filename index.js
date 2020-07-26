@@ -192,8 +192,8 @@ bot.on('/update', msg => {
       msg.reply.text('您的用户名或ID不在机器人的白名单中，如果是您配置的机器人，请先到config.js中配置自己的username');
       return console.warn('收到非白名单用户的请求')
   }
-  console.log('run update and restart')
-  msg.reply.text('run update and restart');
+  console.log('run update')
+  msg.reply.text('run update');
   const shell = spawn('git',['pull',]).on('error', function( err ){
       msg.reply.text(err);
   });
