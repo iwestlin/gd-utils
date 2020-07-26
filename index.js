@@ -194,7 +194,7 @@ bot.on('/update', msg => {
   }
   console.log('run update and restart')
   msg.reply.text('run update and restart');
-  const shell = spawn('git',['pull','&&','pm2','restart','all']).on('error', function( err ){
+  const shell = spawn('git',['pull',]).on('error', function( err ){
       msg.reply.text(err);
   });
 
