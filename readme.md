@@ -6,6 +6,7 @@
 - [<a href="./changelog.md">更新日志</a>](#更新日志)
 - [demo](#demo)
 - [English Version (thanks to <a href="https://github.com/roshanconnor123">@roshanconnor123</a>)](#english-version-thanks-to-roshanconnor123)
+- [无需域名和nginx版](#无需域名和nginx版)
 - [colab脚本（省去本地安装步骤，直接网页可用，感谢贡献者<a href="https://github.com/orange2008">@orange2008</a>）](#colab脚本省去本地安装步骤直接网页可用感谢贡献者orange2008)
 - [一键安装脚本(感谢 脚本制作者 <a href="https://github.com/vitaminx">@vitaminx</a>)](#一键安装脚本感谢-脚本制作者-vitaminx)
 - [繁体中文版（感谢贡献者<a href="https://github.com/liaojack8/">@liaojack8</a>）](#繁体中文版感谢贡献者liaojack8)
@@ -29,6 +30,11 @@
 
 ## English Version (thanks to [@roshanconnor123](https://github.com/roshanconnor123))
 [https://github.com/roshanconnor123/gd-utils](https://github.com/roshanconnor123/gd-utils)
+
+## 无需域名和nginx版
+> 此版本无需域名和web服务即可使用tg机器人，大大简化了配置过程，感谢贡献者 [@dissipator](https://github.com/dissipator)
+
+[https://github.com/dissipator/gd-utils](https://github.com/dissipator/gd-utils)
 
 ## colab脚本（省去本地安装步骤，直接网页可用，感谢贡献者[@orange2008](https://github.com/orange2008)）
 [https://colab.research.google.com/drive/1i1W9nAzgiDtfA_rmTBcpMpwxVUhwgLsq](https://colab.research.google.com/drive/1i1W9nAzgiDtfA_rmTBcpMpwxVUhwgLsq)
