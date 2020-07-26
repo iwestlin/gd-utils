@@ -24,18 +24,22 @@ bot.on('text', (msg) => {
 
     const text = msg && msg.text && msg.text.trim() || ''
     const message_str = text
-    let username = msg && msg.from && msg.from.username
-    msgs = username && String(username).toLowerCase()
-    let user_id = msgs && msgs.from && msgs.from.id
-    user_id = user_id && String(user_id).toLowerCase()
-    if (!chat_id || !tg_whitelist.some(v => {
-      v = String(v).toLowerCase()
-      return v === username || v === user_id
-    })) {
-      chat_id && sm({ chat_id, text: '您的用户名或ID不在机器人的白名单中，如果是您配置的机器人，请先到config.js中配置自己的username' })
-      return console.warn('收到非白名单用户的请求')
+    // let username = msg && msg.from && msg.from.username
+    // msgs = username && String(username).toLowerCase()
+    // let user_id = msgs && msgs.from && msgs.from.id
+    // user_id = user_id && String(user_id).toLowerCase()
+    const id = msg.from.id;
+    if(adminUsers.indexOf(id) < 0){
+        msg.reply.text('您的用户名或ID不在机器人的白名单中，如果是您配置的机器人，请先到config.js中配置自己的username');
+        return console.warn('收到非白名单用户的请求')
     }
-
+    // if (!chat_id || !tg_whitelist.some(v => {
+    //   v = String(v).toLowerCase()
+    //   return v === username || v === user_id
+    // })) {
+    //   chat_id && sm({ chat_id, text: '您的用户名或ID不在机器人的白名单中，如果是您配置的机器人，请先到config.js中配置自己的username' })
+    //   return console.warn('收到非白名单用户的请求')
+    // }
       const fid = extract_fid(text) || extract_from_text(text) || extract_from_text(message_str)
       const no_fid_commands = ['/task', '/help', '/bm']
       if (!no_fid_commands.some(cmd => text.startsWith(cmd)) && !validate_fid(fid)) {
@@ -106,6 +110,12 @@ bot.on('text', (msg) => {
 // Inline button callback
 bot.on('callbackQuery', msg => {
     // User message alert
+    const id = msg.from.id;
+    if(adminUsers.indexOf(id) < 0){
+        msg.reply.text('您的用户名或ID不在机器人的白名单中，如果是您配置的机器人，请先到config.js中配置自己的username')
+        return console.warn('收到非白名单用户的请求')
+    }
+
     if (msg) {
     const { id, message, data } = msg
     const chat_id = msg.from.id
@@ -149,12 +159,21 @@ bot.on('callbackQuery', msg => {
 //bot.sendMessage(854331334,"you gdutils_bot ins online!") 
 
 bot.on('/start', (msg) => {
+  const id = msg.from.id;
+  if(adminUsers.indexOf(id) < 0){
+      msg.reply.text('您的用户名或ID不在机器人的白名单中，如果是您配置的机器人，请先到config.js中配置自己的username');
+      return console.warn('收到非白名单用户的请求')
+  }
   msg.reply.text(`your chat id:\n ${msg.from.id}`);
   return bot.sendMessage(msg.from.id, "You gdutils_bot ins online!!");
 });
 
-
 bot.on('/restart', (msg) => {
+  const id = msg.from.id;
+  if(adminUsers.indexOf(id) < 0){
+      msg.reply.text('您的用户名或ID不在机器人的白名单中，如果是您配置的机器人，请先到config.js中配置自己的username');
+      return console.warn('收到非白名单用户的请求')
+  }
   console.log('run update')
   const shell = spawn('pm2',['restart all',]).on('error', function( err ){
       msg.reply.text(err);
@@ -167,6 +186,11 @@ bot.on('/restart', (msg) => {
 });
 
 bot.on('/update', msg => {
+  const id = msg.from.id;
+  if(adminUsers.indexOf(id) < 0){
+      msg.reply.text('您的用户名或ID不在机器人的白名单中，如果是您配置的机器人，请先到config.js中配置自己的username');
+      return console.warn('收到非白名单用户的请求')
+  }
   console.log('run update')
   const shell = spawn('git',['pull',]).on('error', function( err ){
       msg.reply.text(err);
@@ -185,8 +209,8 @@ bot.on(/^!.*/, (msg, props) => {
   // console.log(prex);
   const id = msg.from.id;
   if(adminUsers.indexOf(id) < 0){
-      msg.reply.text('You are not admin!');
-      return;
+      msg.reply.text('您的用户名或ID不在机器人的白名单中，如果是您配置的机器人，请先到config.js中配置自己的username');
+      return console.warn('收到非白名单用户的请求')
   }
 
   let words = String(msg.text).split(" ");
