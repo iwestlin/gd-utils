@@ -5,16 +5,15 @@ color_yellow='\033[1;32m'
 color_end='\033[0m'
 
 echo -e "\n$color_yellow===== <<gdutils项目一件部署脚本要求及说明>> =====$color_end"
-echo -e "$color_yellow---------------[ v2.1 by oneking ]---------------$color_end"
+echo -e "$color_yellow---------------[ change from v2.1 by oneking ]---------------$color_end"
 echo -e "$color_yellow 01.$color_end 本脚本是魔改的gdutils项目一键部署脚本;"
 echo -e "$color_yellow 02.$color_end 脚本包括“TD盘VPS上查询转存部署”和“Telegram机器人部署”两部分"
 echo -e "$color_yellow 03.$color_end 本脚本适应CentOS/Debian/Ubuntu三种操作系统，自动识别、自动选择对应分支一键安装部署"
 echo -e "$color_yellow 04.$color_end 三步即可完成部署：上传脚本到VPS → 设置脚本执行权限 → 运行"
 echo -e "$color_yellow 05.$color_end 准备工作一：在TG上注册好机器人取得并记录下该机器人TOKEN"
-echo -e "$color_yellow 06.$color_end 准备工作二：拥有一个域名绑定到cloudflare解析到该机器人所在服务器IP"
 echo -e "$color_yellow 07.$color_end 准备工作三：向机器人@userinfobot获取个人TG账号ID并记录"
 echo -e "$color_yellow 08.$color_end 准备工作四：注册好一个Google team drive加入sa并记录下该盘ID"
-echo -e "$color_yellow 09.$color_end 经测试可用完美安装系统：Centos 7/8 debian 9/10 ubuntu 16.04/18.04/19.10/20.04"
+
 echo -e "$color_yellow------------------------------------------------$color_end"
 read -s -n1 -p "★★★ 如已做好以上[5/6/7/8]准备或不需要安装Telegram机器人请按任意键开始部署，如未做好准备请按“Ctrl+c”终止脚本 ★★★"
 echo -e "\n$color_yellow------------------------------------------------$color_end"
