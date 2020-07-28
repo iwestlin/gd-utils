@@ -1,6 +1,12 @@
 ## 更新日志
 > 更新方法：在 gd-utils 目录下，执行 `git pull` 拉取最新代码，如果你使用了 pm2 守护进程，执行`pm2 reload server`刷新生效。
 
+[2020-07-28]  
+- 添加 [aria2.js](https://github.com/iwestlin/gd-utils/blob/master/aria2.js) 脚本，方便利用 `aria2c` 下载google drive目录，使用帮助可执行 `./aria2.js -h` 查看。
+
+相关 issue: [https://github.com/iwestlin/gd-utils/issues/133](https://github.com/iwestlin/gd-utils/issues/133)  
+使用录屏：[https://drive.google.com/file/d/1lzN7R9Klw66C5UttUUDN3_EsN3pNs62q/view](https://drive.google.com/file/d/1lzN7R9Klw66C5UttUUDN3_EsN3pNs62q/view)
+
 [2020-07-21]  
 - 添加数据库clear脚本，只需在`gd-utils`目录下执行`node clear-db.js`就可以删除所有获取的文件信息（但会保留拷贝记录和bookmark）同时减小数据库文件大小了
 - 调整提取分享链接的方法，基本能够识别所有类型消息中的分享ID
