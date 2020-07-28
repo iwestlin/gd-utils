@@ -850,4 +850,4 @@ function print_progress (msg) {
   }
 }
 
-module.exports = { ls_folder, count, validate_fid, copy, dedupe, copy_file, gen_count_body, real_copy, get_name_by_id, get_info_by_id }
+module.exports = { ls_folder, count, validate_fid, copy, dedupe, copy_file, gen_count_body, real_copy, get_name_by_id, get_info_by_id, get_access_token, get_sa_token, walk_and_save }
