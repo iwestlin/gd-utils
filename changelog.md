@@ -1,6 +1,12 @@
 ## 更新日志
 > 更新方法：在 gd-utils 目录下，执行 `git pull` 拉取最新代码，如果你使用了 pm2 守护进程，执行`pm2 reload server`刷新生效。
 
+[2020-07-28]  
+- 添加 [aria2.js](https://github.com/iwestlin/gd-utils/blob/master/aria2.js) 脚本，方便利用 `aria2c` 下载google drive目录，使用帮助可执行 `./aria2.js -h` 查看。
+
+相关 issue: [https://github.com/iwestlin/gd-utils/issues/133](https://github.com/iwestlin/gd-utils/issues/133)  
+使用录屏：[https://drive.google.com/file/d/1lzN7R9Klw66C5UttUUDN3_EsN3pNs62q/view](https://drive.google.com/file/d/1lzN7R9Klw66C5UttUUDN3_EsN3pNs62q/view)
+
 [2020-07-25]
 - 调整shell 执行结构 在bot中输入"! ls"等即可
 - 增加 在bot中升级bot功能,在bot中依次执行"/update" "/restart" (restart 功能仅限使用pm2 启动的bot)
