@@ -631,6 +631,7 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
     }
     try {
       const { data } = await axins.post(url, { parents: [parent] }, config)
+      gtoken.flaged = false
       return data
     } catch (err) {
       retry++
@@ -643,9 +644,14 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
         throw new Error(FILE_EXCEED_MSG)
       }
       if (use_sa && message && message.toLowerCase().includes('rate limit')) {
-        SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== gtoken)
-        if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
-        console.log('此帐号触发使用限额，剩余可用service account帐号数量：', SA_TOKENS.length)
+        if (gtoken.flaged) {
+          SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== gtoken)
+          if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
+          console.log('此帐号连续两次触发使用限额，剩余可用SA数量：', SA_TOKENS.length)
+        } else {
+          console.log('此帐号触发使用限额，已标记，若下次请求正常则解除标记，否则剔除此SA')
+          gtoken.flaged = true
+        }
       }
     }
   }
