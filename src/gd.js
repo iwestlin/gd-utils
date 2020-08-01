@@ -659,6 +659,7 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
 }
 
 async function create_folders ({ source, old_mapping, folders, root, task_id, service_account }) {
+  if (argv.dncf) return {} // do not copy folders
   if (!Array.isArray(folders)) throw new Error('folders must be Array:' + folders)
   const mapping = old_mapping || {}
   mapping[source] = root

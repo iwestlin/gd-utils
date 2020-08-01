@@ -44,8 +44,8 @@ async function gen_input_file ({fid, service_account, update, output}) {
 }
 
 function get_dir (id, folders) {
-  if (ID_DIR_MAPPING[id]) return ID_DIR_MAPPING[id]
-  let result = ''
+  let result = ID_DIR_MAPPING[id]
+  if (result !== undefined) return result
   let temp = id
   let folder = folders.filter(v => v.id === temp)[0]
   while (folder) {
@@ -57,5 +57,5 @@ function get_dir (id, folders) {
     }
     folder = folders.filter(v => v.id === temp)[0]
   }
-  return ID_DIR_MAPPING[id] = result
+  return ID_DIR_MAPPING[id] = result || ''
 }
