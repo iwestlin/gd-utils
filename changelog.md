@@ -1,8 +1,8 @@
 ## 更新日志
 > 更新方法：在 gd-utils 目录下，执行 `git pull` 拉取最新代码，如果你使用了 pm2 守护进程，执行`pm2 reload server`刷新生效。
 
-[2020-08-02]  
-- 最近Google Drive的 API 似乎有点抽风，转存新分享的资源时经常随机遇到`userRateLimitExceeded`的接口返回错误导致SA被剔除（即使是新加的SA也会遇到），而对于比较老的分享则没问题。  
+### [2020-08-02] 关于“没有可用的SA”报错信息
+- 最近Google Drive的 API 似乎有点抽风，转存新分享的资源时经常随机遇到`userRateLimitExceeded`（一般这种错误只会在SA用完每日转存流量750G时触发）的接口返回错误导致SA被剔除（即使是新加的SA也会遇到），而对于比较老的分享或者自己团队盘文件对拷则没问题。  
 不得已我只好修改了一下程序的逻辑，只有当SA连续两次遇到`userRateLimitExceeded`的错误时才会被剔除，在这种条件下，据我的观察，拷贝一个新分享的资源时，平均每转存100个文件会被剔除掉一个SA。  
 如果你不希望因为接口返回`userRateLimitExceeded`而剔除掉对应的SA，可以手动修改代码，方法见：https://github.com/iwestlin/gd-utils/issues/138#issuecomment-666156273
 - 命令行添加 `--dncf` 参数，表示`do not copy folders`，即转存资源时不复制任何递归子目录，直接将所有文件拷贝到新生成的文件夹中。
