@@ -2,7 +2,7 @@ const Table = require('cli-table3')
 const colors = require('colors/safe')
 const { escape } = require('html-escaper')
 
-module.exports = { make_table, summary, make_html, make_tg_table }
+module.exports = { make_table, summary, make_html, make_tg_table, format_size }
 
 function make_html ({ file_count, folder_count, total_size, details }) {
   const head = ['类型', '数量', '大小']
