@@ -8,8 +8,9 @@ const { GoogleToken } = require('gtoken')
 const handle_exit = require('signal-exit')
 const { argv } = require('yargs')
 
-let { PARALLEL_LIMIT } = require('../config')
+let { PARALLEL_LIMIT, EXCEED_LIMIT } = require('../config')
 PARALLEL_LIMIT = argv.l || argv.limit || PARALLEL_LIMIT
+EXCEED_LIMIT = EXCEED_LIMIT || 7
 
 const { AUTH, RETRY_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET } = require('../config')
 const { db } = require('../db')
@@ -346,7 +347,7 @@ async function get_sa_token () {
       if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
     }
   }
-  throw new Error('没有可用的SA帐号')
+  throw new Error('没有可用的SA')
 }
 
 async function real_get_sa_token (el) {
@@ -489,8 +490,6 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
       let files = arr.filter(v => v.mimeType !== FOLDER_TYPE).filter(v => !copied_ids[v.id])
       if (min_size) files = files.filter(v => v.size >= min_size)
       const folders = arr.filter(v => v.mimeType === FOLDER_TYPE)
-      console.log('待复制的目录数：', folders.length)
-      console.log('待复制的文件数：', files.length)
       const all_mapping = await create_folders({
         old_mapping,
         source,
@@ -558,7 +557,7 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
 
   const loop = setInterval(() => {
     const now = dayjs().format('HH:mm:ss')
-    const message = `${now} | 已复制文件数 ${count} | 排队中文件数 ${files.length}`
+    const message = `${now} | 已复制文件数 ${count} | 进行中 ${concurrency} | 排队中文件数 ${files.length}`
     print_progress(message)
   }, 1000)
 
@@ -631,7 +630,7 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
     }
     try {
       const { data } = await axins.post(url, { parents: [parent] }, config)
-      gtoken.flaged = false
+      gtoken.exceed_count = 0
       return data
     } catch (err) {
       retry++
@@ -644,13 +643,17 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
         throw new Error(FILE_EXCEED_MSG)
       }
       if (use_sa && message && message.toLowerCase().includes('rate limit')) {
-        if (gtoken.flaged) {
+        if (gtoken.exceed_count >= EXCEED_LIMIT) {
           SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== gtoken)
           if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
-          console.log('此帐号连续两次触发使用限额，剩余可用SA数量：', SA_TOKENS.length)
+          console.log(`此帐号连续${EXCEED_LIMIT}次触发使用限额，本批次剩余可用SA数量：`, SA_TOKENS.length)
         } else {
-          console.log('此帐号触发使用限额，已标记，若下次请求正常则解除标记，否则剔除此SA')
-          gtoken.flaged = true
+          // console.log('此帐号触发使用限额，已标记，若下次请求正常则解除标记，否则剔除此SA')
+          if (gtoken.exceed_count) {
+            gtoken.exceed_count++
+          } else {
+            gtoken.exceed_count = 1
+          }
         }
       }
     }
@@ -658,7 +661,7 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
   if (use_sa && !SA_TOKENS.length) {
     if (limit) limit.clearQueue()
     if (task_id) db.prepare('update task set status=? where id=?').run('error', task_id)
-    throw new Error('所有SA帐号流量已用完')
+    throw new Error('没有可用的SA')
   } else {
     console.warn('复制文件失败，文件id: ' + id)
   }
@@ -842,6 +845,8 @@ async function dedupe ({ fid, update, service_account, yes }) {
 function handle_error (err) {
   const data = err && err.response && err.response.data
   if (data) {
+    const message = data.error && data.error.message
+    if (message && message.toLowerCase().includes('rate limit')) return
     console.error(JSON.stringify(data))
   } else {
     if (!err.message.includes('timeout')) console.error(err.message)
