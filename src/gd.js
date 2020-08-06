@@ -643,6 +643,7 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
         throw new Error(FILE_EXCEED_MSG)
       }
       if (use_sa && message && message.toLowerCase().includes('rate limit')) {
+        retry--
         if (gtoken.exceed_count >= EXCEED_LIMIT) {
           SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== gtoken)
           if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
