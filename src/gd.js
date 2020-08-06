@@ -48,7 +48,7 @@ if (is_pm2()) {
   setInterval(() => {
     SA_FILES.flag = 0
     SA_TOKENS = get_sa_batch()
-  }, 1000 * 3600 * 12)
+  }, 1000 * 3600 * 2)
 }
 
 // https://github.com/Leelow/is-pm2/blob/master/index.js
