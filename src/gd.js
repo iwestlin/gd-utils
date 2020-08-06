@@ -630,7 +630,7 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
     }
     try {
       const { data } = await axins.post(url, { parents: [parent] }, config)
-      gtoken.exceed_count = 0
+      if (gtoken) gtoken.exceed_count = 0
       return data
     } catch (err) {
       retry++
