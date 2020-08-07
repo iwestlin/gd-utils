@@ -29,7 +29,8 @@
 [https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg](https://drive.google.com/drive/folders/124pjM5LggSuwI1n40bcD5tQ13wS0M6wg)
 
 ## English Version (thanks to [@roshanconnor123](https://github.com/roshanconnor123))
-[https://github.com/roshanconnor123/gd-utils](https://github.com/roshanconnor123/gd-utils)
+- [roshanconnor123/gd-utils](https://github.com/roshanconnor123/gd-utils)
+- [roshanconnor123/Gdutils_Tgbot](https://github.com/roshanconnor123/Gdutils_Tgbot)
 
 ## 无需域名和nginx版
 > 此版本无需域名和web服务即可使用tg机器人，大大简化了配置过程，感谢贡献者 [@dissipator](https://github.com/dissipator)
