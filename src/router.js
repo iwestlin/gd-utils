@@ -107,7 +107,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
   if (text.startsWith('/help')) return send_help(chat_id)
   if (text.startsWith('/reload')) {
     if (!is_pm2()) return sm({ chat_id, text: '进程并非pm2守护，不执行重启' })
-    return sm({ chat_id, text: '重启进程' }).then(() => process.exit())
+    sm({ chat_id, text: '重启进程' }).then(() => process.exit())
   } else if (text.startsWith('/bm')) {
     const [cmd, action, alias, target] = text.split(' ').map(v => v.trim()).filter(v => v)
     if (!action) return send_all_bookmarks(chat_id)
