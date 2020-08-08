@@ -334,7 +334,7 @@ async function get_access_token () {
   return data.access_token
 }
 
-// get_sa_token().catch(console.error)
+// get_sa_token().then(console.log).catch(console.error)
 async function get_sa_token () {
   if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
   while (SA_TOKENS.length) {
@@ -847,10 +847,10 @@ function handle_error (err) {
   const data = err && err.response && err.response.data
   if (data) {
     const message = data.error && data.error.message
-    if (message && message.toLowerCase().includes('rate limit')) return
+    if (message && message.toLowerCase().includes('rate limit') && !argv.verbose) return
     console.error(JSON.stringify(data))
   } else {
-    if (!err.message.includes('timeout')) console.error(err.message)
+    if (!err.message.includes('timeout') || argv.verbose) console.error(err.message)
   }
 }
 

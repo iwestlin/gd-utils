@@ -366,7 +366,7 @@ function extract_from_text (text) {
   // const reg = /https?:\/\/drive.google.com\/[^\s]+/g
   const reg = /https?:\/\/drive.google.com\/[a-zA-Z0-9_\\/?=&-]+/g
   const m = text.match(reg)
-  return m && extract_fid(m[0])
+  return m && extract_fid(m[0].trim())
 }
 
 module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy, extract_from_text, get_target_by_alias, send_bm_help, send_all_bookmarks, set_bookmark, unset_bookmark, clear_tasks, send_task_help, rm_task }
