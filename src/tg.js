@@ -343,7 +343,7 @@ function sm (data, endpoint) {
 }
 
 function extract_fid (text) {
-  text = text.replace(/^\/count/, '').replace(/^\/copy/, '').replace(/\\/g, '').trim()
+  text = text.replace(/^\/count/, '').replace(/^\/copy/, '').replace(/\\n/g, '').replace(/\\/g, '').trim()
   const [source, target] = text.split(' ').map(v => v.trim())
   if (validate_fid(source)) return source
   try {
@@ -366,7 +366,7 @@ function extract_from_text (text) {
   // const reg = /https?:\/\/drive.google.com\/[^\s]+/g
   const reg = /https?:\/\/drive.google.com\/[a-zA-Z0-9_\\/?=&-]+/g
   const m = text.match(reg)
-  return m && extract_fid(m[0].trim())
+  return m && extract_fid(m[0])
 }
 
 module.exports = { send_count, send_help, sm, extract_fid, reply_cb_query, send_choice, send_task_info, send_all_tasks, tg_copy, extract_from_text, get_target_by_alias, send_bm_help, send_all_bookmarks, set_bookmark, unset_bookmark, clear_tasks, send_task_help, rm_task }
