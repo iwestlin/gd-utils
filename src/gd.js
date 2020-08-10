@@ -81,13 +81,11 @@ handle_exit(() => {
 
 async function gen_count_body ({ fid, type, update, service_account }) {
   async function update_info () {
-    const info = await walk_and_save({ fid, update, service_account }) // 这一步已经将fid记录存入数据库中了
-    const row = db.prepare('SELECT summary from gd WHERE fid=?').get(fid)
-    if (!row) return []
-    return [info, JSON.parse(row.summary)]
+    const info = await walk_and_save({ fid, update, service_account })
+    return [info, summary(info)]
   }
 
-  function render_smy (smy, type) {
+  function render_smy (smy, type, unfinished_number) {
     if (!smy) return
     if (['html', 'curl', 'tg'].includes(type)) {
       smy = (typeof smy === 'object') ? smy : JSON.parse(smy)
@@ -96,7 +94,9 @@ async function gen_count_body ({ fid, type, update, service_account }) {
         curl: make_table,
         tg: make_tg_table
       }
-      return type_func[type](smy)
+      let result = type_func[type](smy)
+      if (unfinished_number) result += `\n未统计完成目录数量：${unfinished_number}`
+      return result
     } else { // 默认输出json
       return (typeof smy === 'string') ? smy : JSON.stringify(smy)
     }
@@ -124,7 +124,7 @@ async function gen_count_body ({ fid, type, update, service_account }) {
   } else {
     [info, smy] = await update_info()
   }
-  return render_smy(smy, type)
+  return render_smy(smy, type, info.unfinished_number)
 }
 
 async function count ({ fid, update, sort, type, output, not_teamdrive, service_account }) {
@@ -199,7 +199,7 @@ function get_all_by_fid (fid) {
 
 async function walk_and_save ({ fid, not_teamdrive, update, service_account }) {
   let result = []
-  const not_finished = []
+  const unfinished_folders = []
   const limit = pLimit(PARALLEL_LIMIT)
 
   const loop = setInterval(() => {
@@ -223,7 +223,7 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account }) {
       }
     }
     if (!files) return
-    if (files.not_finished) not_finished.push(parent)
+    if (files.unfinished) unfinished_folders.push(parent)
     should_save && save_files_to_db(parent, files)
     const folders = files.filter(v => v.mimeType === FOLDER_TYPE)
     files.forEach(v => v.parent = parent)
@@ -236,16 +236,17 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account }) {
     console.error(e)
   }
   console.log('\n信息获取完毕')
-  not_finished.length ? console.log('未读取完毕的目录ID：', JSON.stringify(not_finished)) : console.log('所有目录读取完毕')
+  unfinished_folders.length ? console.log('未读取完毕的目录ID：', JSON.stringify(unfinished_folders)) : console.log('所有目录读取完毕')
   clearInterval(loop)
-  const smy = summary(result)
+  const smy = unfinished_folders.length ? null : summary(result)
   db.prepare('UPDATE gd SET summary=?, mtime=? WHERE fid=?').run(JSON.stringify(smy), Date.now(), fid)
+  result.unfinished_number = unfinished_folders.length
   return result
 }
 
 function save_files_to_db (fid, files) {
   // 不保存请求未完成的目录，那么下次调用get_all_by_id会返回null，从而再次调用walk_and_save试图完成此目录的请求
-  if (files.not_finished) return
+  if (files.unfinished) return
   let subf = files.filter(v => v.mimeType === FOLDER_TYPE).map(v => v.id)
   subf = subf.length ? JSON.stringify(subf) : null
   const exists = db.prepare('SELECT fid FROM gd WHERE fid = ?').get(fid)
@@ -294,7 +295,7 @@ async function ls_folder ({ fid, not_teamdrive, service_account }) {
     }
     if (!data) {
       console.error('读取目录未完成(部分读取), 参数:', params)
-      files.not_finished = true
+      files.unfinished = true
       return files
     }
     files = files.concat(data.files)
