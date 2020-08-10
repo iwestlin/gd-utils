@@ -132,6 +132,10 @@ async function count ({ fid, update, sort, type, output, not_teamdrive, service_
   type = (type || '').toLowerCase()
   output = (output || '').toLowerCase()
   if (!update) {
+    if (!type && !sort && !output) {
+      const record = db.prepare('SELECT * FROM gd WHERE fid = ?').get(fid)
+      if (record && record.summary) return console.log(make_table(JSON.parse(record.summary)))
+    }
     const info = get_all_by_fid(fid)
     if (info) {
       console.log('找到本地缓存数据，缓存时间：', dayjs(info.mtime).format('YYYY-MM-DD HH:mm:ss'))
