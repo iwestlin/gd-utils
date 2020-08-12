@@ -206,6 +206,11 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account }) {
   const unfinished_folders = []
   const limit = pLimit(PARALLEL_LIMIT)
 
+  if (update) {
+    const exists = db.prepare('SELECT fid FROM gd WHERE fid = ?').get(fid)
+    exists && db.prepare('UPDATE gd SET summary=? WHERE fid=?').run(null, fid)
+  }
+
   const loop = setInterval(() => {
     const now = dayjs().format('HH:mm:ss')
     const message = `${now} | 已获取对象 ${result.length} | 网络请求 进行中${limit.activeCount}/排队中${limit.pendingCount}`
