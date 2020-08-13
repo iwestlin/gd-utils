@@ -16,6 +16,7 @@ const { AUTH, RETRY_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFA
 const { db } = require('../db')
 const { make_table, make_tg_table, make_html, summary } = require('./summary')
 const { gen_tree_html } = require('./tree')
+const { snap2html } = require('./snap2html')
 
 const FILE_EXCEED_MSG = '您的团队盘文件数已超限(40万)，停止复制。请将未复制完成的文件夹(或者它的任意子文件夹)移到另一个(sa也有权限的)团队盘中，再执行一遍复制指令即可接上进度继续复制(是的你没看错...)'
 const FOLDER_TYPE = 'application/vnd.google-apps.folder'
@@ -131,6 +132,7 @@ async function count ({ fid, update, sort, type, output, not_teamdrive, service_
   sort = (sort || '').toLowerCase()
   type = (type || '').toLowerCase()
   output = (output || '').toLowerCase()
+  let out_str
   if (!update) {
     if (!type && !sort && !output) {
       const record = db.prepare('SELECT * FROM gd WHERE fid = ?').get(fid)
@@ -139,13 +141,24 @@ async function count ({ fid, update, sort, type, output, not_teamdrive, service_
     const info = get_all_by_fid(fid)
     if (info) {
       console.log('找到本地缓存数据，缓存时间：', dayjs(info.mtime).format('YYYY-MM-DD HH:mm:ss'))
-      const out_str = get_out_str({ info, type, sort })
+      if (type === 'snap') {
+        const root = await get_info_by_id(fid, service_account)
+        out_str = snap2html({ root, data: info })
+      } else {
+        out_str = get_out_str({ info, type, sort })
+      }
       if (output) return fs.writeFileSync(output, out_str)
       return console.log(out_str)
     }
   }
-  const result = await walk_and_save({ fid, not_teamdrive, update, service_account })
-  const out_str = get_out_str({ info: result, type, sort })
+  const with_modifiedTime = type === 'snap'
+  const result = await walk_and_save({ fid, not_teamdrive, update, service_account, with_modifiedTime })
+  if (type === 'snap') {
+    const root = await get_info_by_id(fid, service_account)
+    out_str = snap2html({ root, data: result })
+  } else {
+    out_str = get_out_str({ info: result, type, sort })
+  }
   if (output) {
     fs.writeFileSync(output, out_str)
   } else {
@@ -201,7 +214,7 @@ function get_all_by_fid (fid) {
   }
 }
 
-async function walk_and_save ({ fid, not_teamdrive, update, service_account }) {
+async function walk_and_save ({ fid, not_teamdrive, update, service_account, with_modifiedTime }) {
   let result = []
   const unfinished_folders = []
   const limit = pLimit(PARALLEL_LIMIT)
@@ -220,14 +233,14 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account }) {
   async function recur (parent) {
     let files, should_save
     if (update) {
-      files = await limit(() => ls_folder({ fid: parent, not_teamdrive, service_account }))
+      files = await limit(() => ls_folder({ fid: parent, not_teamdrive, service_account, with_modifiedTime }))
       should_save = true
     } else {
       const record = db.prepare('SELECT * FROM gd WHERE fid = ?').get(parent)
       if (record) {
         files = JSON.parse(record.info)
       } else {
-        files = await limit(() => ls_folder({ fid: parent, not_teamdrive, service_account }))
+        files = await limit(() => ls_folder({ fid: parent, not_teamdrive, service_account, with_modifiedTime }))
         should_save = true
       }
     }
@@ -268,7 +281,7 @@ function save_files_to_db (fid, files) {
   }
 }
 
-async function ls_folder ({ fid, not_teamdrive, service_account }) {
+async function ls_folder ({ fid, not_teamdrive, service_account, with_modifiedTime }) {
   let files = []
   let pageToken
   const search_all = { includeItemsFromAllDrives: true, supportsAllDrives: true }
@@ -276,6 +289,9 @@ async function ls_folder ({ fid, not_teamdrive, service_account }) {
   params.q = `'${fid}' in parents and trashed = false`
   params.orderBy = 'folder,name desc'
   params.fields = 'nextPageToken, files(id, name, mimeType, size, md5Checksum)'
+  if (with_modifiedTime) {
+    params.fields = 'nextPageToken, files(id, name, mimeType, modifiedTime, size, md5Checksum)'
+  }
   params.pageSize = Math.min(PAGE_SIZE, 1000)
   // const use_sa = (fid !== 'root') && (service_account || !not_teamdrive) // 不带参数默认使用sa
   const use_sa = (fid !== 'root') && service_account
@@ -430,7 +446,7 @@ async function get_info_by_id (fid, use_sa) {
     includeItemsFromAllDrives: true,
     supportsAllDrives: true,
     corpora: 'allDrives',
-    fields: 'id, name, size, parents, mimeType'
+    fields: 'id, name, size, parents, mimeType, modifiedTime'
   }
   url += '?' + params_to_query(params)
   const headers = await gen_headers(use_sa)
