@@ -1,6 +1,14 @@
 ## 更新日志
 > 更新方法：在 gd-utils 目录下，执行 `git pull` 拉取最新代码，如果你使用了 pm2 守护进程，执行`pm2 reload server`刷新生效。
 
+### [2020-08-13]
+- 给命令行 `./count` 添加 [snap2html](https://github.com/rlv-dan/Snap2HTML) 的导出方式，示例用法：
+```bash
+./count folderID -S -t snap -o example.html
+```
+导出html示例：[example.html](https://code.viegg.com/single/snap2html-example.html)
+源文件夹链接：[999](https://drive.google.com/drive/folders/1A35MT6auEHASo3egpZ3VINMOwvA47cJG)
+
 ### [2020-08-08]
 - 给机器人添加 `/reload` 指令，表示重启进程，中断所有进行中的任务(前提是进程由pm2守护)
 
