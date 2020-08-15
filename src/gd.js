@@ -619,7 +619,8 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
       concurrency--
     })
   } while (concurrency || files.length)
-  return clearInterval(loop)
+  clearInterval(loop)
+  if (err) throw err
   // const limit = pLimit(PARALLEL_LIMIT)
   // let count = 0
   // const loop = setInterval(() => {
@@ -667,6 +668,9 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
         if (limit) limit.clearQueue()
         if (task_id) db.prepare('update task set status=? where id=?').run('error', task_id)
         throw new Error(FILE_EXCEED_MSG)
+      }
+      if (!use_sa && message && message.toLowerCase().includes('rate limit')) {
+        throw new Error('个人帐号触发限制：' + message)
       }
       if (use_sa && message && message.toLowerCase().includes('rate limit')) {
         retry--
