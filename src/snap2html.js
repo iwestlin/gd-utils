@@ -58,6 +58,10 @@ function unix_time (t) {
   return parseInt(t / 1000, 10)
 }
 
+function escape_name (name) {
+  return name.replace(/\*/g, '&#42;')
+}
+
 function trans (arr, root) {
   if (!arr.length) return arr
   const first = arr[0]
@@ -66,11 +70,11 @@ function trans (arr, root) {
   dirs.unshift(root)
   dirs = dirs.map(dir => {
     const { name, id, size, modifiedTime } = dir
-    const path = root.name + get_path(id, arr)
-    let result = [`${path}*0*${unix_time(modifiedTime)}`]
+    const dir_path = root.name + get_path(id, arr)
+    let result = [`${escape_name(dir_path)}*0*${unix_time(modifiedTime)}`]
     const children = arr.filter(v => v.parent === id)
     const child_files = children.filter(v => !is_folder(v)).map(file => {
-      return `${file.name}*${file.size}*${unix_time(file.modifiedTime)}`
+      return `${escape_name(file.name)}*${file.size}*${unix_time(file.modifiedTime)}`
     })
     result = result.concat(child_files)
     result.push(size)
