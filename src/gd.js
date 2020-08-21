@@ -12,7 +12,7 @@ let { PARALLEL_LIMIT, EXCEED_LIMIT } = require('../config')
 PARALLEL_LIMIT = argv.l || argv.limit || PARALLEL_LIMIT
 EXCEED_LIMIT = EXCEED_LIMIT || 7
 
-const { AUTH, RETRY_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET } = require('../config')
+const { AUTH, USE_PERSONAL_AUTH, RETRY_LIMIT, TIMEOUT_BASE, TIMEOUT_MAX, LOG_DELAY, PAGE_SIZE, DEFAULT_TARGET } = require('../config')
 const { db } = require('../db')
 const { make_table, make_tg_table, make_html, summary } = require('./summary')
 const { gen_tree_html } = require('./tree')
@@ -472,6 +472,11 @@ async function user_choose () {
 async function copy ({ source, target, name, min_size, update, not_teamdrive, service_account, dncnr, is_server }) {
   target = target || DEFAULT_TARGET
   if (!target) throw new Error('目标位置不能为空')
+
+  const file = await get_info_by_id(source, !USE_PERSONAL_AUTH)
+  if (file && file.mimeType !== FOLDER_TYPE) {
+    return copy_file(source, target, !USE_PERSONAL_AUTH).catch(console.error)
+  }
 
   const record = db.prepare('select id, status from task where source=? and target=?').get(source, target)
   if (record && record.status === 'copying') return console.log('已有相同源和目的地的任务正在运行，强制退出')
