@@ -136,7 +136,8 @@ async function count ({ fid, update, sort, type, output, not_teamdrive, service_
   if (!update) {
     if (!type && !sort && !output) {
       const record = db.prepare('SELECT * FROM gd WHERE fid = ?').get(fid)
-      if (record && record.summary) return console.log(make_table(JSON.parse(record.summary)))
+      const smy = record && record.summary && JSON.parse(record.summary)
+      if (smy) return console.log(make_table(smy))
     }
     const info = get_all_by_fid(fid)
     if (info) {
