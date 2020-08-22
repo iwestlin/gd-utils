@@ -262,7 +262,7 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account, wit
   unfinished_folders.length ? console.log('未读取完毕的目录ID：', JSON.stringify(unfinished_folders)) : console.log('所有目录读取完毕')
   clearInterval(loop)
   const smy = unfinished_folders.length ? null : summary(result)
-  db.prepare('UPDATE gd SET summary=?, mtime=? WHERE fid=?').run(JSON.stringify(smy), Date.now(), fid)
+  db.prepare('UPDATE gd SET summary=?, mtime=? WHERE fid=?').run(smy && JSON.stringify(smy), Date.now(), fid)
   result.unfinished_number = unfinished_folders.length
   return result
 }
@@ -602,7 +602,7 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
       files = null
       throw err
     }
-    if (concurrency > PARALLEL_LIMIT) {
+    if (concurrency >= PARALLEL_LIMIT) {
       await sleep(100)
       continue
     }
@@ -635,6 +635,7 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
   //   const message = `${now} | 已复制文件数 ${count} | 网络请求 进行中${activeCount}/排队中${pendingCount}`
   //   print_progress(message)
   // }, 1000)
+  // 可能造成内存占用过大被node强制退出
   // return Promise.all(files.map(async file => {
   //   const { id, parent } = file
   //   const target = mapping[parent] || root
