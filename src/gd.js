@@ -107,6 +107,9 @@ async function gen_count_body ({ fid, type, update, service_account }) {
 
   let info, smy
   const record = db.prepare('SELECT * FROM gd WHERE fid = ?').get(fid)
+  if (!file && !record) {
+    throw new Error(`无法获取对象信息，请检查链接是否有效且SA拥有相应的权限：https://drive.google.com/drive/folders/${fid}`)
+  }
   if (!record || update) {
     [info, smy] = await update_info()
   }
