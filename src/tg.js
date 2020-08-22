@@ -240,7 +240,11 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
     sm({ chat_id, text: '请输入目的地ID或先在config.js里设置默认复制目的地ID(DEFAULT_TARGET)' })
     return
   }
+
   const file = await get_info_by_id(fid, !USE_PERSONAL_AUTH)
+  if (!file) {
+    return sm({ chat_id, text: `无法获取对象信息，请检查链接是否有效且SA拥有相应的权限：https://drive.google.com/drive/folders/${fid}` })
+  }
   if (file && file.mimeType !== 'application/vnd.google-apps.folder') {
     return copy_file(fid, target, !USE_PERSONAL_AUTH).then(data => {
       sm({ chat_id, parse_mode: 'HTML', text: `复制单文件成功，文件位置：${gen_link(target)}` })
@@ -317,6 +321,7 @@ ${table}</pre>`
     if (true) {
       const smy = await gen_count_body({ fid, type: 'json', service_account: !USE_PERSONAL_AUTH })
       const { file_count, folder_count, total_size } = JSON.parse(smy)
+      // TODO 显示前n条
       return sm({
         chat_id,
         parse_mode: 'HTML',
@@ -329,7 +334,7 @@ ${table}</pre>`
 </pre>`
       })
     }
-    throw err
+    // throw err
   })
 }
 

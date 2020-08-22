@@ -143,8 +143,8 @@ async function count ({ fid, update, sort, type, output, not_teamdrive, service_
     if (info) {
       console.log('找到本地缓存数据，缓存时间：', dayjs(info.mtime).format('YYYY-MM-DD HH:mm:ss'))
       if (type === 'snap') {
-        const root = await get_info_by_id(fid, service_account)
-        out_str = snap2html({ root, data: info })
+        const name = await get_name_by_id(fid, service_account)
+        out_str = snap2html({ root: {name, id: fid}, data: info })
       } else {
         out_str = get_out_str({ info, type, sort })
       }
@@ -155,8 +155,8 @@ async function count ({ fid, update, sort, type, output, not_teamdrive, service_
   const with_modifiedTime = type === 'snap'
   const result = await walk_and_save({ fid, not_teamdrive, update, service_account, with_modifiedTime })
   if (type === 'snap') {
-    const root = await get_info_by_id(fid, service_account)
-    out_str = snap2html({ root, data: result })
+    const name = await get_name_by_id(fid, service_account)
+    out_str = snap2html({ root: {name, id: fid}, data: result })
   } else {
     out_str = get_out_str({ info: result, type, sort })
   }
@@ -433,12 +433,8 @@ async function create_folder (name, parent, use_sa, limit) {
 }
 
 async function get_name_by_id (fid, use_sa) {
-  try {
-    const { name } = await get_info_by_id(fid, use_sa)
-    return name
-  } catch (e) {
-    return fid
-  }
+  const info = await get_info_by_id(fid, use_sa)
+  return info ? info.name : fid
 }
 
 async function get_info_by_id (fid, use_sa) {
@@ -450,9 +446,18 @@ async function get_info_by_id (fid, use_sa) {
     fields: 'id, name, size, parents, mimeType, modifiedTime'
   }
   url += '?' + params_to_query(params)
-  const headers = await gen_headers(use_sa)
-  const { data } = await axins.get(url, { headers })
-  return data
+  let retry = 0
+  while (retry < RETRY_LIMIT) {
+    try {
+      const headers = await gen_headers(use_sa)
+      const { data } = await axins.get(url, { headers })
+      return data
+    } catch (e) {
+      retry++
+      handle_error(e)
+    }
+  }
+  // throw new Error('无法获取此ID的文件信息：' + fid)
 }
 
 async function user_choose () {
@@ -474,13 +479,10 @@ async function copy ({ source, target, name, min_size, update, not_teamdrive, se
   target = target || DEFAULT_TARGET
   if (!target) throw new Error('目标位置不能为空')
 
-  try {
-    const file = await get_info_by_id(source, service_account)
-    if (file && file.mimeType !== FOLDER_TYPE) {
-      return copy_file(source, target, service_account).catch(console.error)
-    }
-  } catch (e) {
-    handle_error(e)
+  const file = await get_info_by_id(source, service_account)
+  if (!file) return console.error(`无法获取对象信息，请检查链接是否有效且SA拥有相应的权限：https://drive.google.com/drive/folders/${source}`)
+  if (file && file.mimeType !== FOLDER_TYPE) {
+    return copy_file(source, target, service_account).catch(console.error)
   }
 
   const record = db.prepare('select id, status from task where source=? and target=?').get(source, target)
@@ -502,8 +504,9 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
     if (name) {
       return create_folder(name, target, service_account)
     } else {
-      const source_info = await get_info_by_id(source, service_account)
-      return create_folder(source_info.name, target, service_account)
+      const file = await get_info_by_id(source, service_account)
+      if (!file) throw new Error(`无法获取对象信息，请检查链接是否有效且SA拥有相应的权限：https://drive.google.com/drive/folders/${fid}`)
+      return create_folder(file.name, target, service_account)
     }
   }
 

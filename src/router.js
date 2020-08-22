@@ -75,7 +75,10 @@ router.post('/api/gdurl/tgbot', async ctx => {
     } else if (action === 'update') {
       if (counting[fid]) return sm({ chat_id, text: fid + ' 正在统计，请稍等片刻' })
       counting[fid] = true
-      send_count({ fid, chat_id, update: true }).finally(() => {
+      send_count({ fid, chat_id, update: true }).catch(err => {
+        console.error(err)
+        sm({ chat_id, text: fid + ' 统计失败：' + err.message })
+      }).finally(() => {
         delete counting[fid]
       })
     } else if (action === 'clear_button') {
