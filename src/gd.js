@@ -262,7 +262,7 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account, wit
   unfinished_folders.length ? console.log('未读取完毕的目录ID：', JSON.stringify(unfinished_folders)) : console.log('所有目录读取完毕')
   clearInterval(loop)
   const smy = unfinished_folders.length ? null : summary(result)
-  db.prepare('UPDATE gd SET summary=?, mtime=? WHERE fid=?').run(smy && JSON.stringify(smy), Date.now(), fid)
+  smy && db.prepare('UPDATE gd SET summary=?, mtime=? WHERE fid=?').run(JSON.stringify(smy), Date.now(), fid)
   result.unfinished_number = unfinished_folders.length
   return result
 }
