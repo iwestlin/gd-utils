@@ -474,9 +474,13 @@ async function copy ({ source, target, name, min_size, update, not_teamdrive, se
   target = target || DEFAULT_TARGET
   if (!target) throw new Error('目标位置不能为空')
 
-  const file = await get_info_by_id(source, service_account)
-  if (file && file.mimeType !== FOLDER_TYPE) {
-    return copy_file(source, target, service_account).catch(console.error)
+  try {
+    const file = await get_info_by_id(source, service_account)
+    if (file && file.mimeType !== FOLDER_TYPE) {
+      return copy_file(source, target, service_account).catch(console.error)
+    }
+  } catch (e) {
+    handle_error(e)
   }
 
   const record = db.prepare('select id, status from task where source=? and target=?').get(source, target)
