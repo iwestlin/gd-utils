@@ -178,13 +178,11 @@ async function send_all_tasks (chat_id) {
     parse_mode: 'HTML',
     text: `所有拷贝任务：\n<pre>${text}</pre>`
   }).catch(err => {
+    console.error(err.message)
     // const description = err.response && err.response.data && err.response.data.description
     // if (description && description.includes('message is too long')) {
-    if (true) {
-      const text = [headers].concat(records.slice(-100)).map(v => v.join('\t')).join('\n')
-      return sm({ chat_id, parse_mode: 'HTML', text: `所有拷贝任务(只显示最近100条)：\n<pre>${text}</pre>` })
-    }
-    console.error(err)
+    const text = [headers].concat(records.slice(-100)).map(v => v.join('\t')).join('\n')
+    return sm({ chat_id, parse_mode: 'HTML', text: `所有拷贝任务(只显示最近100条)：\n<pre>${text}</pre>` })
   })
 }
 
@@ -236,15 +234,12 @@ async function send_task_info ({ task_id, chat_id }) {
 
 async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
   target = target || DEFAULT_TARGET
-  if (!target) {
-    sm({ chat_id, text: '请输入目的地ID或先在config.js里设置默认复制目的地ID(DEFAULT_TARGET)' })
-    return
-  }
+  if (!target) return sm({ chat_id, text: '请输入目的地ID或先在config.js里设置默认复制目的地ID(DEFAULT_TARGET)' })
 
   const file = await get_info_by_id(fid, !USE_PERSONAL_AUTH)
   if (!file) {
-    sm({ chat_id, text: `无法获取对象信息，请检查链接是否有效且SA拥有相应的权限：https://drive.google.com/drive/folders/${fid}` })
-    return
+    const text = `无法获取对象信息，请检查链接是否有效且SA拥有相应的权限：https://drive.google.com/drive/folders/${fid}`
+    return sm({ chat_id, text })
   }
   if (file && file.mimeType !== 'application/vnd.google-apps.folder') {
     return copy_file(fid, target, !USE_PERSONAL_AUTH).then(data => {
@@ -257,8 +252,7 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
   let record = db.prepare('select id, status from task where source=? and target=?').get(fid, target)
   if (record) {
     if (record.status === 'copying') {
-      sm({ chat_id, text: '已有相同源ID和目的ID的任务正在进行，查询进度可输入 /task ' + record.id })
-      return
+      return sm({ chat_id, text: '已有相同源ID和目的ID的任务正在进行，查询进度可输入 /task ' + record.id })
     } else if (record.status === 'finished') {
       sm({ chat_id, text: `检测到已存在的任务 ${record.id}，开始继续拷贝` })
     }
@@ -316,26 +310,24 @@ async function send_count ({ fid, chat_id, update }) {
 源链接：${gd_link}
 ${table}</pre>`
   }).catch(async err => {
+    console.log(err.message)
     // const description = err.response && err.response.data && err.response.data.description
     // const too_long_msgs = ['request entity too large', 'message is too long']
     // if (description && too_long_msgs.some(v => description.toLowerCase().includes(v))) {
-    if (true) {
-      const smy = await gen_count_body({ fid, type: 'json', service_account: !USE_PERSONAL_AUTH })
-      const { file_count, folder_count, total_size } = JSON.parse(smy)
-      // TODO 显示前n条
-      return sm({
-        chat_id,
-        parse_mode: 'HTML',
-        text: `链接：<a href="https://drive.google.com/drive/folders/${fid}">${fid}</a>\n<pre>
+    const smy = await gen_count_body({ fid, type: 'json', service_account: !USE_PERSONAL_AUTH })
+    const { file_count, folder_count, total_size } = JSON.parse(smy)
+    // TODO 显示前n条
+    return sm({
+      chat_id,
+      parse_mode: 'HTML',
+      text: `链接：<a href="https://drive.google.com/drive/folders/${fid}">${fid}</a>\n<pre>
 表格太长超出telegram消息限制，只显示概要：
 目录名称：${name}
 文件总数：${file_count}
 目录总数：${folder_count}
 合计大小：${total_size}
 </pre>`
-      })
-    }
-    // throw err
+    })
   })
 }
 

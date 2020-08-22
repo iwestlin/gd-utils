@@ -147,7 +147,7 @@ async function count ({ fid, update, sort, type, output, not_teamdrive, service_
       console.log('找到本地缓存数据，缓存时间：', dayjs(info.mtime).format('YYYY-MM-DD HH:mm:ss'))
       if (type === 'snap') {
         const name = await get_name_by_id(fid, service_account)
-        out_str = snap2html({ root: {name, id: fid}, data: info })
+        out_str = snap2html({ root: { name, id: fid }, data: info })
       } else {
         out_str = get_out_str({ info, type, sort })
       }
@@ -159,7 +159,7 @@ async function count ({ fid, update, sort, type, output, not_teamdrive, service_
   const result = await walk_and_save({ fid, not_teamdrive, update, service_account, with_modifiedTime })
   if (type === 'snap') {
     const name = await get_name_by_id(fid, service_account)
-    out_str = snap2html({ root: {name, id: fid}, data: result })
+    out_str = snap2html({ root: { name, id: fid }, data: result })
   } else {
     out_str = get_out_str({ info: result, type, sort })
   }
@@ -508,7 +508,7 @@ async function real_copy ({ source, target, name, min_size, update, dncnr, not_t
       return create_folder(name, target, service_account)
     } else {
       const file = await get_info_by_id(source, service_account)
-      if (!file) throw new Error(`无法获取对象信息，请检查链接是否有效且SA拥有相应的权限：https://drive.google.com/drive/folders/${fid}`)
+      if (!file) throw new Error(`无法获取对象信息，请检查链接是否有效且SA拥有相应的权限：https://drive.google.com/drive/folders/${source}`)
       return create_folder(file.name, target, service_account)
     }
   }

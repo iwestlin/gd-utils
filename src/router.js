@@ -15,6 +15,10 @@ function is_pm2 () {
   return 'PM2_HOME' in process.env || 'PM2_JSON_PROCESSING' in process.env || 'PM2_CLI' in process.env
 }
 
+function is_int (n) {
+  return n === parseInt(n)
+}
+
 router.get('/api/gdurl/count', async ctx => {
   if (!ROUTER_PASSKEY) return ctx.body = 'gd-utils 成功启动'
   const { query, headers } = ctx.request
@@ -70,7 +74,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
       if (COPYING_FIDS[fid]) return sm({ chat_id, text: `正在处理 ${fid} 的复制命令` })
       COPYING_FIDS[fid] = true
       tg_copy({ fid, target: get_target_by_alias(target), chat_id }).then(task_id => {
-        task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
+        is_int(task_id) && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
       }).finally(() => COPYING_FIDS[fid] = false)
     } else if (action === 'update') {
       if (counting[fid]) return sm({ chat_id, text: fid + ' 正在统计，请稍等片刻' })
@@ -143,7 +147,7 @@ router.post('/api/gdurl/tgbot', async ctx => {
     if (target && !validate_fid(target)) return sm({ chat_id, text: `目标ID ${target} 格式不正确` })
     const update = text.endsWith(' -u')
     tg_copy({ fid, target, chat_id, update }).then(task_id => {
-      task_id && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
+      is_int(task_id) && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
     })
   } else if (text.startsWith('/task')) {
     let task_id = text.replace('/task', '').trim()

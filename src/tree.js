@@ -51,7 +51,7 @@ function gen_tree_data (data, is_folder) {
   sort_folders(folders, 'count')
   sort_folders(sub_folders, 'count')
   folders.forEach(v => {
-    let {name, size, count, id} = v
+    let { name, size, count, id } = v
     if (name.length > 50) name = name.slice(0, 48) + '...'
     v.title = `${name} | [共${count}个文件 ${format_size(size)}]`
   })
@@ -66,7 +66,7 @@ function sort_folders (folders, type) {
 }
 
 function gen_node (v, folders) {
-  const {id, title, node} = v
+  const { id, title, node } = v
   if (node) return node
   return v.node = {
     title,
