@@ -243,7 +243,8 @@ async function tg_copy ({ fid, target, chat_id, update }) { // return task_id
 
   const file = await get_info_by_id(fid, !USE_PERSONAL_AUTH)
   if (!file) {
-    return sm({ chat_id, text: `无法获取对象信息，请检查链接是否有效且SA拥有相应的权限：https://drive.google.com/drive/folders/${fid}` })
+    sm({ chat_id, text: `无法获取对象信息，请检查链接是否有效且SA拥有相应的权限：https://drive.google.com/drive/folders/${fid}` })
+    return
   }
   if (file && file.mimeType !== 'application/vnd.google-apps.folder') {
     return copy_file(fid, target, !USE_PERSONAL_AUTH).then(data => {
