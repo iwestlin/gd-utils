@@ -71,11 +71,11 @@ router.post('/api/gdurl/tgbot', async ctx => {
         delete counting[fid]
       })
     } else if (action === 'copy') {
-      if (COPYING_FIDS[fid]) return sm({ chat_id, text: `正在处理 ${fid} 的复制命令` })
-      COPYING_FIDS[fid] = true
+      if (COPYING_FIDS[fid + target]) return sm({ chat_id, text: '正在处理相同源和目的地的复制命令' })
+      COPYING_FIDS[fid + target] = true
       tg_copy({ fid, target: get_target_by_alias(target), chat_id }).then(task_id => {
         is_int(task_id) && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
-      }).finally(() => COPYING_FIDS[fid] = false)
+      }).finally(() => COPYING_FIDS[fid + target] = false)
     } else if (action === 'update') {
       if (counting[fid]) return sm({ chat_id, text: fid + ' 正在统计，请稍等片刻' })
       counting[fid] = true
@@ -145,10 +145,12 @@ router.post('/api/gdurl/tgbot', async ctx => {
     let target = text.replace('/copy', '').replace(' -u', '').trim().split(' ').map(v => v.trim()).filter(v => v)[1]
     target = get_target_by_alias(target) || target
     if (target && !validate_fid(target)) return sm({ chat_id, text: `目标ID ${target} 格式不正确` })
+    if (COPYING_FIDS[fid + target]) return sm({ chat_id, text: '正在处理相同源和目的地的复制命令' })
+    COPYING_FIDS[fid + target] = true
     const update = text.endsWith(' -u')
     tg_copy({ fid, target, chat_id, update }).then(task_id => {
       is_int(task_id) && sm({ chat_id, text: `开始复制，任务ID: ${task_id} 可输入 /task ${task_id} 查询进度` })
-    })
+    }).finally(() => COPYING_FIDS[fid + target] = false)
   } else if (text.startsWith('/task')) {
     let task_id = text.replace('/task', '').trim()
     if (task_id === 'all') {

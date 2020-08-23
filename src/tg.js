@@ -227,6 +227,7 @@ async function send_task_info ({ task_id, chat_id }) {
   if (!message_id || status !== 'copying') return
   const loop = setInterval(async () => {
     const { text, status } = await get_task_info(task_id)
+    // TODO check if text changed
     if (status !== 'copying') clearInterval(loop)
     sm({ chat_id, message_id, text, parse_mode: 'HTML' }, 'editMessageText')
   }, 10 * 1000)
