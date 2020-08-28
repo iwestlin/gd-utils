@@ -306,8 +306,8 @@ async function send_count ({ fid, chat_id, update }) {
     return `统计对象：${gen_link(fid)}
 更新时间：${now}
 对象数量：${obj_count || ''}
-排队请求：${pending_count || ''}
-进行请求：${processing_count || ''}`
+${pending_count ? ('排队请求：' + pending_count) : ''}
+${processing_count ? ('进行请求：' + processing_count) : ''}`
   }
   const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
   let response
