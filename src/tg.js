@@ -298,8 +298,6 @@ function reply_cb_query ({ id, data }) {
 }
 
 async function send_count ({ fid, chat_id, update }) {
-  sm({ chat_id, text: `开始获取 ${fid} 所有文件信息，请稍后，建议统计完成前先不要开始复制，因为复制也需要先获取源文件夹信息` })
-
   const gen_text = payload => {
     const { obj_count, processing_count, pending_count } = payload || {}
     const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
@@ -309,10 +307,11 @@ async function send_count ({ fid, chat_id, update }) {
 ${pending_count ? ('排队请求：' + pending_count) : ''}
 ${processing_count ? ('进行请求：' + processing_count) : ''}`
   }
+
   const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
   let response
   try {
-    response = await axins.post(url, { chat_id, text: gen_text(), parse_mode: 'HTML' })
+    response = await axins.post(url, { chat_id, text: `开始获取 ${fid} 所有文件信息，请稍后，建议统计完成前先不要开始复制，因为复制也需要先获取源文件夹信息` })
   } catch (e) {}
   const { data } = response || {}
   const message_id = data && data.result && data.result.message_id
