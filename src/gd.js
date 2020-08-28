@@ -80,9 +80,9 @@ handle_exit(() => {
   db.close()
 })
 
-async function gen_count_body ({ fid, type, update, service_account, limit }) {
+async function gen_count_body ({ fid, type, update, service_account, limit, tg }) {
   async function update_info () {
-    const info = await walk_and_save({ fid, update, service_account })
+    const info = await walk_and_save({ fid, update, service_account, tg })
     return [info, summary(info)]
   }
 
@@ -218,7 +218,7 @@ function get_all_by_fid (fid) {
   }
 }
 
-async function walk_and_save ({ fid, not_teamdrive, update, service_account, with_modifiedTime }) {
+async function walk_and_save ({ fid, not_teamdrive, update, service_account, with_modifiedTime, tg }) {
   let result = []
   const unfinished_folders = []
   const limit = pLimit(PARALLEL_LIMIT)
@@ -233,6 +233,14 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account, wit
     const message = `${now} | 已获取对象 ${result.length} | 网络请求 进行中${limit.activeCount}/排队中${limit.pendingCount}`
     print_progress(message)
   }, 1000)
+
+  const tg_loop = tg && setInterval(() => {
+    tg({
+      obj_count: result.length,
+      processing_count: limit.activeCount,
+      pending_count: limit.pendingCount
+    })
+  }, 10 * 1000)
 
   async function recur (parent) {
     let files, should_save
@@ -264,6 +272,14 @@ async function walk_and_save ({ fid, not_teamdrive, update, service_account, wit
   console.log('\n信息获取完毕')
   unfinished_folders.length ? console.log('未读取完毕的目录ID：', JSON.stringify(unfinished_folders)) : console.log('所有目录读取完毕')
   clearInterval(loop)
+  if (tg_loop) {
+    clearInterval(tg_loop)
+    tg({
+      obj_count: result.length,
+      processing_count: limit.activeCount,
+      pending_count: limit.pendingCount
+    })
+  }
   const smy = unfinished_folders.length ? null : summary(result)
   smy && db.prepare('UPDATE gd SET summary=?, mtime=? WHERE fid=?').run(JSON.stringify(smy), Date.now(), fid)
   result.unfinished_number = unfinished_folders.length

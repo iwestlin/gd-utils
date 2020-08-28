@@ -299,9 +299,33 @@ function reply_cb_query ({ id, data }) {
 
 async function send_count ({ fid, chat_id, update }) {
   sm({ chat_id, text: `开始获取 ${fid} 所有文件信息，请稍后，建议统计完成前先不要开始复制，因为复制也需要先获取源文件夹信息` })
-  const table = await gen_count_body({ fid, update, type: 'tg', service_account: !USE_PERSONAL_AUTH })
-  if (!table) return sm({ chat_id, parse_mode: 'HTML', text: gen_link(fid) + ' 信息获取失败' })
+
+  const gen_text = payload => {
+    const { obj_count, processing_count, pending_count } = payload || {}
+    const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
+    return `统计对象：${gen_link(fid)}
+更新时间：${now}
+对象数量：${obj_count || ''}
+排队请求：${pending_count || ''}
+进行请求：${processing_count || ''}`
+  }
   const url = `https://api.telegram.org/bot${tg_token}/sendMessage`
+  let response
+  try {
+    response = await axins.post(url, { chat_id, text: gen_text(), parse_mode: 'HTML' })
+  } catch (e) {}
+  const { data } = response || {}
+  const message_id = data && data.result && data.result.message_id
+  const message_updater = payload => sm({
+    chat_id,
+    message_id,
+    parse_mode: 'HTML',
+    text: gen_text(payload)
+  }, 'editMessageText')
+
+  const service_account = !USE_PERSONAL_AUTH
+  const table = await gen_count_body({ fid, update, service_account, type: 'tg', tg: message_id && message_updater })
+  if (!table) return sm({ chat_id, parse_mode: 'HTML', text: gen_link(fid) + ' 信息获取失败' })
   const gd_link = `https://drive.google.com/drive/folders/${fid}`
   const name = await get_folder_name(fid)
   return axins.post(url, {
