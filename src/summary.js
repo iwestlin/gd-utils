@@ -60,7 +60,9 @@ function make_tg_table ({ file_count, folder_count, total_size, details }, limit
     if (v.ext === '无扩展名') v.ext = '[NoExt]'
   })
   let records = details.map(v => [v.ext, v.count, v.size]).map(arr => arr.map(content => ({ content, hAlign })))
+  const folder_row = records.pop()
   if (limit) records = records.slice(0, limit)
+  records.push(folder_row)
   const total_count = file_count + folder_count
   const tails = ['Total', total_count, total_size].map(v => ({ content: v, hAlign }))
   tb.push(headers, ...records)
