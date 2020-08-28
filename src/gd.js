@@ -80,7 +80,7 @@ handle_exit(() => {
   db.close()
 })
 
-async function gen_count_body ({ fid, type, update, service_account }) {
+async function gen_count_body ({ fid, type, update, service_account, limit }) {
   async function update_info () {
     const info = await walk_and_save({ fid, update, service_account })
     return [info, summary(info)]
@@ -95,7 +95,7 @@ async function gen_count_body ({ fid, type, update, service_account }) {
         curl: make_table,
         tg: make_tg_table
       }
-      let result = type_func[type](smy)
+      let result = type_func[type](smy, limit)
       if (unfinished_number) result += `\n未统计完成目录数量：${unfinished_number}`
       return result
     } else { // 默认输出json

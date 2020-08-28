@@ -32,7 +32,7 @@ function make_table ({ file_count, folder_count, total_size, details }) {
   return tb.toString() + '\n'
 }
 
-function make_tg_table ({ file_count, folder_count, total_size, details }) {
+function make_tg_table ({ file_count, folder_count, total_size, details }, limit) {
   const tb = new Table({
     // chars: {
     //   'top': '═',
@@ -59,7 +59,8 @@ function make_tg_table ({ file_count, folder_count, total_size, details }) {
     if (v.ext === '文件夹') v.ext = '[Folder]'
     if (v.ext === '无扩展名') v.ext = '[NoExt]'
   })
-  const records = details.map(v => [v.ext, v.count, v.size]).map(arr => arr.map(content => ({ content, hAlign })))
+  let records = details.map(v => [v.ext, v.count, v.size]).map(arr => arr.map(content => ({ content, hAlign })))
+  if (limit) records = records.slice(0, limit)
   const total_count = file_count + folder_count
   const tails = ['Total', total_count, total_size].map(v => ({ content: v, hAlign }))
   tb.push(headers, ...records)

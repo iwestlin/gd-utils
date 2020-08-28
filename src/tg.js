@@ -315,19 +315,15 @@ ${table}</pre>`
     // const description = err.response && err.response.data && err.response.data.description
     // const too_long_msgs = ['request entity too large', 'message is too long']
     // if (description && too_long_msgs.some(v => description.toLowerCase().includes(v))) {
-    const smy = await gen_count_body({ fid, type: 'json', service_account: !USE_PERSONAL_AUTH })
-    const { file_count, folder_count, total_size } = JSON.parse(smy)
-    // TODO 显示前n条
+    const limit = 20
+    const table = await gen_count_body({ fid, type: 'tg', service_account: !USE_PERSONAL_AUTH, limit })
     return sm({
       chat_id,
       parse_mode: 'HTML',
-      text: `链接：<a href="https://drive.google.com/drive/folders/${fid}">${fid}</a>\n<pre>
-表格太长超出telegram消息限制，只显示概要：
-目录名称：${name}
-文件总数：${file_count}
-目录总数：${folder_count}
-合计大小：${total_size}
-</pre>`
+      text: `<pre>源文件夹名称：${name}
+源链接：${gd_link}
+表格太长超出telegram消息限制，只显示前${limit}条：
+${table}</pre>`
     })
   })
 }
