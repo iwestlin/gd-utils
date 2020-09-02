@@ -125,6 +125,10 @@ http_proxy="YOUR_PROXY_URL" && https_proxy=$http_proxy && HTTP_PROXY=$http_proxy
 ```
 请把`YOUR_PROXY_URL`替换成你自己的代理地址
 
+## 其他环境
+nodejs本身是跨平台的，所以项目可以在各种操作系统上运行，下面的说明是针对Linux系统，如果你需要在 Windows 或 Android 上进行安装，可以参考：
+[https://github.com/roshanconnor123/gd-utils#installation (英文)](https://github.com/roshanconnor123/gd-utils#installation)
+
 ## 依赖安装
 - 命令行执行`git clone https://github.com/iwestlin/gd-utils && cd gd-utils` 克隆并切换到本项目文件夹下
 - **执行 `npm install --unsafe-perm=true --allow-root` 安装依赖**，部分依赖可能需要代理环境才能下载，所以需要上一步的配置
