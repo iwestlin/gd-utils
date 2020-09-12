@@ -705,8 +705,8 @@ async function copy_file (id, parent, use_sa, limit, task_id) {
       if (!use_sa && message && message.toLowerCase().includes('rate limit')) {
         throw new Error('个人帐号触发限制：' + message)
       }
-      if (use_sa && message && message.toLowerCase().includes('rate limit')) {
-        retry--
+      if (use_sa && message && message.toLowerCase().includes('user rate limit')) {
+        if (retry >= RETRY_LIMIT) throw new Error(`此资源连续${EXCEED_LIMIT}次触发userRateLimitExceeded错误，停止复制`)
         if (gtoken.exceed_count >= EXCEED_LIMIT) {
           SA_TOKENS = SA_TOKENS.filter(v => v.gtoken !== gtoken)
           if (!SA_TOKENS.length) SA_TOKENS = get_sa_batch()
