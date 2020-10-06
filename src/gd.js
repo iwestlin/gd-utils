@@ -70,8 +70,14 @@ function get_sa_batch () {
   })
 }
 
-handle_exit(() => {
-  // console.log('handle_exit running')
+handle_exit((code, signal) => {
+  // console.log(code, signal)
+  // ctrl+c: null SIGINT
+  // pm2 reload: null SIGINT
+  // tg bot /reload: 0 null
+  // normal exit: 0 null
+  if (code === 0 && !is_pm2()) return // normal exit in command line, do nothing
+  // TODO: record running task ID for each thread
   const records = db.prepare('select id from task where status=?').all('copying')
   records.forEach(v => {
     db.prepare('update task set status=? where id=?').run('interrupt', v.id)
