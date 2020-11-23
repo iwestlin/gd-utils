@@ -32,4 +32,20 @@ function create_table_bookmark () {
   db.prepare(create_index).run()
 }
 
+create_table_hash()
+function create_table_hash () {
+  const [exists] = db.prepare('PRAGMA table_info(hash)').all()
+  if (exists) return
+  const create_table = `CREATE TABLE "hash" (
+  "md5" TEXT NOT NULL,
+  "gid" TEXT NOT NULL UNIQUE,
+  "status"  TEXT NOT NULL DEFAULT 'normal'
+);`
+  db.prepare(create_table).run()
+  const create_index = 'CREATE INDEX "hash_md5" ON "hash" ("md5");'
+  db.prepare(create_index).run()
+  const create_index2 = 'CREATE INDEX "hash_gid" ON "hash" ("gid");'
+  db.prepare(create_index2).run()
+}
+
 module.exports = { db }

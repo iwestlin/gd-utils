@@ -43,3 +43,17 @@ CREATE TABLE "bookmark" (
 CREATE UNIQUE INDEX "bookmark_alias" ON "bookmark" (
   "alias"
 );
+
+CREATE TABLE "hash" (
+  "md5" TEXT NOT NULL,
+  "gid" TEXT NOT NULL UNIQUE,
+  "status"  TEXT NOT NULL DEFAULT 'normal'
+);
+
+CREATE INDEX "hash_md5" ON "hash" (
+  "md5"
+);
+
+CREATE UNIQUE INDEX "hash_gid" ON "hash" (
+  "gid"
+);

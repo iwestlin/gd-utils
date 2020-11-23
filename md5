@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+
+const { argv } = require('yargs')
+  .usage('用法: ./$0 <目录ID> [options]')
+  .example('./$0 1ULY8ISgWSOVc0UrzejykVgXfVL_I4r75', '获取 https://drive.google.com/drive/folders/1ULY8ISgWSOVc0UrzejykVgXfVL_I4r75 内的所有文件信息，并将各文件的md5值和ID存入本地数据库中')
+  .example('./$0 1ULY8ISgWSOVc0UrzejykVgXfVL_I4r75 -s 10mb', '获取指定目录的所有文件信息，将不小于10MB大小的文件的md5值和ID存入本地数据库中')
+  .alias('s', 'size')
+  .describe('s', '不填默认存储所有文件的md5记录，如果设置了这个值，则过滤掉小于这个size的文件，必须以b结尾，比如10mb')
+  .alias('u', 'update')
+  .describe('u', '强制从线上获取信息(无视是否存在本地缓存)')
+  .alias('N', 'not_teamdrive')
+  .describe('N', '如果不是团队盘链接，可以加上此参数以提高接口查询效率，降低延迟')
+  .alias('S', 'service_account')
+  .describe('S', '使用service account获取文件信息，前提是必须在./sa目录下放置SA json文件')
+  .help('h')
+  .alias('h', 'help')
+
+const { save_md5, validate_fid } = require('./src/gd')
+const [fid] = argv._
+if (validate_fid(fid)) {
+  const { update, size, not_teamdrive, service_account } = argv
+  save_md5({fid, size, not_teamdrive, update, service_account}).catch(console.error)
+} else {
+  console.warn('目录ID缺失或格式错误')
+}

@@ -6,9 +6,11 @@ const pLimit = require('p-limit')
 const axios = require('@viegg/axios')
 const { GoogleToken } = require('gtoken')
 const handle_exit = require('signal-exit')
+const bytes = require('bytes')
 const { argv } = require('yargs')
 
 let { PARALLEL_LIMIT, EXCEED_LIMIT } = require('../config')
+// TODO 根据过去一段时间内的请求成功数和失败数动态调整并行请求数
 PARALLEL_LIMIT = argv.l || argv.limit || PARALLEL_LIMIT
 EXCEED_LIMIT = EXCEED_LIMIT || 7
 
@@ -85,6 +87,31 @@ handle_exit((code, signal) => {
   records.length && console.log(records.length, 'task interrupted')
   db.close()
 })
+
+async function save_md5 ({fid, size, not_teamdrive, update, service_account}) {
+  let files = await walk_and_save({ fid, not_teamdrive, update, service_account })
+  files = files.filter(v => v.mimeType !== FOLDER_TYPE)
+  if (typeof size !== 'number') size = bytes.parse(size)
+  if (size) files = files.filter(v => v.size >= size)
+  let cnt = 0
+  files.forEach(file => {
+    const {md5Checksum, id} = file
+    if (!md5Checksum) return
+    const record = db.prepare('SELECT * FROM hash WHERE gid = ?').get(id)
+    if (record) return
+    db.prepare('INSERT INTO hash (gid, md5) VALUES (?, ?)')
+      .run(id, md5Checksum)
+    cnt++
+  })
+  console.log('已新增', cnt, '条md5记录')
+}
+
+function get_gid_by_md5 (md5) {
+  const records = db.prepare('select * from hash where md5=? and status=?').all(md5, 'normal')
+  if (!records.length) return null
+  // console.log('got existed md5 record in db:', md5)
+  return get_random_element(records).gid
+}
 
 async function gen_count_body ({ fid, type, update, service_account, limit, tg }) {
   async function update_info () {
@@ -507,6 +534,7 @@ async function copy ({ source, target, name, min_size, update, not_teamdrive, se
   const file = await get_info_by_id(source, service_account)
   if (!file) return console.error(`无法获取对象信息，请检查链接是否有效且SA拥有相应的权限：https://drive.google.com/drive/folders/${source}`)
   if (file && file.mimeType !== FOLDER_TYPE) {
+    if (argv.hash_server === 'local') source = get_gid_by_md5(file.md5Checksum)
     return copy_file(source, target, service_account).catch(console.error)
   }
 
@@ -644,12 +672,14 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
       continue
     }
     concurrency++
-    const { id, parent } = file
+    let { id, parent, md5Checksum } = file
+    if (argv.hash_server) service_account = true
+    if (argv.hash_server === 'local') id = get_gid_by_md5(md5Checksum) || id
     const target = mapping[parent] || root
     copy_file(id, target, service_account, null, task_id).then(new_file => {
       if (new_file) {
         count++
-        db.prepare('INSERT INTO copied (taskid, fileid) VALUES (?, ?)').run(task_id, id)
+        db.prepare('INSERT INTO copied (taskid, fileid) VALUES (?, ?)').run(task_id, file.id)
       }
     }).catch(e => {
       err = e
@@ -807,9 +837,10 @@ function find_dupe (arr) {
     return !has_child
   })
   for (const file of files) {
-    const { md5Checksum, parent, name } = file
+    const { md5Checksum, parent, name, size } = file
     // 根据文件位置和md5值来判断是否重复
-    const key = parent + '|' + md5Checksum // + '|' + name
+    const key = parent + '|' + md5Checksum
+    // const key = md5Checksum + '|' + size
     if (exists[key]) {
       dupe_files.push(file)
     } else {
@@ -932,4 +963,4 @@ function print_progress (msg) {
   }
 }
 
-module.exports = { ls_folder, count, validate_fid, copy, dedupe, copy_file, gen_count_body, real_copy, get_name_by_id, get_info_by_id, get_access_token, get_sa_token, walk_and_save }
+module.exports = { ls_folder, count, validate_fid, copy, dedupe, copy_file, gen_count_body, real_copy, get_name_by_id, get_info_by_id, get_access_token, get_sa_token, walk_and_save, save_md5 }
