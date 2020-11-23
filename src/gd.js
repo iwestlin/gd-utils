@@ -673,10 +673,9 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
     }
     concurrency++
     let { id, parent, md5Checksum } = file
-    if (argv.hash_server) service_account = true
     if (argv.hash_server === 'local') id = get_gid_by_md5(md5Checksum) || id
     const target = mapping[parent] || root
-    copy_file(id, target, service_account, null, task_id).then(new_file => {
+    copy_file(id, target, service_account: !!argv.hash_server, null, task_id).then(new_file => {
       if (new_file) {
         count++
         db.prepare('INSERT INTO copied (taskid, fileid) VALUES (?, ?)').run(task_id, file.id)
