@@ -675,7 +675,7 @@ async function copy_files ({ files, mapping, service_account, root, task_id }) {
     let { id, parent, md5Checksum } = file
     if (argv.hash_server === 'local') id = get_gid_by_md5(md5Checksum) || id
     const target = mapping[parent] || root
-    const use_sa = argv.hash_server ? true : service_account
+    const use_sa = (id !== file.id) ? true : service_account // 如果在本地数据库中找到了相同md5的记录，则使用sa拷贝
     copy_file(id, target, use_sa, null, task_id).then(new_file => {
       if (new_file) {
         count++
