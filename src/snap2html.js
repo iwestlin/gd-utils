@@ -29,6 +29,7 @@ const dirs = [
 ] */
 
 function snap2html ({ root, data }) {
+  data.sort((a, b) => a.name > b.name ? 1 : -1)
   const total_size = sum_size(data)
   const template = fs.readFileSync(path.join(__dirname, '../static/snap2html.template'), 'utf8')
   let html = template.replace('var dirs = []', 'var dirs = ' + JSON.stringify(trans(data, root)))
